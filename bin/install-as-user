@@ -1,0 +1,86 @@
+#!/bin/sh
+
+set -e
+error_msg() { printf "\033[31m%s\033[0m\n" "$*"; }
+notice_msg() { printf "\033[33m%s\033[0m " "$*"; }
+done_msg() { printf "\033[32m%s\033[0m\n" "$*"; }
+DONE_MSG=$(done_msg done)
+
+if [ $# -ne 3 ]
+then
+    cat >&2 <<EOUSAGE
+Usage: $0 <UNIX-USER> <HOST> <INSTALLATION-DIRECTORY>
+EOUSAGE
+    exit 1
+fi
+
+UNIX_USER="$1"
+HOST="$2"
+DIRECTORY="$3"
+DB_NAME="mapit"
+
+# Check that the arguments we've been passed are sensible:
+
+IP_ADDRESS_FOR_HOST="$(dig +short $HOST)"
+
+if [ x = x"$IP_ADDRESS_FOR_HOST" ]
+then
+    error_msg "The hostname $HOST didn't resolve to an IP address"
+    exit 1
+fi
+
+if ! id "$UNIX_USER" 2> /dev/null > /dev/null
+then
+    error_msg "The user '$UNIX_USER' didn't exist."
+    exit 1
+fi
+
+if [ "$(whoami)" != "$UNIX_USER" ]
+then
+    error_msg "This script should be run by the user '$UNIX_USER'."
+    exit 1
+fi
+
+REPOSITORY="$DIRECTORY/mapit"
+LINK_DESTINATION="$HOME/mapit"
+
+if [ ! -d "$LINK_DESTINATION" ]
+then
+    ln -sfn "$REPOSITORY" $LINK_DESTINATION
+fi
+cd "$REPOSITORY"
+
+# Write sensible values into the config file:
+if [ ! -f conf/general.yml ]; then
+    echo -n "Setting up default conf/general.yml file... "
+    RANDOM_STRING=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c32)
+    sed -r \
+        -e "s,^( *MAPIT_DB_NAME:).*,\\1 '$DB_NAME'," \
+        -e "s,^( *MAPIT_DB_USER:).*,\\1 '$UNIX_USER'," \
+        -e "s,^( *COUNTRY:).*,\\1 ''," \
+        -e "s,^( *AREA_SRID:).*,\\1 4326," \
+        -e "s,^( *DJANGO_SECRET_KEY:).*,\\1 '$RANDOM_STRING'," \
+        conf/general.yml-example > conf/general.yml
+    echo $DONE_MSG
+fi
+
+# Create the database if it doesn't exist:
+echo -n "Setting up database... "
+if ! psql -l | egrep "^ *$DB_NAME *\|" > /dev/null
+then
+    if [ trusty = "$(lsb_release -s -c)" ]
+    then
+        # Currently the only supported distribution where we can just
+        # use CREATE EXTENSION to make this a PostGIS database is on
+        # Ubuntu trusty:
+        createdb --owner "$UNIX_USER" "$DB_NAME"
+        COMMAND="CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology;"
+        psql -c "$COMMAND" "$DB_NAME"
+    else
+        # Otherwise, the template_postgis template should already
+        # have been created.
+        createdb -T template_postgis --owner "$UNIX_USER" "$DB_NAME"
+    fi
+fi
+
+conf/post_deploy_actions.bash

@@ -1,0 +1,22 @@
+*.pyc
+.idea
+/conf/general.yml
+/conf/general.yml.deployed
+/conf/httpd.conf
+/conf/httpd.conf.deployed
+/web/down.html
+/data/cache
+/MANIFEST
+/build
+/dist
+/django_mapit.egg-info
+*~
+/.coverage
+
+.sass-cache
+/mapit/static/mapit/css
+
+# This is the name that the install notes suggest be used for the virtualenv
+.venv
+
+.DS_Store
