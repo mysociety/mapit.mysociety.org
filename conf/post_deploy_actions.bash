@@ -17,7 +17,7 @@ if [ "$(echo -e '1.7\n'$virtualenv_version | sort -V | head -1)" = '1.7' ]; then
     virtualenv_args="--system-site-packages"
 fi
 
-virtualenv_dir='../virtualenv-mapit'
+virtualenv_dir='../virtualenv-mapit-gb'
 virtualenv_activate="$virtualenv_dir/bin/activate"
 
 if [ ! -f "$virtualenv_activate" ]
@@ -36,7 +36,7 @@ curl -L -s https://raw.github.com/mysociety/commonlib/master/bin/get_pip.bash | 
 # Install all the packages
 pip install -e .
 
-# make sure that there is no old code (the .py files may have been git deleted) 
+# make sure that there is no old code (the .py files may have been git deleted)
 find . -name '*.pyc' -delete
 
 # Compile CSS
