@@ -1,0 +1,15 @@
+{% load url from compat %}
+{% load i18n %}
+
+<header>
+    <h2>MapIt API</h2>
+    <nav class="toc">
+        <p>Account</p>
+        <ul>
+            <li><a href="{% url 'account_logout' %}">{% trans "Log out" %}</a></li>
+            <li><a href="{% url 'account_password' %}">{% trans "Change password" %}</a></li>
+            <li><a href="{% url 'account_settings' %}">{% trans "Account settings" %}</a></li>
+            <li><a href="{% url 'account_delete' %}">{% trans "Delete account" %}</a></li>
+        </ul>
+    </nav>
+</header>

@@ -1,0 +1,23 @@
+{% extends "mapit/base.html" %}
+
+{% load url from compat %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign up" %}{% endblock %}
+
+{% block content %}
+<article id="api-docs">
+    {% include 'account/_signup_sidebar.html' %}
+    <section>
+        <form id="signup_form" method="post" action="{% url "account_signup" %}" autocapitalize="off" {% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
+            <legend>{% trans "Sign up" %}</legend>
+            {% csrf_token %}
+            {{ form }}
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            <button type="submit" class="btn">{% trans "Sign up" %}</button>
+        </form>
+    </section>
+</article>
+{% endblock %}

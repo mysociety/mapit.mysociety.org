@@ -1,0 +1,15 @@
+{% load url from compat %}
+{% load i18n %}
+
+<header>
+    <h2>MapIt API</h2>
+    <nav class="toc">
+        <p>Account</p>
+        <ul>
+            <li><a href="{% url 'account_login' %}">{% trans "Log in" %}</a></li>
+            {% if ACCOUNT_OPEN_SIGNUP %}
+                <li><a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>

@@ -34,3 +34,14 @@ RATE_LIMIT:
 
 # Email address that errors should be sent to. Optional.
 BUGS_EMAIL: 'example@example.org'
+
+# Fully qualified url that the site lives at, so that we can make emails with
+# fully qualified links in
+SITE_BASE_URL: 'http://www.example.com'
+
+# Name for the site, for use in the above sites framework
+SITE_NAME: 'MapIt: UK'
+
+# An email address for support enquiries (Used by django-user-acounts to give
+people signing up someone to contact for example)
+CONTACT_EMAIL: support@example.org

@@ -1,0 +1,20 @@
+{% extends "mapit/base.html" %}
+
+{% load url from compat %}
+{% load i18n %}
+
+{% block title %}{% trans "Account" %}{% endblock %}
+
+{% block content %}
+<article>
+    {% include 'account/_logged_in_sidebar.html' %}
+    <section>
+        <form method="POST" action="{% url "account_settings" %}">
+            <legend>{% trans "Account" %}</legend>
+            {% csrf_token %}
+            {{ form }}
+            <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+        </form>
+    </section>
+</article>
+{% endblock %}

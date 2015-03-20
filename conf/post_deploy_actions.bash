@@ -48,3 +48,7 @@ python manage.py migrate
 
 # gather all the static files in one place
 python manage.py collectstatic --noinput
+
+# Configure the default site's base url, so that link-building using the sites
+# framework works.
+python manage.py create_default_site
