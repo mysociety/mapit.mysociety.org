@@ -1,1 +1,1 @@
-django-mapit
+-e git+git://github.com/mysociety/mapit.git@package-country-templates#egg=mapit
