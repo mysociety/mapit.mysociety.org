@@ -168,6 +168,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.cache.FetchFromCacheMiddleware',
     'mapit.middleware.JSONPMiddleware',
     'mapit.middleware.ViewExceptionMiddleware',
+    'account.middleware.LocaleMiddleware',
+    'account.middleware.TimezoneMiddleware',
 ]
 if django.get_version() >= '1.7':
     MIDDLEWARE_CLASSES.append('django.contrib.auth.middleware.SessionAuthenticationMiddleware')
@@ -189,6 +191,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.messages.context_processors.messages',
     'mapit.context_processors.country',
     'mapit.context_processors.analytics',
+    'account.context_processors.account',
 )
 
 if django.get_version() >= '1.8':
@@ -209,7 +212,10 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.gis',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'mapit-gb',
     'mapit',
+    'account',
 ]
 if django.get_version() < '1.7':
     INSTALLED_APPS.append('south')
@@ -224,3 +230,15 @@ if MAPIT_COUNTRY:
         pass
 
 DATE_FORMAT = 'j F Y'
+
+# Config for Django's sites framework, needed so that we can send emails from
+# django-user-accounts with fully qualifed urls in
+SITE_ID = 1
+SITE_BASE_URL = config.get('SITE_BASE_URL', '')
+SITE_NAME = config.get('SITE_NAME', 'MapIt')
+
+# django-user-accounts settings
+ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
+THEME_CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
+
+EMAIL_PORT = 1025

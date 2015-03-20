@@ -1,1 +1,2 @@
--e git+git://github.com/mysociety/mapit.git@package-country-templates#egg=mapit
+-e git://github.com/mysociety/mapit.git@10420790691be40ad413d079fb79844918a9a15b#egg=django_mapit-dev
+django-user-accounts==1.0.1
