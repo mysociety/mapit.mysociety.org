@@ -1,4 +1,4 @@
-{% extends "mapit/base.html" %}
+{% extends "account/base.html" %}
 
 {% load url from compat %}
 {% load i18n %}
@@ -7,17 +7,16 @@
 {% block title %}{% trans "Log in" %}{% endblock %}
 
 {% block content %}
-<article>
+<article id="api-docs">
     {% include 'account/_login_sidebar.html' %}
-    <section>
+    <section class="account-form">
+        <h2>{% trans "Log in to an existing account" %}</h2>
         <form method="POST" action="{% url "account_login" %}" autocapitalize="off" {% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
-            <legend>{% trans "Log in to an existing account" %}</legend>
             {% csrf_token %}
-            {{ form }}
-            {% if redirect_field_value %}
-                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-            {% endif %}
-            <button type="submit" class="btn">{% trans "Log in" %}</button>
+            {% include 'account/_form_fields.html' %}
+            <div class="account-form__field account-form__field--submit">
+                <button type="submit" class="btn">{% trans "Log in" %}</button>
+            </div>
             <a href="{% url "account_password_reset" %}" class="btn">{% trans "Forgot your password?" %}</a>
         </form>
     </section>

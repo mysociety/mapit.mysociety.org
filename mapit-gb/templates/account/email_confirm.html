@@ -1,4 +1,4 @@
-{% extends "mapit/base.html" %}
+{% extends "account/base.html" %}
 
 {% load url from compat %}
 {% load i18n %}
@@ -6,15 +6,16 @@
 {% block title %}{% trans "Confirm Email" %}{% endblock %}
 
 {% block content %}
-<article>
-    <section>
+<article id="api-docs">
+    {% include 'account/_signup_sidebar.html' %}
+    <section class="account-form">
+        <h2>{% trans "Confirm Email" %}</h2>
         <form method="post" action="{% url "account_confirm_email" key=confirmation.key %}">
-            <legend>{% trans "Confirm Email" %}</legend>
-            <fieldset>
-                {% csrf_token %}
-                <p>{% blocktrans with email=confirmation.email_address.email %}Confirm email address <b>{{ email }}</b>?{% endblocktrans %}</p>
-                <button type="submit" class="btn btn-primary">{% trans "Confirm" %}</button>
-            </fieldset>
+            {% csrf_token %}
+            <p>{% blocktrans with email=confirmation.email_address.email %}Confirm email address <b>{{ email }}</b>?{% endblocktrans %}</p>
+            <div class="account-form__field">
+                <button type="submit" class="btn">{% trans "Confirm" %}</button>
+            </div>
         </form>
     </section>
 </article>

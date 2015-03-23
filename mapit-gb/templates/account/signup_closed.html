@@ -1,4 +1,4 @@
-{% extends "mapit/base.html" %}
+{% extends "account/base.html" %}
 
 {% load url from compat %}
 {% load i18n %}
@@ -6,14 +6,21 @@
 {% block title %}{% trans "Sign up" %}{% endblock %}
 
 {% block content %}
-<article>
+<article id="api-docs">
     {% include 'account/_logged_in_sidebar.html' %}
-    <section>
-        <h1>{% trans "This site is in private beta" %}</h1>
+    <section class="account-form">
+        <h2>{% trans "This site is in private beta" %}</h2>
         <p>{% blocktrans %}If you have signup code you can enter it below.{% endblocktrans %}</p>
         <form method="get" action="">
-            <div><input type="text" name="code" placeholder="Your signup code..." /></div>
-            <div><input type="submit" class="btn"></div>
+            <div class="account-form__field">
+                <div class="account-form__label">Signup code</div>
+                <div class="account-form__input">
+                    <input type="text" name="code" placeholder="Your signup code..." />
+                </div>
+            </div>
+            <div class="account-form__field account-form__field--submit">
+                <input type="submit" class="btn">
+            </div>
         </form>
     </section>
 </article>

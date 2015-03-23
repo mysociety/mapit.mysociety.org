@@ -1,4 +1,4 @@
-{% extends "mapit/base.html" %}
+{% extends "account/base.html" %}
 
 {% load i18n %}
 {% load url from compat %}
@@ -6,16 +6,18 @@
 {% block title %}{% trans "Delete Account" %}{% endblock %}
 
 {% block content %}
-<article>
+<article id="api-docs">
     {% include 'account/_logged_in_sidebar.html' %}
-    <section>
-        <h1>{% trans "Delete Account" %}</h1>
+    <section class="account-form">
+        <h2>{% trans "Delete Account" %}</h2>
 
         <p>{% blocktrans %}If you go ahead and delete your account, your information will be <b>expunged within {{ ACCOUNT_DELETION_EXPUNGE_HOURS }} hours</b>.{% endblocktrans %}</p>
 
         <form method="post" action="{% url "account_delete" %}" autocapitalize="off">
             {% csrf_token %}
-            <button type="submit" class="btn">{% trans "Delete My Account" %}</button>
+            <div class="account-form__field account-form__field--submit">
+                <button type="submit" class="btn">{% trans "Delete My Account" %}</button>
+            </div>
         </form>
     </section>
 </article>

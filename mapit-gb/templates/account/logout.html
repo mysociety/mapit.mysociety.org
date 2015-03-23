@@ -1,4 +1,4 @@
-{% extends "mapit/base.html" %}
+{% extends "account/base.html" %}
 
 {% load url from compat %}
 {% load i18n %}
@@ -6,16 +6,16 @@
 {% block title %}{% trans "Log out" %}{% endblock %}
 
 {% block content %}
-<article>
+<article id="api-docs">
     {% include 'account/_logged_in_sidebar.html' %}
-    <section>
+    <section class="account-form">
+        <h2>{% trans "Log out" %}</h2>
         <form method="POST" action="{% url "account_logout" %}">
-            <legend>{% trans "Log out" %}</legend>
-            <fieldset>
-                {% csrf_token %}
-                <p>{% trans "Are you sure you want to log out?" %}</p>
+            {% csrf_token %}
+            <p>{% trans "Are you sure you want to log out?" %}</p>
+            <div class="account-form__field account-form__field--submit">
                 <button type="submit" class="btn">{% trans "Log out" %}</button>
-            </fieldset>
+            </div>
         </form>
     </section>
 </article>
