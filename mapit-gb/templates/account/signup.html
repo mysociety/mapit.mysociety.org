@@ -1,4 +1,4 @@
-{% extends "mapit/base.html" %}
+{% extends "account/base.html" %}
 
 {% load url from compat %}
 {% load i18n %}
@@ -8,15 +8,29 @@
 {% block content %}
 <article id="api-docs">
     {% include 'account/_signup_sidebar.html' %}
-    <section>
+    <section class="account-form">
+        <h2>{% trans "Sign up" %}</h2>
         <form id="signup_form" method="post" action="{% url "account_signup" %}" autocapitalize="off" {% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
-            <legend>{% trans "Sign up" %}</legend>
             {% csrf_token %}
-            {{ form }}
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% else %}
+                    <div class="account-form__field">
+                        <div class="account-form__label">{{ field.label_tag }}</div>
+                        <div class="account-form__input">{{ field }}</div>
+                        {% if field.errors %}
+                            <div class="account-form__errors">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
             {% if redirect_field_value %}
                 <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
             {% endif %}
-            <button type="submit" class="btn">{% trans "Sign up" %}</button>
+            <div class="account-form__field account-form__field--submit">
+                    <button type="submit" class="btn">{% trans "Sign up" %}</button>
+            </div>
         </form>
     </section>
 </article>
