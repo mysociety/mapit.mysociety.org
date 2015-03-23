@@ -1,4 +1,4 @@
-{% extends "mapit/base.html" %}
+{% extends "account/base.html" %}
 
 {% load url from compat %}
 {% load i18n %}
@@ -6,7 +6,7 @@
 {% block title %}{% trans "Confirm your email address" %}{% endblock %}
 
 {% block content %}
-<article>
+<article id="api-docs">
     {% include 'account/_signup_sidebar.html' %}
     <section>
         <h2>{% trans "Confirm your email address" %}</h2>

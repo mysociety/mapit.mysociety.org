@@ -1,0 +1,16 @@
+{% for field in form %}
+    {% if field.is_hidden %}
+        {{ field }}
+    {% else %}
+        <div class="account-form__field">
+            <div class="account-form__label">{{ field.label_tag }}</div>
+            <div class="account-form__input">{{ field }}</div>
+            {% if field.errors %}
+                <div class="account-form__errors">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endfor %}
+{% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+{% endif %}

@@ -1,4 +1,4 @@
-{% extends "mapit/base.html" %}
+{% extends "account/base.html" %}
 
 {% load url from compat %}
 {% load i18n %}
@@ -6,10 +6,10 @@
 {% block title %}{% trans "Email confirmed" %}{% endblock %}
 
 {% block content %}
-<article>
+<article id="api-docs">
     {% include 'account/_login_sidebar.html' %}
     <section>
-        <h1>{% trans "Email confirmed" %}</h1>
+        <h2>{% trans "Email confirmed" %}</h2>
         <p>{% blocktrans with email=confirmation.email_address.email %}You have confirmed <b>{{ email }}</b>{% endblocktrans %}</p>
     </section>
 </article>
