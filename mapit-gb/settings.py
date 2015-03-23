@@ -217,6 +217,7 @@ INSTALLED_APPS = [
     'mapit-gb',
     'mapit',
     'account',
+    'api_keys',
 ]
 if django.get_version() < '1.7':
     INSTALLED_APPS.append('south')
