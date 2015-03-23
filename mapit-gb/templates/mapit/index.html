@@ -1,0 +1,123 @@
+{% extends "mapit/base.html" %}
+{% load url from compat %}
+{% load static from staticfiles %}
+
+{% block fulltitle %}
+    MapIt : map postcodes and geographical points to administrative areas
+{% endblock %}
+
+{% block content %}
+
+    <!-- Main header -->
+    <header class="header homepage">
+        {% include "mapit/index-cross-sell.html" %}
+        <h1>Map<em>It</em><em class="mapit-type">: {% include "mapit/country.html" %}</em></h1>
+        {% include "mapit/intro.html" %}
+    </header>
+
+    <!-- Try out MapIt postcode bar -->
+    <div id="try-mapit">
+        <form method="post" action="{% url "mapit_index" %}{% if postcodes_available %}postcode{% else %}point{% endif %}/">
+            <label for="try-mapit-pc">
+                {% if postcodes_available %}Try it out, enter a postcode:
+                {% else %}Try it out, enter a lat,lon:{% endif %}
+            </label>
+            <input type="text" name="pc" id="try-mapit-pc"{% if not postcodes_available %} placeholder="latitude,longitude"{% endif %}>
+            <input class="btn" type="submit" value="Look up">
+        </form>
+    </div>
+
+    <article id="api-docs">
+
+        <header>
+
+            <h2>MapIt API</h2>
+
+            <nav class="toc">
+
+                <p>Lookups</p>
+                <ol>
+                    {% if postcodes_available %}
+                    <li><a href="#api-by_postcode">Postcode</a></li>
+                    <li><a href="#api-by_partial_postcode">Partial postcode</a></li>
+                    {% endif %}
+                    <li><a href="#api-by_point">Point</a></li>
+                    {% if postcodes_available %}
+                    <li><a href="#api-nearest">Nearest postcode</a></li>
+                    {% endif %}
+                    <li><a href="#api-by_area_id">Area</a></li>
+                    <li><a href="#api-related_areas">Related areas</a></li>
+                    <li><a href="#api-multiple_areas">Multiple areas</a></li>
+                    <li><a href="#api-generations">Generations</a></li>
+                </ol>
+
+                <p>Information</p>
+                <ul>
+                    <li><a href="#general">General information</a></li>
+                    <li><a href="#about-mapit">About MapIt</a></li>
+                    <li><a href="#usage-licence">Usage &amp; licence</a></li>
+                    <li><a href="https://github.com/mysociety/mapit">Source code</a></li>
+                    {% if country == 'GB' %}
+                    <li><a href="{% url 'mapit_changelog' %}">Changelog</a></li>
+                    {% endif %}
+                </ul>
+
+                {% if request.user.is_authenticated %}
+                    {% include 'account/_logged_in_nav.html' %}
+                {% else %}
+                    {% include 'account/_signup_nav.html' %}
+                {% endif %}
+
+            </nav>
+
+        </header>
+
+        {% include "mapit/api/intro.html" %}
+        {% if postcodes_available %}
+        {% include "mapit/api/postcode.html" %}
+        {% endif %}
+        {% include "mapit/api/point.html" %}
+        {% include "mapit/api/area.html" %}
+        {% include "mapit/api/areas.html" %}
+        {% include "mapit/api/generations.html" %}
+
+        <section id="general">
+            <h3>General information</h3>
+            <dl>
+                <dt>Format</dt>
+                <dd>
+                <p>All calls return JSON, you can generally get an HTML representation
+                by sticking .html on the end.</p>
+                <p>Whenever an area is returned from MapIt, it is as a
+                dictionary with the following keys: id, name, country, type,
+                parent_area, generation_low, generation_high, codes.</p>
+                </dd>
+                <dt>Historical areas</dt>
+                <dd>By default, calls will return active areas; for some calls
+                you may specify a previous generation to look up instead.
+                {% include "mapit/index-general-extra.html" %}
+                </dd>
+            </dl>
+        </section>
+
+        <section id="about-mapit">
+            <h3>About MapIt</h3>
+
+            <p>MapIt was written back in 2003 as a postcode lookup to power the
+            original <a href="http://www.mysociety.org/">mySociety</a> sites
+            such as <a href="http://www.writetothem.com/">WriteToThem</a>. Over
+            time it gained features such as point lookup (for
+            <a href="http://www.fixmystreet.com/">FixMyStreet</a>), and when
+            Ordnance Survey data became freely available in 2010, it was
+            rewritten and made public for the whole UK.
+
+            {% include "mapit/index-others.html" %}
+            </p>
+
+        </section>
+
+        {% include "mapit/index-usage.html" %}
+
+    </article>
+
+{% endblock %}
