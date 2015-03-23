@@ -7,8 +7,8 @@
 
 {% block content %}
 <article>
-{% include 'account/_logged_in_sidebar.html' %}
-<section>
+    {% include 'account/_logged_in_sidebar.html' %}
+    <section>
         <form method="POST" action="{% url "account_logout" %}">
             <legend>{% trans "Log out" %}</legend>
             <fieldset>
