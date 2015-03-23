@@ -1,10 +1,16 @@
+{% if form.non_field_errors %}
+<div class="account-form__errors">
+    {{ form.non_field_errors }}
+</div>
+</div>
+{% endif %}
 {% for field in form %}
     {% if field.is_hidden %}
         {{ field }}
     {% else %}
         <div class="account-form__field">
             <div class="account-form__label">{{ field.label_tag }}</div>
-            <div class="account-form__input">{{ field }}</div>
+            <div class="account-form__input{% if field.errors %} account-form__input--error{% endif %}">{{ field }}</div>
             {% if field.errors %}
                 <div class="account-form__errors">{{ field.errors }}</div>
             {% endif %}
