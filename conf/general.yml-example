@@ -11,6 +11,11 @@ MAPIT_DB_PASS: ''
 MAPIT_DB_HOST: null
 MAPIT_DB_PORT: null
 
+REDIS_DB_HOST: 'localhost'
+REDIS_DB_PORT: 6379
+REDIS_DB_NUMBER: 0
+REDIS_DB_PASSWORD: null
+
 # Country is currently one of GB, NO, or KE. Optional; country specific things won't happen if not set.
 COUNTRY: 'GB'
 
@@ -45,3 +50,4 @@ SITE_NAME: 'MapIt: UK'
 # An email address for support enquiries (Used by django-user-acounts to give
 # people signing up someone to contact for example)
 CONTACT_EMAIL: support@example.org
+EMAIL_PORT: 25
