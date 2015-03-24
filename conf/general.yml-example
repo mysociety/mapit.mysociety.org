@@ -51,3 +51,6 @@ SITE_NAME: 'MapIt: UK'
 # people signing up someone to contact for example)
 CONTACT_EMAIL: support@example.org
 EMAIL_PORT: 25
+
+# The name of this api in the redis api management db
+REDIS_API_NAME: 'mapit.mysociety.org'
