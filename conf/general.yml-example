@@ -48,9 +48,30 @@ SITE_BASE_URL: 'http://www.example.com'
 SITE_NAME: 'MapIt: UK'
 
 # An email address for support enquiries (Used by django-user-acounts to give
-people signing up someone to contact for example)
+# people signing up someone to contact for example)
 CONTACT_EMAIL: support@example.org
 EMAIL_PORT: 25
 
 # The name of this api in the redis api management db
 REDIS_API_NAME: 'mapit.mysociety.org'
+
+# Should the API be restricted to users with API Keys only?
+# Note: you can still have api keys and set rate limits on them independently
+# of this setting
+API_RESTRICT: False
+
+# Should the API be throttled?
+API_THROTTLE: False
+
+# How long a time period should the api rate limiter counts hits over (seconds)
+API_RATE_LIMIT_COUNTER_TIME: 360
+
+# How many hits during the API_RATE_LIMIT_COUNTER_TIME can a single user make
+# by default?
+# Note: you can still set limits, or have no limit at all, for individual api
+# keys or IP addresses indepent of this setting
+API_RATE_LIMIT_DEFAULT: 360
+
+# How long should users who go over the rate limit be blocked for? (Seconds)
+API_RATE_LIMIT_BLOCK_TIME: 360
+
