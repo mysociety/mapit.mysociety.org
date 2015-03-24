@@ -21,10 +21,18 @@ class Command(NoArgsCommand):
             if options['verbosity'] > 2:
                 self.stdout.write("Throttled api: {0}".format(settings.REDIS_API_NAME))
                 self.stdout.write("Set throttling to {0} hits in {1} seconds, blocking offenders for {2} seconds.".format(settings.API_THROTTLE_DEFAULT_LIMIT, settings.API_THROTTLE_COUNTER, settings.API_THROTTLE_BLOCKED))
+
+            # Respect any clients that are excluded from throttling
+            for identity in settings.API_THROTTLE_UNLIMITED:
+                r.set(RedisStrings.rate_limit_string(identity), '0')
+                if options['verbosity'] > 2:
+                    self.stdout.write("Excluded {0} from throttling".format(identity))
         else:
             r.delete(RedisStrings.API_THROTTLE)
             r.delete(RedisStrings.API_THROTTLE_COUNTER)
             r.delete(RedisStrings.API_THROTTLE_BLOCKED)
             r.delete(RedisStrings.API_THROTTLE_DEFAULT_LIMIT)
+            for identity in settings.API_THROTTLE_UNLIMITED:
+                r.delete(RedisStrings.rate_limit_string(identity))
             if options['verbosity'] > 2:
                 self.stdout.write("Removed throttling on api: {0}".format(settings.REDIS_API_NAME))
