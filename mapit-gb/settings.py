@@ -261,3 +261,8 @@ EMAIL_PORT = config.get('EMAIL_PORT', 25)
 # TEST_RUNNER is a required setting from Django 1.6 onwards
 if django.get_version() >= '1.6':
     TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# The name of this api in the redis api management db
+REDIS_API_NAME = config.get('REDIS_API_NAME')
+
+ACCOUNT_DELETION_EXPUNGE_HOURS = 0
