@@ -250,3 +250,6 @@ REDIS_DB_HOST = config.get('REDIS_DB_HOST')
 REDIS_DB_PORT = config.get('REDIS_DB_PORT')
 REDIS_DB_NUMBER = config.get('REDIS_DB_NUMBER')
 REDIS_DB_PASSWORD = config.get('REDIS_DB_PASSWORD')
+
+# Configurable email port, to make it easier to develop email sending
+EMAIL_PORT = config.get('EMAIL_PORT', 25)
