@@ -144,3 +144,48 @@ class RestrictAPICommandTest(PatchedRedisTestCase):
         self.assertEqual(r.get(RedisStrings.API_RESTRICT), '1')
         call_command('api_keys_restrict_api', stdout=StringIO(), stderr=StringIO())
         self.assertIsNone(r.get(RedisStrings.API_RESTRICT))
+
+
+class ThrottleAPICommandTest(PatchedRedisTestCase):
+
+    @override_settings(
+        REDIS_API_NAME='test_api',
+        API_THROTTLE=True,
+        API_THROTTLE_BLOCKED=360,
+        API_THROTTLE_COUNTER=360,
+        API_THROTTLE_DEFAULT_LIMIT=360
+    )
+    def test_throttle_api(self):
+        r = redis_connection()
+
+        self.assertIsNone(r.get(RedisStrings.API_THROTTLE))
+        self.assertIsNone(r.get(RedisStrings.API_THROTTLE_COUNTER))
+        self.assertIsNone(r.get(RedisStrings.API_THROTTLE_BLOCKED))
+        self.assertIsNone(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT))
+
+        call_command('api_keys_throttle_api', stdout=StringIO(), stderr=StringIO())
+
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE), '1')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_COUNTER), '360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), '360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), '360')
+
+    @override_settings(REDIS_API_NAME='test_api', API_THROTTLE=False)
+    def test_unthrottles_api(self):
+        r = redis_connection()
+        r.set(RedisStrings.API_THROTTLE, '1')
+        r.set(RedisStrings.API_THROTTLE_COUNTER, '360')
+        r.set(RedisStrings.API_THROTTLE_BLOCKED, '360')
+        r.set(RedisStrings.API_THROTTLE_DEFAULT_LIMIT, '360')
+
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE), '1')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_COUNTER), '360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), '360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), '360')
+
+        call_command('api_keys_throttle_api', stdout=StringIO(), stderr=StringIO())
+
+        self.assertIsNone(r.get(RedisStrings.API_THROTTLE))
+        self.assertIsNone(r.get(RedisStrings.API_THROTTLE_COUNTER))
+        self.assertIsNone(r.get(RedisStrings.API_THROTTLE_BLOCKED))
+        self.assertIsNone(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT))
