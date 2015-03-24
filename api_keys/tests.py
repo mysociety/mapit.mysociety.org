@@ -162,6 +162,7 @@ class ThrottleAPICommandTest(PatchedRedisTestCase):
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE_COUNTER))
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE_BLOCKED))
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT))
+        self.assertIsNone(r.get(RedisStrings.rate_limit_string('127.0.0.1')))
 
         call_command('api_keys_throttle_api', stdout=StringIO(), stderr=StringIO())
 
@@ -169,6 +170,7 @@ class ThrottleAPICommandTest(PatchedRedisTestCase):
         self.assertEqual(r.get(RedisStrings.API_THROTTLE_COUNTER), '360')
         self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), '360')
         self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), '360')
+        self.assertEqual(r.get(RedisStrings.rate_limit_string('127.0.0.1')), '0')
 
     @override_settings(REDIS_API_NAME='test_api', API_THROTTLE=False)
     def test_unthrottles_api(self):

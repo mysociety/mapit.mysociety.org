@@ -75,3 +75,6 @@ API_THROTTLE_DEFAULT: 360
 # How long should users who go over the rate limit be blocked for? (Seconds)
 API_THROTTLE_BLOCK_TIME: 360
 
+# A list of api keys or IP addresses to exclude from rate limiting
+API_THROTTLE_UNLIMITED:
+    - '127.0.0.1'
