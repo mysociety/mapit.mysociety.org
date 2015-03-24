@@ -1,3 +1,5 @@
+from StringIO import StringIO
+
 from mock import patch
 from mockredis import mock_strict_redis_client
 
@@ -5,11 +7,12 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.management import call_command
 
 from account.signals import user_signed_up
 
 from .models import APIKey, create_key_for_new_user
-from .utils import redis_connection
+from .utils import redis_connection, RedisStrings
 
 
 class PatchedRedisTestCase(TestCase):
@@ -123,3 +126,21 @@ class APIKeyModelTest(PatchedRedisTestCase):
         with self.assertRaises(APIKey.DoesNotExist):
             APIKey.objects.get(pk=key.pk)
         self.assertIsNone(r.get(expected_key), '1')
+
+
+class RestrictAPICommandTest(PatchedRedisTestCase):
+
+    @override_settings(REDIS_API_NAME='test_api', API_RESTRICT=True)
+    def test_restricts_api(self):
+        r = redis_connection()
+        self.assertIsNone(r.get(RedisStrings.API_RESTRICT))
+        call_command('api_keys_restrict_api', stdout=StringIO(), stderr=StringIO())
+        self.assertEqual(r.get(RedisStrings.API_RESTRICT), '1')
+
+    @override_settings(REDIS_API_NAME='test_api', API_RESTRICT=False)
+    def test_unrestricts_api(self):
+        r = redis_connection()
+        r.set(RedisStrings.API_RESTRICT, '1')
+        self.assertEqual(r.get(RedisStrings.API_RESTRICT), '1')
+        call_command('api_keys_restrict_api', stdout=StringIO(), stderr=StringIO())
+        self.assertIsNone(r.get(RedisStrings.API_RESTRICT))
