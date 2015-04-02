@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "API Key" %}{% endblock %}
+
+{% block content %}
+    <h1>{% trans "API Key" %}</h1>
+    <p>Your API Key is:</p>
+    <pre>{{ api_key.key }}</pre>
+{% endblock %}

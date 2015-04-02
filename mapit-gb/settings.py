@@ -144,12 +144,18 @@ STATICFILES_FINDERS = (
 )
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
+if DEBUG:
+    TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
-    )),
-)
+    )
+else:
+    TEMPLATE_LOADERS = (
+        ('django.template.loaders.cached.Loader', (
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        )),
+    )
 
 # UpdateCacheMiddleware does ETag setting, and
 # ConditionalGetMiddleware does ETag checking.
@@ -217,6 +223,7 @@ INSTALLED_APPS = [
     'mapit-gb',
     'mapit',
     'account',
+    'api_keys',
 ]
 if django.get_version() < '1.7':
     INSTALLED_APPS.append('south')
@@ -241,3 +248,43 @@ SITE_NAME = config.get('SITE_NAME', 'MapIt')
 # django-user-accounts settings
 ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
 THEME_CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
+
+# Redis connection for syncing user accounts with Varnish
+REDIS_DB_HOST = config.get('REDIS_DB_HOST')
+REDIS_DB_PORT = config.get('REDIS_DB_PORT')
+REDIS_DB_NUMBER = config.get('REDIS_DB_NUMBER')
+REDIS_DB_PASSWORD = config.get('REDIS_DB_PASSWORD')
+
+# Configurable email port, to make it easier to develop email sending
+EMAIL_PORT = config.get('EMAIL_PORT', 25)
+
+# TEST_RUNNER is a required setting from Django 1.6 onwards
+if django.get_version() >= '1.6':
+    TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# The name of this api in the redis api management db
+REDIS_API_NAME = config.get('REDIS_API_NAME')
+
+# Should the API be restricted to users with API Keys only?
+# Note: you can still have api keys and set rate limits on them independently
+# of this setting
+API_RESTRICT = config.get('API_RESTRICT')
+
+# Should the API be throttled?
+API_THROTTLE = config.get('API_THROTTLE')
+
+# How long a time period should the api rate limiter counts hits over (seconds)
+API_THROTTLE_COUNTER_TIME = config.get('API_THROTTLE_COUNTER_TIME')
+
+# How many hits during the API_RATE_LIMIT_COUNTER_TIME can a single user make
+# by default?
+# Note: you can still set limits, or have no limit at all, for individual api
+# keys or IP addresses indepent of this setting
+API_THROTTLE_DEFAULT = config.get('API_THROTTLE_DEFAULT')
+
+# How long should users who go over the rate limit be blocked for? (Seconds)
+API_THROTTLE_BLOCK_TIME = config.get('API_THROTTLE_BLOCK_TIME')
+
+# A list of api keys or IP addresses to exclude from rate limiting
+# Take this from Mapit's existing setting for now
+API_THROTTLE_UNLIMITED = MAPIT_RATE_LIMIT
