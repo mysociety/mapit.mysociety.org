@@ -43,5 +43,5 @@ SITE_BASE_URL: 'http://www.example.com'
 SITE_NAME: 'MapIt: UK'
 
 # An email address for support enquiries (Used by django-user-acounts to give
-people signing up someone to contact for example)
+# people signing up someone to contact for example)
 CONTACT_EMAIL: support@example.org
