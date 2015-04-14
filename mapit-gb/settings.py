@@ -145,11 +145,13 @@ STATICFILES_FINDERS = (
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )),
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
 )
+if not DEBUG:
+    TEMPLATE_LOADERS = (
+        ('django.template.loaders.cached.Loader', TEMPLATE_LOADERS),
+    )
 
 # UpdateCacheMiddleware does ETag setting, and
 # ConditionalGetMiddleware does ETag checking.
@@ -242,3 +244,21 @@ SITE_NAME = config.get('SITE_NAME', 'MapIt')
 # django-user-accounts settings
 ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
 THEME_CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
+
+# Redis connection for syncing user accounts with Varnish
+REDIS_DB_HOST = config.get('REDIS_DB_HOST')
+REDIS_DB_PORT = config.get('REDIS_DB_PORT')
+REDIS_DB_NUMBER = config.get('REDIS_DB_NUMBER')
+REDIS_DB_PASSWORD = config.get('REDIS_DB_PASSWORD')
+
+# Configurable email port, to make it easier to develop email sending
+EMAIL_PORT = config.get('EMAIL_PORT', 25)
+
+# TEST_RUNNER is a required setting from Django 1.6 onwards
+if django.get_version() >= '1.6':
+    TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# The name of this api in the redis api management db
+REDIS_API_NAME = config.get('REDIS_API_NAME')
+
+ACCOUNT_DELETION_EXPUNGE_HOURS = 0
