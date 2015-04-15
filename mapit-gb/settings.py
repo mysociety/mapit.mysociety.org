@@ -261,4 +261,26 @@ if django.get_version() >= '1.6':
 # The name of this api in the redis api management db
 REDIS_API_NAME = config.get('REDIS_API_NAME')
 
-ACCOUNT_DELETION_EXPUNGE_HOURS = 0
+# Should the API be restricted to users with API Keys only?
+# Note: you can still have api keys and set rate limits on them independently
+# of this setting
+API_RESTRICT = config.get('API_RESTRICT')
+
+# Should the API be throttled?
+API_THROTTLE = config.get('API_THROTTLE')
+
+# How long a time period should the api rate limiter counts hits over (seconds)
+API_THROTTLE_COUNTER_TIME = config.get('API_THROTTLE_COUNTER_TIME')
+
+# How many hits during the API_RATE_LIMIT_COUNTER_TIME can a single user make
+# by default?
+# Note: you can still set limits, or have no limit at all, for individual api
+# keys or IP addresses indepent of this setting
+API_THROTTLE_DEFAULT = config.get('API_THROTTLE_DEFAULT')
+
+# How long should users who go over the rate limit be blocked for? (Seconds)
+API_THROTTLE_BLOCK_TIME = config.get('API_THROTTLE_BLOCK_TIME')
+
+# A list of api keys or IP addresses to exclude from rate limiting
+# Take this from Mapit's existing setting for now
+API_THROTTLE_UNLIMITED = MAPIT_RATE_LIMIT
