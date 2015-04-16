@@ -13,7 +13,7 @@ server {
     error_log /var/www/mapit/logs/error.log;
 
     listen 80;
-    root /var/www/mapit/mapit-gb/web;
+    root /var/www/mapit/mapit_mysociety_org/web;
     error_page 503 /down.html;
 
     location /static {
