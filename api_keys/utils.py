@@ -21,8 +21,8 @@ def redis_connection():
 class RedisStrings(object):
     API_RESTRICT = 'api:{0}:restricted'.format(settings.REDIS_API_NAME)
     API_THROTTLE = 'api:{0}:throttled'.format(settings.REDIS_API_NAME)
-    API_THROTTLE_COUNTER = 'api:{0}:counter'.format(settings.REDIS_API_NAME)
-    API_THROTTLE_BLOCKED = 'api:{0}:blocked'.format(settings.REDIS_API_NAME)
+    API_THROTTLE_COUNTER = 'api:{0}:counter:time'.format(settings.REDIS_API_NAME)
+    API_THROTTLE_BLOCKED = 'api:{0}:blocked:time'.format(settings.REDIS_API_NAME)
     API_THROTTLE_DEFAULT_LIMIT = 'api:{0}:default_max'.format(settings.REDIS_API_NAME)
 
     @staticmethod
