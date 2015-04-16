@@ -151,8 +151,8 @@ class ThrottleAPICommandTest(PatchedRedisTestCase):
     @override_settings(
         REDIS_API_NAME='test_api',
         API_THROTTLE=True,
-        API_THROTTLE_BLOCKED=360,
-        API_THROTTLE_COUNTER=360,
+        API_THROTTLE_BLOCK_TIME=360,
+        API_THROTTLE_COUNTER_TIME=360,
         API_THROTTLE_DEFAULT_LIMIT=360
     )
     def test_throttle_api(self):
