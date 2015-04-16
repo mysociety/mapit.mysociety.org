@@ -17,7 +17,7 @@ if [ "$(echo -e '1.7\n'$virtualenv_version | sort -V | head -1)" = '1.7' ]; then
     virtualenv_args="--system-site-packages"
 fi
 
-virtualenv_dir='../virtualenv-mapit-gb'
+virtualenv_dir='../virtualenv-mapit_mysociety_org'
 virtualenv_activate="$virtualenv_dir/bin/activate"
 
 if [ ! -f "$virtualenv_activate" ]

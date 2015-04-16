@@ -177,10 +177,10 @@ MIDDLEWARE_CLASSES = [
 if django.get_version() >= '1.7':
     MIDDLEWARE_CLASSES.append('django.contrib.auth.middleware.SessionAuthenticationMiddleware')
 
-ROOT_URLCONF = 'mapit-gb.urls'
+ROOT_URLCONF = 'mapit_mysociety_org.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'mapit-gb.wsgi.application'
+WSGI_APPLICATION = 'mapit_mysociety_org.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -216,7 +216,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'mapit-gb',
+    'mapit_mysociety_org',
     'mapit',
     'account',
     'api_keys',

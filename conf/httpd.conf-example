@@ -9,6 +9,6 @@
 WSGIDaemonProcess example.mapit.mysociety.org user=exampleuser group=examplegroup processes=5 threads=1 display-name=example.mapit.mysociety.org python-path=/data/vhost/example.mapit.mysociety.org/virtualenv-mapit/lib/python/site-packages
 WSGIProcessGroup example.mapit.mysociety.org
 
-WSGIScriptAlias / /data/vhost/example.mapit.mysociety.org/mapit-gb/mapit-gb/wsgi.py
+WSGIScriptAlias / /data/vhost/example.mapit.mysociety.org/mapit.mysociety.org/mapit_mysociety_org/wsgi.py
 
 Alias /static /data/vhost/example.mapit.mysociety.org/collected_static
