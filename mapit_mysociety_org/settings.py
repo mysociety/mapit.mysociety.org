@@ -276,7 +276,7 @@ API_THROTTLE_COUNTER_TIME = config.get('API_THROTTLE_COUNTER_TIME')
 # by default?
 # Note: you can still set limits, or have no limit at all, for individual api
 # keys or IP addresses indepent of this setting
-API_THROTTLE_DEFAULT = config.get('API_THROTTLE_DEFAULT')
+API_THROTTLE_DEFAULT_LIMIT = config.get('API_THROTTLE_DEFAULT_LIMIT')
 
 # How long should users who go over the rate limit be blocked for? (Seconds)
 API_THROTTLE_BLOCK_TIME = config.get('API_THROTTLE_BLOCK_TIME')
