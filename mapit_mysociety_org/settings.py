@@ -195,6 +195,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'mapit.context_processors.country',
     'mapit.context_processors.analytics',
     'account.context_processors.account',
+    'mapit_mysociety_org.context_processors.contact_email',
 )
 
 if django.get_version() >= '1.8':
@@ -243,7 +244,7 @@ SITE_NAME = config.get('SITE_NAME', 'MapIt')
 
 # django-user-accounts settings
 ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
-THEME_CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
+CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
 
 # Redis connection for syncing user accounts with Varnish
 REDIS_DB_HOST = config.get('REDIS_DB_HOST')
