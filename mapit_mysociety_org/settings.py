@@ -244,8 +244,13 @@ SITE_BASE_URL = config.get('SITE_BASE_URL', '')
 SITE_NAME = config.get('SITE_NAME', 'MapIt')
 
 # django-user-accounts settings
+# Emails must be unique because we use them as usernames
+ACCOUNT_EMAIL_UNIQUE = True
 ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
 CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
+ACCOUNT_USER_DISPLAY = lambda user: user.email
+# Enable authentication by email address not username
+AUTHENTICATION_BACKENDS = ('account.auth_backends.EmailAuthenticationBackend',)
 
 # Redis connection for syncing user accounts with Varnish
 REDIS_DB_HOST = config.get('REDIS_DB_HOST')
