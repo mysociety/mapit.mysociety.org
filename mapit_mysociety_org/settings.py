@@ -96,6 +96,7 @@ ALLOWED_HOSTS = ['*']
 TIME_ZONE = 'Europe/London'
 LANGUAGE_CODE = 'en-gb'
 POSTCODES_AVAILABLE = True
+PARTIAL_POSTCODES_AVAILABLE = True
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
