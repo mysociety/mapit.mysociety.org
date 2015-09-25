@@ -82,3 +82,28 @@
         }
     }
 }
+
+// Messages shown after an account action like changing a password
+.messages {
+    list-style: none;
+    list-style-type: none;
+    padding: 0;
+}
+
+.message {
+    padding: 1em;
+    border: 2px solid #948994;
+    background-color: #bfb9c8;
+
+    // The accounts app only generates info, success or warning messages
+
+    &.success {
+        border-color: darken(#dff0d8, 20%);
+        background-color: #dff0d8;
+    }
+    &.warning {
+        border-color: darken(#fcf8e3, 20%);
+        background-color: #fcf8e3;
+    }
+}
+
