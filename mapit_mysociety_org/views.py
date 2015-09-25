@@ -18,5 +18,4 @@ class SignupView(account.views.SignupView):
     def generate_username(self, form):
         # Return the email address as the username (Django's user model needs
         # something to store there).
-        print "generating username: {0}".format(form.cleaned_data['email'])
         return form.cleaned_data['email']
