@@ -4,17 +4,22 @@
 </div>
 </div>
 {% endif %}
+{% comment %}
+This template is used for several different forms, and we want to specify the
+ordering of the fields, so we list each field separately
+{% endcomment %}
+{% if form.email %}
+    {% include 'account/_form_field.html' with field=form.email %}
+    {% include 'account/_form_field.html' with field=form.password %}
+    {% include 'account/_form_field.html' with field=form.password_confirmation %}
+{% elif form.password_new %}
+    {% include 'account/_form_field.html' with field=form.password_current %}
+    {% include 'account/_form_field.html' with field=form.password_new %}
+    {% include 'account/_form_field.html' with field=form.password_new_confirm %}
+{% endif %}
 {% for field in form %}
     {% if field.is_hidden %}
         {{ field }}
-    {% else %}
-        <div class="account-form__field">
-            <div class="account-form__label">{{ field.label_tag }}</div>
-            <div class="account-form__input{% if field.errors %} account-form__input--error{% endif %}">{{ field }}</div>
-            {% if field.errors %}
-                <div class="account-form__errors">{{ field.errors }}</div>
-            {% endif %}
-        </div>
     {% endif %}
 {% endfor %}
 {% if redirect_field_value %}
