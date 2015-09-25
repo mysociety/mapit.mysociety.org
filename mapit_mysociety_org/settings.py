@@ -249,6 +249,7 @@ ACCOUNT_EMAIL_UNIQUE = True
 ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
 CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
 ACCOUNT_USER_DISPLAY = lambda user: user.email
+ACCOUNT_LOGOUT_REDIRECT_URL = 'mapit_index'
 # Enable authentication by email address not username
 AUTHENTICATION_BACKENDS = ('account.auth_backends.EmailAuthenticationBackend',)
 
