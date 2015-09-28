@@ -252,7 +252,8 @@ DEFAULT_FROM_EMAIL = CONTACT_EMAIL
 ACCOUNT_USER_DISPLAY = lambda user: user.email
 ACCOUNT_LOGOUT_REDIRECT_URL = 'mapit_index'
 # Enable authentication by email address not username
-AUTHENTICATION_BACKENDS = ('account.auth_backends.EmailAuthenticationBackend',)
+AUTHENTICATION_BACKENDS = ('account.auth_backends.EmailAuthenticationBackend',
+                           'django.contrib.auth.backends.ModelBackend')
 
 # Redis connection for syncing user accounts with Varnish
 REDIS_DB_HOST = config.get('REDIS_DB_HOST')
