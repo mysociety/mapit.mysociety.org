@@ -32,6 +32,9 @@ subprocess.check_call([
 ])
 
 subprocess.check_call([
+    "mkdir", "-p", "%s/static/css" % parent_dir
+])
+subprocess.check_call([
     "sass", "--scss",
     "--style", "compressed",
     "%s/static/sass/accounts.scss" % parent_dir,
