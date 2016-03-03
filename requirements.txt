@@ -1,5 +1,5 @@
-django-mapit==1.4
-django-user-accounts==1.2.0
-mock==1.0.1
-mockredispy==2.9.0.10
-redis==2.10.3
+-e git://github.com/mysociety/mapit.git@329e452c99aea3f86d066f37e2b637668ed303a8#egg=django-mapit
+django-user-accounts==1.3.1
+redis==2.10.5
+mock==1.3.0
+mockredispy==2.9.0.12
