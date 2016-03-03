@@ -4,6 +4,8 @@ libgdal1-dev
 memcached
 python-virtualenv
 ruby-sass
+redis-server
+varnish
 
 python-psycopg2
 python-shapely
