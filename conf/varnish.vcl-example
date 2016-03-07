@@ -1,0 +1,47 @@
+# A really basic example to use the Varnish api key checking.
+# Copy this to /etc/varnish/default.vcl to use it (or edit
+# /etc/default/varnishto point at this)
+import std;
+include "/etc/varnish/varnish-apikey.vcl";
+
+backend local_django {
+  .host = "127.0.0.1";
+  .port = "8000";
+}
+
+#
+# Subroutine that defines the api, key and token.
+#
+sub recognize_apiname_apikey_token {
+  # Identify api
+
+  # As mapit is both an API and a website, we only want to invoke the api key
+  # checking on the actual api endpoints. We purposely exclude the .html
+  # versions of the endpoints too, because they're basically documentation,
+  # not an actual use of the API.
+  if (req.url ~ "^/postcode/.*[^\.html$]" ||
+    req.url ~ "^/point/.*[^\.html$]" ||
+    req.url ~ "^/area/.*[^\.html$]" ||
+    req.url ~ "^/areas/.*[^\.html$]" ||
+    req.url ~ "^/nearest/.*[^\.html$]" ||
+    req.url ~ "^/code/.*[^\.html$]" ||
+    req.url ~ "^/generations/.*[^\.html$]") {
+    set req.http.apiname = "mapit";
+
+    # Save apikey if there is one
+    if (regsub(req.url, "^.*(\?|&)apikey=([^&;]*).*", "\2") != req.url) {
+      set req.http.apikey = regsub(req.url, "^.*(\?|&)apikey=([^&;]*).*", "\2");
+    }
+  }
+}
+
+sub vcl_init {
+  # Initialise the redis connection
+  redis.init("main", "127.0.0.1:6379", 500, 0, 0, 0, 0, false, 1);
+}
+
+sub vcl_recv {
+  # Validate apikey using apikey library.
+  call validate_api;
+  set req.backend = local_django;
+}
