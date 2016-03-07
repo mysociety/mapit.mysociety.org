@@ -5,6 +5,7 @@ memcached
 python-virtualenv
 ruby-sass
 redis-server
+libhiredis-dev
 varnish
 
 python-psycopg2
