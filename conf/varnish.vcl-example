@@ -1,0 +1,54 @@
+# A really basic example to use the Varnish api key checking.
+# Copy this to /etc/varnish/default.vcl to use it (or edit
+# /etc/default/varnishto point at this)
+import std;
+include "/etc/varnish/varnish-apikey.vcl";
+
+backend local_django {
+  .host = "127.0.0.1";
+  .port = "8000";
+}
+
+#
+# Subroutine that defines the api, key and token.
+#
+sub recognize_apiname_apikey_token {
+  # Identify api
+
+  # As mapit is both an API and a website, we only want to invoke the api key
+  # checking on the actual api endpoints. We purposely exclude the .html
+  # versions of the endpoints too, because they're basically documentation,
+  # not an actual use of the API.
+  if (req.url ~ "^\/postcode\/.*(?<!\.html)$" ||
+    req.url ~ "^\/point\/.*(?<!\.html)$" ||
+    req.url ~ "^\/area\/.*(?<!\.html)$" ||
+    req.url ~ "^\/areas\/.*(?<!\.html)$" ||
+    req.url ~ "^\/nearest\/.*(?<!\.html)$" ||
+    req.url ~ "^\/code\/.*(?<!\.html)$" ||
+    req.url ~ "^\/generations\/.*(?<!\.html)$") {
+    set req.http.apiname = "mapit";
+
+    # Save the key if there is one in the api_key querystring parameter or the
+    # X-Api-Key header.
+    # Note that we prefer the query string to the HTTP header if there's both.
+    if (regsub(req.url, ".*[\?&]api_key=([^&;]*).*", "\1") != req.url) {
+      set req.http.apikey = regsub(req.url, ".*[\?&]api_key=([^&;]*).*", "\1");
+    } else if(req.http.X-Api-Key) {
+      set req.http.apikey = req.http.X-Api-Key;
+    }
+  }
+}
+
+sub vcl_init {
+  # Initialise the redis connection
+  # Simple configuration following: https://github.com/carlosabalde/libvmod-redis/tree/3.0-0.2.8#single-server
+  # One Redis server, with one Redis connection per Varnish worker thread
+  # init(TAG, LOCATION, CONNECTION_TIMEOUT, CONNECTION_TTL, COMMAND_TIMEOUT, MAX_CLUSTER_HOPS, RETRIES, SHARED_CONTEXTS, MAX_CONTEXTS)
+  redis.init("main", "127.0.0.1:6379", 500, 0, 0, 0, 0, false, 1);
+}
+
+sub vcl_recv {
+  # Validate apikey using apikey library.
+  call validate_api;
+  set req.backend = local_django;
+}
