@@ -59,7 +59,7 @@ Vagrant.configure(2) do |config|
     sudo -u postgres psql -c "CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology;" -d mapit
 
     # Install mailcatcher to make dev email development easier
-    sudo gem install mailcatcher
+    sudo gem install --no-rdoc --no-ri mailcatcher
 
     # Copy the example config file into place to get things going
     cp conf/general.yml-example conf/general.yml
