@@ -13,6 +13,12 @@ Vagrant.configure(2) do |config|
   # Enable NFS access to the disk
   config.vm.synced_folder "..", "/vagrant", :nfs => true
 
+  # Speed up DNS lookups
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
+  end
+
   # NFS requires a host-only network
   # This also allows you to test via other devices (e.g. mobiles) on the same
   # network
