@@ -70,10 +70,8 @@ Vagrant.configure(2) do |config|
     # python packages we need, migrate the db and generate the sass etc
     conf/post_deploy_actions.bash
 
-    # Checkout the varnish-api-key project
-    cd /vagrant
-    git clone https://github.com/mysociety/varnish-apikey
-    sudo cp /vagrant/varnish-apikey/vcl/varnish-apikey.vcl /etc/varnish
+    # Get the VCL from the varnish-api-key project
+    wget --quiet -O - https://raw.githubusercontent.com/mysociety/varnish-apikey/master/vcl/varnish-apikey.vcl | sudo tee /etc/varnish/varnish-apikey.vcl > /dev/null
 
     # Install our own varnish config file
     sudo cp /vagrant/mapit.mysociety.org/conf/varnish.vcl-example /etc/varnish/default.vcl
