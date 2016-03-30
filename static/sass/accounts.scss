@@ -24,6 +24,20 @@
         margin-top:-1.1em;
     }
 }
+.btn {
+    background-color: #333333;
+    border: none;
+    color: #fff;
+    padding: (0.625em/2) 0.625em*2;
+    font-family: 'MuseoSlab500', sans-serif;
+    @include border-radius(0.625em/2);
+}
+
+.btn--api-key-delete {
+    text-decoration: none;
+    margin-left: 1em;
+    font-size: 0.8em;
+}
 
 .account-form__field {
     @include clearfix;
@@ -32,15 +46,6 @@
     input {
         padding: (0.625em/2);
         vertical-align: middle;
-    }
-
-    .btn {
-        background-color: #333333;
-        border: none;
-        color: #fff;
-        padding: (0.625em/2) 0.625em*2;
-        font-family: 'MuseoSlab500', sans-serif;
-        @include border-radius(0.625em/2);
     }
 
     .account-form__errors {

@@ -5,11 +5,20 @@
 {% block content %}
     <h1>{% trans "API Keys" %}</h1>
     <ul>
-  {% for api_key in api_keys %}
-      <li>
-        <code>{{ api_key.key }}</code><a href="#">{% trans 'Delete' %}</a>
-      </li>
-  {% endfor %}
+    {% for api_key in api_keys %}
+        <li>
+            <code>{{ api_key.key }}</code>
+            <br/>
+            <small>
+              {% blocktrans with datetime=api_key.created_at %}
+                Created: {{datetime}}
+              {% endblocktrans %}
+            </small>
+            <a href="{% url 'api_keys_delete_key' api_key.pk %}">
+                {% trans 'Delete' %}
+            </a>
+        </li>
+    {% endfor %}
     </ul>
     <a href="#">Generate new API Key</a>
 {% endblock %}

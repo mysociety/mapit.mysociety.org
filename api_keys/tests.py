@@ -80,6 +80,7 @@ class APIKeyListViewTest(PatchedRedisTestCase):
         super(APIKeyListViewTest, self).tearDown()
         self.user.delete()
         self.key.delete()
+        self.key2.delete()
 
     def test_view_requires_login(self):
         url = reverse('api_keys_keys')
@@ -96,6 +97,53 @@ class APIKeyListViewTest(PatchedRedisTestCase):
         response = self.client.get(url)
         self.assertContains(response, self.key.key)
         self.assertContains(response, self.key2.key)
+
+
+class APIKeyDeleteViewTest(PatchedRedisTestCase):
+    def setUp(self):
+        super(APIKeyDeleteViewTest, self).setUp()
+        self.user = User.objects.create_user(
+            "Test user",
+            "test@example.com",
+            "password"
+        )
+        self.key = APIKey.objects.create(
+            user=self.user,
+            key=APIKey.generate_key()
+        )
+        self.key2 = APIKey.objects.create(
+            user=self.user,
+            key=APIKey.generate_key()
+        )
+
+    def tearDown(self):
+        super(APIKeyDeleteViewTest, self).tearDown()
+        self.user.delete()
+        self.key.delete()
+        self.key2.delete()
+
+    def test_view_requires_login(self):
+        url = reverse('api_keys_delete_key', kwargs={'pk': self.key.id})
+        self.client.logout()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.client.login(username="Test user", password="password")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_prints_api_key(self):
+        url = reverse('api_keys_delete_key', kwargs={'pk': self.key.id})
+        self.client.login(username="Test user", password="password")
+        response = self.client.get(url)
+        self.assertContains(response, self.key.key)
+
+    def test_deletes_key(self):
+        key_id = self.key.id
+        url = reverse('api_keys_delete_key', kwargs={'pk': self.key.id})
+        self.client.login(username="Test user", password="password")
+        self.client.post(url)
+        with self.assertRaises(APIKey.DoesNotExist):
+            APIKey.objects.get(pk=key_id)
 
 
 class APIKeyModelTest(PatchedRedisTestCase):
