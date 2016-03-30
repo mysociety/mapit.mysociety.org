@@ -1,11 +1,11 @@
 from urlparse import urlparse
 
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.contrib.sites.models import Site
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     """
     This command creates or updates the first entry in the sites
     database, with the domain set to the domain part of
@@ -14,7 +14,7 @@ class Command(NoArgsCommand):
 
     help = "Create or update site id 1 with the domain in settings.SITE_BASE_URL"
 
-    def handle_noargs(self, *args, **options):
+    def handle(self, *args, **options):
         verbosity = int(options.get('verbosity'))
         if settings.SITE_BASE_URL and settings.SITE_NAME:
             if verbosity >= 2:

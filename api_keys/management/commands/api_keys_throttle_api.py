@@ -1,17 +1,17 @@
 # This script is used to manage throttling access to this site's API through
 # a Varnish-based api management system.
 
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from ...utils import redis_connection, RedisStrings
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     help = """Throttle access to the api named in settings.REDIS_API_NAME if
             settings.API_THROTTLE is True, un-throttle it otherwise."""
 
-    def handle_noargs(self, **options):
+    def handle(self, **options):
         r = redis_connection()
         if settings.API_THROTTLE:
             r.set(RedisStrings.API_THROTTLE, '1')
