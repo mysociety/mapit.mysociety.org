@@ -21,7 +21,10 @@ class PatchedRedisTestCase(TestCase):
     """
 
     def setUp(self):
-        self.redis_patcher = patch('api_keys.utils.redis.StrictRedis', mock_strict_redis_client)
+        self.redis_patcher = patch(
+            'api_keys.utils.redis.StrictRedis',
+            mock_strict_redis_client
+        )
         self.redis_patcher.start()
 
     def tearDown(self):
@@ -32,7 +35,11 @@ class SignalsTest(PatchedRedisTestCase):
 
     def setUp(self):
         super(SignalsTest, self).setUp()
-        self.user = User.objects.create_user("Test user", "test@example.com", "password")
+        self.user = User.objects.create_user(
+            "Test user",
+            "test@example.com",
+            "password"
+        )
 
     def tearDown(self):
         super(SignalsTest, self).tearDown()
@@ -51,20 +58,31 @@ class SignalsTest(PatchedRedisTestCase):
         key.delete()
 
 
-class APIKeyDetailViewTest(PatchedRedisTestCase):
+class APIKeyListViewTest(PatchedRedisTestCase):
 
     def setUp(self):
-        super(APIKeyDetailViewTest, self).setUp()
-        self.user = User.objects.create_user("Test user", "test@example.com", "password")
-        self.key = APIKey.objects.create(user=self.user, key=APIKey.generate_key())
+        super(APIKeyListViewTest, self).setUp()
+        self.user = User.objects.create_user(
+            "Test user",
+            "test@example.com",
+            "password"
+        )
+        self.key = APIKey.objects.create(
+            user=self.user,
+            key=APIKey.generate_key()
+        )
+        self.key2 = APIKey.objects.create(
+            user=self.user,
+            key=APIKey.generate_key()
+        )
 
     def tearDown(self):
-        super(APIKeyDetailViewTest, self).tearDown()
+        super(APIKeyListViewTest, self).tearDown()
         self.user.delete()
         self.key.delete()
 
     def test_view_requires_login(self):
-        url = reverse('api_keys_key')
+        url = reverse('api_keys_keys')
         self.client.logout()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
@@ -72,19 +90,23 @@ class APIKeyDetailViewTest(PatchedRedisTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-
-    def test_prints_api_key(self):
-        url = reverse('api_keys_key')
+    def test_prints_api_keys(self):
+        url = reverse('api_keys_keys')
         self.client.login(username="Test user", password="password")
         response = self.client.get(url)
         self.assertContains(response, self.key.key)
+        self.assertContains(response, self.key2.key)
 
 
 class APIKeyModelTest(PatchedRedisTestCase):
 
     def setUp(self):
         super(APIKeyModelTest, self).setUp()
-        self.user = User.objects.create_user("Test user", "test@example.com", "password")
+        self.user = User.objects.create_user(
+            "Test user",
+            "test@example.com",
+            "password"
+        )
 
     def tearDown(self):
         super(APIKeyModelTest, self).tearDown()
@@ -134,7 +156,11 @@ class RestrictAPICommandTest(PatchedRedisTestCase):
     def test_restricts_api(self):
         r = redis_connection()
         self.assertIsNone(r.get(RedisStrings.API_RESTRICT))
-        call_command('api_keys_restrict_api', stdout=StringIO(), stderr=StringIO())
+        call_command(
+            'api_keys_restrict_api',
+            stdout=StringIO(),
+            stderr=StringIO()
+        )
         self.assertEqual(r.get(RedisStrings.API_RESTRICT), '1')
 
     @override_settings(REDIS_API_NAME='test_api', API_RESTRICT=False)
@@ -142,7 +168,11 @@ class RestrictAPICommandTest(PatchedRedisTestCase):
         r = redis_connection()
         r.set(RedisStrings.API_RESTRICT, '1')
         self.assertEqual(r.get(RedisStrings.API_RESTRICT), '1')
-        call_command('api_keys_restrict_api', stdout=StringIO(), stderr=StringIO())
+        call_command(
+            'api_keys_restrict_api',
+            stdout=StringIO(),
+            stderr=StringIO()
+        )
         self.assertIsNone(r.get(RedisStrings.API_RESTRICT))
 
 
@@ -164,13 +194,20 @@ class ThrottleAPICommandTest(PatchedRedisTestCase):
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT))
         self.assertIsNone(r.get(RedisStrings.rate_limit_string('127.0.0.1')))
 
-        call_command('api_keys_throttle_api', stdout=StringIO(), stderr=StringIO())
+        call_command(
+            'api_keys_throttle_api',
+            stdout=StringIO(),
+            stderr=StringIO()
+        )
 
         self.assertEqual(r.get(RedisStrings.API_THROTTLE), '1')
         self.assertEqual(r.get(RedisStrings.API_THROTTLE_COUNTER), '360')
         self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), '360')
         self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), '360')
-        self.assertEqual(r.get(RedisStrings.rate_limit_string('127.0.0.1')), '0')
+        self.assertEqual(
+            r.get(RedisStrings.rate_limit_string('127.0.0.1')),
+            '0'
+        )
 
     @override_settings(REDIS_API_NAME='test_api', API_THROTTLE=False)
     def test_unthrottles_api(self):
@@ -185,7 +222,11 @@ class ThrottleAPICommandTest(PatchedRedisTestCase):
         self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), '360')
         self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), '360')
 
-        call_command('api_keys_throttle_api', stdout=StringIO(), stderr=StringIO())
+        call_command(
+            'api_keys_throttle_api',
+            stdout=StringIO(),
+            stderr=StringIO()
+        )
 
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE))
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE_COUNTER))

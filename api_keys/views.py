@@ -1,9 +1,12 @@
-from django.views.generic import DetailView
+from django.views.generic import ListView
+
+from .models import APIKey
 
 
-class APIKeyDetailView(DetailView):
-    template_name = 'api_keys/api_key_detail.html'
-    context_object_name = 'api_key'
+class APIKeyListView(ListView):
+    template_name = 'api_keys/api_key_list.html'
+    context_object_name = 'api_keys'
+    model = APIKey
 
-    def get_object(self, queryset=None):
-        return self.request.user.api_key
+    def get_queryset(self):
+        return APIKey.objects.filter(user=self.request.user)

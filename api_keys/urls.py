@@ -1,8 +1,12 @@
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
-from .views import APIKeyDetailView
+from .views import APIKeyListView
 
 urlpatterns = [
-    url(r'^key', login_required(APIKeyDetailView.as_view()), name="api_keys_key"),
+    url(
+        r'^keys',
+        login_required(APIKeyListView.as_view()),
+        name="api_keys_keys"
+    ),
 ]

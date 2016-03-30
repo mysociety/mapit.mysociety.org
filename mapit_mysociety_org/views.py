@@ -54,7 +54,7 @@ class ConfirmEmailView(account.views.ConfirmEmailView):
                     "email": confirmation.email_address.email
                 })
             )
-        return redirect('api_keys_key')
+        return redirect('api_keys_keys')
 
     def login_user(self, user):
         """

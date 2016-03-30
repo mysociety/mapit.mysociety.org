@@ -1,0 +1,15 @@
+{% load i18n %}
+
+{% block title %}{% trans "API Keys" %}{% endblock %}
+
+{% block content %}
+    <h1>{% trans "API Keys" %}</h1>
+    <ul>
+  {% for api_key in api_keys %}
+      <li>
+        <code>{{ api_key.key }}</code><a href="#">{% trans 'Delete' %}</a>
+      </li>
+  {% endfor %}
+    </ul>
+    <a href="#">Generate new API Key</a>
+{% endblock %}

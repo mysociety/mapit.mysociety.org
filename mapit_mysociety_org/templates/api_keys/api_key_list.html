@@ -10,8 +10,15 @@
     <section class="account-form">
         <h2>{% trans "API Key" %}</h2>
         {% include 'account/_messages.html' %}
-        <p>Your API Key is:</p>
-        <pre>{{ api_key.key }}</pre>
+        <p>Your API Keys:</p>
+        <ul>
+      {% for api_key in api_keys %}
+        <li>
+            <code>{{ api_key.key }}</code> <a href="#">{% trans 'Delete' %}</a>
+        </li>
+      {% endfor %}
+        </ul>
+        <a href="#">Generate new API Key</a>
     </section>
 </article>
 {% endblock %}
