@@ -18,7 +18,12 @@
                 {% trans 'Delete' %}
             </a>
         </li>
+    {% empty %}
+        <p>{% trans "You don't have any keys yet, why not generate one now?" %}</p>
     {% endfor %}
     </ul>
-    <a href="#">Generate new API Key</a>
+    <form action="{% url 'api_keys_create_key' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="{% trans 'Generate new API Key' %}" />
+    </form>
 {% endblock %}

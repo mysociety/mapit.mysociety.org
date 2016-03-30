@@ -1,6 +1,7 @@
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.views.generic import ListView, DeleteView
-from django.http import Http404
+from django.views.generic.base import View
+from django.http import Http404, HttpResponseRedirect
 
 from .models import APIKey
 
@@ -26,3 +27,11 @@ class APIKeyDeleteView(DeleteView):
         if not api_key.user == self.request.user:
             raise Http404
         return api_key
+
+
+class APIKeyCreateView(View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        APIKey.objects.create(user=request.user, key=APIKey.generate_key())
+        return HttpResponseRedirect(reverse('api_keys_keys'))

@@ -27,7 +27,14 @@
             </li>
         {% endfor %}
         </ul>
-        <a href="#">Generate new API Key</a>
+        <form action="{% url 'api_keys_create_key' %}" method="post">
+            {% csrf_token %}
+            <div class="account-form__field account-form__field--submit">
+                <button type="submit" class="btn">
+                    {% trans 'Generate new API Key' %}
+                </button>
+            </div>
+        </form>
     </section>
 </article>
 {% endblock %}

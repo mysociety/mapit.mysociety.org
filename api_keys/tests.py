@@ -146,6 +146,41 @@ class APIKeyDeleteViewTest(PatchedRedisTestCase):
             APIKey.objects.get(pk=key_id)
 
 
+class APIKeyCreateViewTest(PatchedRedisTestCase):
+    def setUp(self):
+        super(APIKeyCreateViewTest, self).setUp()
+        self.user = User.objects.create_user(
+            "Test user",
+            "test@example.com",
+            "password"
+        )
+
+    def tearDown(self):
+        super(APIKeyCreateViewTest, self).tearDown()
+        self.user.delete()
+
+    def test_view_requires_login(self):
+        url = reverse('api_keys_create_key')
+        self.client.logout()
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        self.client.login(username="Test user", password="password")
+        response = self.client.post(url)
+        self.assertRedirects(response, reverse('api_keys_keys'))
+
+    def test_generates_new_key(self):
+        url = reverse('api_keys_create_key')
+        self.client.login(username="Test user", password="password")
+        self.client.post(url)
+        self.assertEqual(APIKey.objects.filter(user=self.user).count(), 1)
+
+    def test_redirects_to_list(self):
+        url = reverse('api_keys_create_key')
+        self.client.login(username="Test user", password="password")
+        response = self.client.post(url)
+        self.assertRedirects(response, reverse('api_keys_keys'))
+
+
 class APIKeyModelTest(PatchedRedisTestCase):
 
     def setUp(self):
