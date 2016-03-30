@@ -18,6 +18,7 @@ class APIKey(models.Model):
         on_delete=models.CASCADE
     )
     key = models.CharField(max_length=40, blank=False, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return "%s: %s" % (self.user, self.key)
@@ -25,6 +26,7 @@ class APIKey(models.Model):
     def save(self, *args, **kwargs):
         # Call the "real" save() method.
         super(APIKey, self).save(*args, **kwargs)
+
         self.save_key_to_redis()
 
     @property
