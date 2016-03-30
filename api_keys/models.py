@@ -12,14 +12,19 @@ from .utils import redis_connection
 
 # Inspired by https://github.com/CIGIHub/django-simple-api-key
 class APIKey(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='api_key')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='api_key',
+        on_delete=models.CASCADE
+    )
     key = models.CharField(max_length=40, blank=False, unique=True)
 
     def __unicode__(self):
         return "%s: %s" % (self.user, self.key)
 
     def save(self, *args, **kwargs):
-        super(APIKey, self).save(*args, **kwargs) # Call the "real" save() method.
+        # Call the "real" save() method.
+        super(APIKey, self).save(*args, **kwargs)
         self.save_key_to_redis()
 
     @property
@@ -59,4 +64,3 @@ def delete_api_key_from_redis(sender, instance, using, **kwargs):
     """Delete an APIKey from redis when it's deleted."""
     if sender == APIKey:
         instance.delete_key_from_redis()
-
