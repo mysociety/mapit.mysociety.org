@@ -1,9 +1,8 @@
 postgresql
 postgresql-9.3-postgis-2.1
-libgdal1-dev
+libgdal1h
 memcached
 python-virtualenv
-ruby-sass
 redis-server
 libhiredis-dev
 varnish

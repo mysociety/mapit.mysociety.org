@@ -3,7 +3,6 @@ postgresql-9.1-postgis
 libgdal1
 memcached
 python-virtualenv
-ruby-sass
 libapache2-mod-wsgi
 redis-server
 libhiredis-dev
