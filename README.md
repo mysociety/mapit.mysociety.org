@@ -1,7 +1,7 @@
 MapIt GB
 ========
 
-This repository houses a Django project which will runs
+This repository houses a Django project which runs
 http://mapit.mysociety.org, mySociety's administrative boundary tool for the
 UK.
 
