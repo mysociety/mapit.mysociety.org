@@ -24,4 +24,5 @@
 .DS_Store
 
 /static/css
+/static/down.html
 .vagrant
