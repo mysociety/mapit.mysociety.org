@@ -215,6 +215,7 @@ TEMPLATES = [{
         # List of callables that know how to import templates from various sources.
         'loaders': (
             ('django.template.loaders.cached.Loader', (
+                'apptemplates.Loader',
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
             )),
