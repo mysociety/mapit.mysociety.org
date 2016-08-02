@@ -1,6 +1,7 @@
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.http import Http404
 
 import account.forms
@@ -21,9 +22,25 @@ class SignupView(account.views.SignupView):
     form_class = forms.SignupForm
 
     def generate_username(self, form):
-        # Return the email address as the username (Django's user model needs
-        # something to store there).
-        return form.cleaned_data['email']
+        # Generate a random username (we used to use the email address
+        # directly, but Django has a 30 character limit for the username).
+        truncated_email = form.cleaned_data['email'][:25]
+        return self.generate_unique_username(truncated_email, 0)
+
+    def generate_unique_username(self, email, index):
+        username = email
+        if index > 0:
+            username = "{0}_{1}".format(username, str(index))
+        try:
+            print("Trying username: {0}".format(username))
+            User.objects.get(username=username)
+            # If we get here, the username already exists, so we have to try
+            # a different one.
+            index += 1
+            return self.generate_unique_username(email, index)
+        except User.DoesNotExist:
+            # Yay, it's unique
+            return username
 
 
 class ConfirmEmailView(account.views.ConfirmEmailView):
