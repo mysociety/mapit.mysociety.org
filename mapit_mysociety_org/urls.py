@@ -3,9 +3,12 @@ from django.contrib import admin
 from django.views.defaults import page_not_found
 admin.autodiscover()
 
+from django.shortcuts import render
+
 from .views import LoginView, SignupView, ConfirmEmailView
 
 urlpatterns = [
+    url(r'^changelog$', render, {'template_name': 'changelog.html'}, 'mapit_changelog'),
     url(r'^', include('mapit.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r"^account/api_keys/", include("api_keys.urls")),
