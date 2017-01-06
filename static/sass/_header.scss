@@ -1,0 +1,21 @@
+// MapIt UK hides the h1 (using height:0 and overflow:hidden)
+// and displays a logo instead.
+
+.site-title {
+    display: block;
+    width: $site-logo-width;
+    height: 0;
+    padding-top: $site-logo-height;
+    overflow: hidden;
+
+    background: transparent url("../img/site-logo.png");
+    background-size: $site-logo-width $site-logo-height;
+
+    @media ($high-dpi-screen) {
+        background-image: url("../img/site-logo@2x.png");
+    }
+
+    @media (all) {
+        background-image: url("../img/site-logo.svg"), none;
+    }
+}
