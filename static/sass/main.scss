@@ -1,23 +1,4 @@
-@mixin border-radius($rad){
-    -webkit-border-radius: $rad;
-       -moz-border-radius: $rad;
-        -ms-border-radius: $rad;
-         -o-border-radius: $rad;
-            border-radius: $rad;
-}
-
-@mixin clearfix{
-    &:before,
-    &:after{
-        content:"";
-        display:table;
-    }
-    &:after {
-        clear:both;
-    }
-    *zoom:1;
-
-}
+@import "../../mysociety_docs_theme/sass/global";
 
 .content--with-sidebar header.account-header {
     @media (min-width: 60em) {
@@ -30,7 +11,7 @@
     color: #fff;
     padding: (0.625em/2) 0.625em*2;
     font-family: 'MuseoSlab500', sans-serif;
-    @include border-radius(0.625em/2);
+    border-radius: (0.625em/2);
 }
 
 .btn--api-key-delete {

@@ -8,30 +8,12 @@ import subprocess
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-try:
-    import mapit
-except:
-    import sys
-    sys.path.insert(0, parent_dir)
-    import mapit
-
-directory = os.path.dirname(mapit.__file__)
-
-subprocess.check_call([
-    "mkdir", "-p", "%s/static/mapit/css" % directory
-])
-subprocess.check_call([
-    "sassc", "--sourcemap",
-    "--style", "compressed",
-    "%s/static/mapit/sass/mapit.scss" % directory,
-    "%s/static/mapit/css/mapit.css" % directory
-])
 subprocess.check_call([
     "mkdir", "-p", "%s/static/css" % parent_dir
 ])
 subprocess.check_call([
     "sassc", "--sourcemap",
     "--style", "compressed",
-    "%s/static/sass/accounts.scss" % parent_dir,
-    "%s/static/css/accounts.css" % parent_dir
+    "%s/static/sass/main.scss" % parent_dir,
+    "%s/static/css/main.css" % parent_dir
 ])
