@@ -28,6 +28,7 @@ MIDDLEWARE_CLASSES.extend([
 old_staticfiles_dirs = STATICFILES_DIRS
 STATICFILES_DIRS = old_staticfiles_dirs + (
     os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'theme'),
 )
 
 # New mapit.mysociety.org settings

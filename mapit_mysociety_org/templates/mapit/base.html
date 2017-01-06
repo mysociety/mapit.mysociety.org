@@ -42,7 +42,14 @@
 
 </head>
 <body>
+
+    {% include "mapit/header.html" %}
+
     {% block content %}{% endblock %}
+
+    {% include "mapit/footer.html" %}
+
     {% block extra_js %}{% endblock %}
+
 </body>
 </html>

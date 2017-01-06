@@ -1,4 +1,7 @@
-@import "../../mysociety_docs_theme/sass/global";
+$theme_dir: '/static';
+$logo_path: ''; // skip docs-theme logo in header
+
+@import "../../theme/sass/global";
 
 .content--with-sidebar header.account-header {
     @media (min-width: 60em) {
