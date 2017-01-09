@@ -1,5 +1,8 @@
 @import "variables";
+@import "mixins";
 @import "../../theme/sass/global";
 
+@import "header";
+@import "content";
 @import "accounts";
 @import "buttons";

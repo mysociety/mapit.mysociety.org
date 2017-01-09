@@ -6,6 +6,31 @@
 
 <header class="site-header">
     <div class="container">
-        <a href="{{ site.baseurl }}" class="site-title"><h1>MapIt</h1></a>
+        <a href="{% url 'mapit_index' %}" class="site-title"><h1>MapIt</h1></a>
+        <nav role="navigation" class="site-nav">
+            <ul>
+                <li>
+                    <a href="{% url 'mapit_index' %}">Home</a>
+                </li>
+                <li>
+                    <a href="{% url 'mapit_pricing' %}">Pricing</a>
+                </li>
+                <li>
+                    <a href="{% url 'mapit_docs' %}">Documentation</a>
+                </li>
+              {% if request.user.is_authenticated %}
+                <li>
+                    <a href="{% url 'account_login' %}">Your account</a>
+                </li>
+              {% else %}
+                <li>
+                    <a href="{% url 'account_login' %}">Log in</a>
+                </li>
+                <li>
+                    <a href="{% url 'account_signup' %}">Sign up</a>
+                </li>
+              {% endif %}
+            </ul>
+        </nav>
     </div>
 </header>

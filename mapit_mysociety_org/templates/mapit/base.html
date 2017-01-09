@@ -10,7 +10,7 @@
 
     <title>{% block fulltitle %}{% block title %}{% endblock %} - MapIt{% endblock %}</title>
 
-    <meta name="viewport" content="initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static "css/main.css" %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static "mapit/leaflet/leaflet.css" %}" />
     <!--[if lte IE 8]>
@@ -45,7 +45,11 @@
 
     {% include "mapit/header.html" %}
 
-    {% block content %}{% endblock %}
+    {% block content_outer %}
+        <div class="content {% block article-class %}{% endblock %}">
+            {% block content %}{% endblock %}
+        </div>
+    {% endblock %}
 
     {% include "mapit/footer.html" %}
 

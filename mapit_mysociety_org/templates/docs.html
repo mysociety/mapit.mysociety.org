@@ -1,0 +1,15 @@
+{% extends "mapit:mapit/index.html" %}
+
+{% block extra_intro %}
+    {% if not request.user.is_authenticated %}
+        <p>
+            We recommend that you use an api key to access this service –
+        {% if ACCOUNT_OPEN_SIGNUP %}
+          <a href="{% url 'account_login' %}">log in</a> or <a href="{% url 'account_signup' %}">create an account</a>
+        {% else %}
+            <a href="{% url 'account_login' %}">log in to your account</a>
+        {% endif %}
+             to get yours.
+        </p>
+    {% endif %}
+{% endblock %}
