@@ -6,14 +6,44 @@
 
 <h2>Pricing</h2>
 
-<p>
-    &pound;500 per year for up to 50,000 calls (free for charitable usage)<br/>
-    &pound;1000 per year for up to 100,000 calls<br/>
-    &pound;2000 per year for up to 200,000 calls<br/>
-    &pound;2500 per year for up to 300,000 calls<br/>
-    &pound;3000 per year for up to 500,000 calls<br/>
-    More than 500,000 calls, <a href="mailto:enquiries&#64;mysociety.org">get in touch</a><br/>
-</p>
-<p>In addition, we offer a 50% discount on the above rates for charitable usage.</p>
+<p>We love seeing people use our data for the public good. That’s why low-volume, charitable use of the MapIt API is completely free, and higher volume charitable users get a 50% discount off the standard commercial rate.</p>
+
+<p>All prices include VAT. Prices and call limits are per month.</p>
+
+<div class="pricing">
+
+    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
+        <h2 class="pricing__option__calls"><small>Up to</small> 5,000 calls</h2>
+        <p class="pricing__option__price"><strong>£50</strong>/mth</p>
+        <p class="pricing__option__price--charitable">Or <strong>free</strong> for charitable use</p>
+    </a>
+
+    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
+        <h2 class="pricing__option__calls"><small>Up to</small> 10,000 calls</h2>
+        <p class="pricing__option__price"><strong>£100</strong>/mth</p>
+        <p class="pricing__option__price--charitable">Or <strong>£50</strong>/mth for charitable use</p>
+    </a>
+
+    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
+        <h2 class="pricing__option__calls"><small>Up to</small> 20,000 calls</h2>
+        <p class="pricing__option__price"><strong>£200</strong>/mth</p>
+        <p class="pricing__option__price--charitable">Or <strong>£100</strong>/mth for charitable use</p>
+    </a>
+
+    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
+        <h2 class="pricing__option__calls"><small>Up to</small> 30,000 calls</h2>
+        <p class="pricing__option__price"><strong>£250</strong>/mth</p>
+        <p class="pricing__option__price--charitable">Or <strong>£125</strong>/mth for charitable use</p>
+    </a>
+
+    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
+        <h2 class="pricing__option__calls"><small>Up to</small> 50,000 calls</h2>
+        <p class="pricing__option__price"><strong>£300</strong>/mth</p>
+        <p class="pricing__option__price--charitable">Or <strong>£150</strong>/mth for charitable use</p>
+    </a>
+
+</div>
+
+<p>Need more than 50,000 calls a month? <a href="#">Contact us for a price.</a></p>
 
 {% endblock %}
