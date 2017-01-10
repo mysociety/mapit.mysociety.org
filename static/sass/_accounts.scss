@@ -1,9 +1,3 @@
-.content--with-sidebar header.account-header {
-    @media (min-width: 60em) {
-        margin-top: -1.1em;
-    }
-}
-
 .account-form__field {
     @include clearfix;
     margin-bottom: 1em;

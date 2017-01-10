@@ -13,11 +13,3 @@
         </p>
     {% endif %}
 {% endblock %}
-
-{% block extra_nav %}
-    {% if request.user.is_authenticated %}
-        {% include 'account/_logged_in_nav.html' %}
-    {% else %}
-        {% include 'account/_signup_nav.html' %}
-    {% endif %}
-{% endblock %}

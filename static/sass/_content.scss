@@ -9,3 +9,39 @@
         padding-bottom: 2em;
     }
 }
+
+.content--with-sidebar {
+    @media (min-width: $medium-screen) {
+        @include clearfix();
+
+        header {
+            float: left;
+            width: 20%;
+        }
+
+        section {
+            float: right;
+            width: 70%;
+        }
+    }
+}
+
+.toc {
+    p {
+        margin: 0.25em 0;
+        font-weight: 600;
+        color: $colour_dark_grey;
+    }
+
+    ol, ul {
+        @extend .unstyled-list;
+        margin-top: 0;
+        margin-bottom: 2em;
+    }
+
+    a {
+        display: block;
+        padding: 0.25em 0;
+        border-top: 1px solid $colour_off_white;
+    }
+}
