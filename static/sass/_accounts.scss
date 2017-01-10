@@ -1,47 +1,33 @@
 .account-form__field {
-    @include clearfix;
     margin-bottom: 1em;
 
     input {
-        padding: (0.625em/2);
-        vertical-align: middle;
-    }
-
-    .account-form__errors {
-        // Pad out the error so that it's aligned under the field when the
-        // field and label are floated next to each other
-        @media (min-width: 19em) {
-            padding-left: 8em;
-        }
-
-        .errorlist {
-            margin: 0;
-        }
+        @extend .form-control;
     }
 }
 
-.account-form__label,
-.account-form__input {
-    float: left;
-}
-.account-form__label {
-    width: 8em;
-}
+.account-form__field--error {
+    color: $color_error_red;
 
- .account-form__input--error {
     input {
-        border-color: red;
-        // Space for the error message below
-        margin-bottom: 0.625em;
+        border-color: $color_error_red;
     }
- }
+}
+
+.account-form__label {
+    margin-bottom: 0.4em;
+    font-weight: 600;
+}
 
 .account-form__errors {
-    float: none;
-    clear: both;
-    color: red;
+    color: $color_error_red;
+    background-color: mix($color_error_red, #fff, 10%);
+    border-radius: 0.3em;
+    padding: 0.5em 1em;
+    margin: 1em 0;
 
     .errorlist {
+        margin: 0;
         padding: 0;
 
         li {
