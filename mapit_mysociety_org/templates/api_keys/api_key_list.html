@@ -10,25 +10,24 @@
         <h2>{% trans "API Key" %}</h2>
         {% include 'account/_messages.html' %}
 
-        <p>To use your API key, include it in each API call as either an
+        <p>To use your API Key, include it in each API call as either an
         <code>api_key</code> URL query parameter, e.g.
         https://mapit.mysociety.org/area/2244?api_key=KEY, or an X-Api-Key HTTP
         request header.</p>
 
         <p>Your API Keys:</p>
-        <ul>
+        <ul class="api-keys">
         {% for api_key in api_keys %}
             <li>
-                <code>{{ api_key.key }}</code>
-                <br/>
-                <small>
-                  {% blocktrans with datetime=api_key.created_at %}
+                <div class="api-key__key">{{ api_key.key }}</div>
+                <ul class="api-key__meta">
+                  <li>{% blocktrans with datetime=api_key.created_at %}
                     Created: {{datetime}}
-                  {% endblocktrans %}
-                </small>
-                <a href="{% url 'api_keys_delete_key' api_key.pk %}" class="btn btn--api-key-delete">
-                    {% trans 'Delete' %}
-                </a>
+                  {% endblocktrans %}</li>
+                    <li><a href="{% url 'api_keys_delete_key' api_key.pk %}" class="btn btn--danger btn--small">
+                        {% trans 'Delete this API Key' %}
+                    </a></li>
+                </ul>
             </li>
         {% endfor %}
         </ul>
