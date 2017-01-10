@@ -21,7 +21,9 @@
     <script src="{% static "mapit/js/reqwest.min.js" %}"></script>
     <script src="{% static "mapit/leaflet/leaflet.js" %}"></script>
 
-    {% block extra_css %}{% endblock %}
+    {% block extra_css %}
+        <link rel="shortcut icon" href="{% static "img/favicon.ico">
+    {% endblock %}
 
 {% if norobots %}
     <meta name="robots" content="noindex, follow">
