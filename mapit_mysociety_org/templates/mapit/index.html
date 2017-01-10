@@ -1,15 +1,33 @@
-{% extends "mapit:mapit/index.html" %}
+{% extends "mapit/base.html" %}
+{% load i18n %}
 
-{% block extra_intro %}
-    {% if not request.user.is_authenticated %}
-        <p>
-            We recommend that you use an api key to access this service –
-        {% if ACCOUNT_OPEN_SIGNUP %}
-          <a href="{% url 'account_login' %}">log in</a> or <a href="{% url 'account_signup' %}">create an account</a>
-        {% else %}
-            <a href="{% url 'account_login' %}">log in to your account</a>
-        {% endif %}
-             to get yours.
-        </p>
-    {% endif %}
+{% block fulltitle %}
+    {% trans "MapIt : map postcodes and geographical points to administrative areas" %}
+{% endblock %}
+
+{% block content_outer %}
+
+    <div style="text-align: center; padding: 3em 0">
+        <div class="container">
+            <h1 style="margin-left: auto; margin-right: auto; max-width: 16em;">MapIt is awesome, you should subscribe to a paid account!</h1>
+            <p>Lots of awesome marketing copy will go here.</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; padding: 3em 0; background-color: #f3f1eb;">
+        <div class="container" id="try-mapit">
+            <form method="post" action="{% url "mapit_index" %}{% if postcodes_available %}postcode{% else %}point{% endif %}/">
+                <label for="try-mapit-pc">
+                  {% if postcodes_available %}
+                    {% trans "Try it out, enter a postcode" %}:
+                  {% else %}
+                    {% trans "Try it out, enter a lat,lon" %}:
+                  {% endif %}
+                </label>
+                <input type="text" name="pc" id="try-mapit-pc"{% if not postcodes_available %} placeholder="{% trans "latitude" %},{% trans "longitude" %}"{% endif %}>
+                <input class="btn" type="submit" value="{% trans "Look up" %}">
+            </form>
+        </div>
+    </div>
+
 {% endblock %}
