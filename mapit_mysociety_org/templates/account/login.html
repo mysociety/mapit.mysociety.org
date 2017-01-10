@@ -14,7 +14,7 @@
             {% csrf_token %}
             {% include 'account/_form_fields.html' %}
             <div class="account-form__field account-form__field--submit">
-                <button type="submit" class="btn">{% trans "Log in" %}</button>
+                <button type="submit" class="btn btn--primary">{% trans "Log in" %}</button>
             </div>
             <a href="{% url "account_password_reset" %}" class="btn">{% trans "Forgot your password?" %}</a>
         </form>

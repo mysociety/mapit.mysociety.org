@@ -1,11 +1,5 @@
 .account-form__field {
-    @include clearfix;
     margin-bottom: 1em;
-
-    input {
-        padding: (0.625em/2);
-        vertical-align: middle;
-    }
 
     .account-form__errors {
         // Pad out the error so that it's aligned under the field when the
@@ -18,14 +12,15 @@
             margin: 0;
         }
     }
+
+    input {
+        @extend .form-control;
+    }
 }
 
-.account-form__label,
-.account-form__input {
-    float: left;
-}
 .account-form__label {
-    width: 8em;
+    margin-bottom: 0.4em;
+    font-weight: 600;
 }
 
  .account-form__input--error {
