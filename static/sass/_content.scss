@@ -1,6 +1,8 @@
 .content {
     @extend .container;
 
+    @include clearfix();
+
     padding-top: 1em;
     padding-bottom: 1em;
 
@@ -12,8 +14,6 @@
 
 .content--with-sidebar {
     @media (min-width: $medium-screen) {
-        @include clearfix();
-
         header {
             float: left;
             width: 20%;
