@@ -21,6 +21,13 @@
     align-items: $alignment;
 }
 
+@mixin justify-content($alignment) {
+    -webkit-justify-content: $alignment;
+    -moz-justify-content: $alignment;
+    -ms-justify-content: $alignment;
+    justify-content: $alignment;
+}
+
 @mixin flex-wrap($wrap) {
     -moz-box-wrap: $wrap;
     -webkit-box-wrap: $wrap;

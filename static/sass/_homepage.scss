@@ -1,0 +1,420 @@
+.homepage-hero {
+    color: #fff;
+    background: #333 url(../img/hero.jpg) 0% 50% no-repeat;
+    background-size: cover;
+    padding: 2em 0;
+
+    .container > :last-child {
+        margin-bottom: 0;
+    }
+
+    h1 {
+        font-weight: 600;
+        font-size: 2em; // down from 2.666666em
+    }
+
+    p {
+        font-size: 1.2em;
+    }
+
+    @media (min-width: $medium-screen) {
+        background-position: 66% 50%;
+
+        @media (min-height: 650px) {
+            padding: 3em 0;
+        }
+
+        h1, p {
+            max-width: 60%;
+        }
+
+        h1 {
+            font-size: 2.6em;
+        }
+    }
+
+    @media (min-width: $large-screen) {
+        @media (min-height: 750px) {
+            padding: 4em 0;
+        }
+
+        h1 {
+            max-width: 50%;
+        }
+
+        p {
+            max-width: 55%;
+            font-size: 1.3em;
+        }
+    }
+}
+
+.homepage-section {
+    padding: 3em 0;
+}
+
+.homepage-section--no-padding-top {
+    padding-top: 0;
+}
+
+.homepage-section--contrasting {
+    background-color: $colour_off_white;
+}
+
+.homepage-section--primary {
+    background-color: $colour_brand;
+    color: #fff;
+
+    .btn {
+        background-color: #fff;
+        color: darken($colour_brand, 5%);
+
+        &:hover,
+        &:focus {
+            background-color: mix(#fff, $colour_brand, 95%);
+        }
+    }
+}
+
+.homepage-process {
+    background: transparent url(../img/mapit-machine.png) 50% 47% no-repeat;
+    background-size: 100% auto;
+
+    padding-top: 3em;
+    border-top: 1px solid $colour_off_white;
+    padding-bottom: 1em; // visually balance whitespace above and below section
+
+    @media ($high-dpi-screen) {
+        background-image: url(../img/mapit-machine@2x.png);
+    }
+
+    h3 {
+        text-align: center;
+        margin-bottom: 1em;
+    }
+
+    ul {
+        @extend .unstyled-list;
+        margin: -0.5em;
+    }
+
+    li {
+        display: block;
+        margin: 0.5em;
+        padding: 0.5em 1em;
+        line-height: 1.4em;
+        border: 2px solid $colour_off_white;
+        background-color: rgba(#fff, 0.6);
+        border-radius: 0.3em;
+        text-align: center;
+    }
+
+    @media (min-width: $medium-screen) {
+        ul {
+            @include flexbox();
+            @include flex-wrap(wrap);
+            margin: -1%;
+        }
+
+        li {
+            @include flexbox();
+            @include flex-align(center);
+            @include justify-content(center);
+            min-height: 1.4em + 1.4em + 0.5em + 0.5em; // always at least 2 "lines" (plus padding) high
+            margin: 1%;
+            width: 50% - 1% - 1%;
+        }
+    }
+
+    @media (min-width: 836px) {
+        background-position: 50% 60%;
+        background-size: 800px auto;
+    }
+
+    @media (min-width: $large-screen) {
+        li {
+            width: 25% - 1% - 1%;
+        }
+    }
+}
+
+.homepage-process__mapit {
+    display: block;
+    width: 100%;
+    padding-top: 45%;
+
+    @media (min-width: 640px) {
+        padding-top: 40%;
+    }
+
+    @media (min-width: 836px) {
+        padding-top: 30%;
+    }
+}
+
+.homepage-process__output {
+    h3 {
+        text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff;
+    }
+}
+
+.homepage-feature-grid {
+    @include clearfix();
+    margin: -1em;
+
+    & > div {
+        float: left;
+        width: 100%;
+        padding: 0 1em;
+        margin: 1em 0;
+
+        & > :last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    @media (min-width: $medium-screen) {
+        & > div {
+            width: 33%;
+        }
+
+        & > :first-child {
+            width: 100%;
+        }
+    }
+
+    @media (min-width: $large-screen) {
+        & > div,
+        & > :first-child {
+            width: 25%;
+        }
+    }
+
+    h3 {
+        margin: 0;
+        line-height: 1.2em;
+    }
+
+    h4 {
+        color: $color_mysoc_dark_grey;
+        font-size: 0.9em;
+        margin: 2em 0 1em 0;
+        font-weight: 600;
+    }
+
+    p {
+        margin: 0.6em 0 0 0;
+    }
+
+    img {
+        display: block; // force top/bottom margins to collapse
+        border: 1px solid #ddd;
+        margin: 0 0 1em 0;
+    }
+
+    & + & {
+        padding-top: 2em;
+        border-top: 1px solid $colour_off_white;
+    }
+}
+
+.homepage-try__form {
+    text-align: center;
+
+    input[type="text"] {
+        width: 8em !important;
+        max-width: 50%;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5em;
+    }
+
+    @media (min-width: $mediumish-screen) {
+        label {
+            display: inline;
+            margin-bottom: 0;
+        }
+    }
+
+    @media (min-width: $large-screen) {
+        label {
+            font-size: 1.3em;
+            vertical-align: middle;
+        }
+
+        input[type="text"] {
+            margin: 0 1em;
+            width: 10em !important;
+        }
+    }
+}
+
+.homepage-try-loading {
+    padding: 2em 0;
+    background-color: $color_mysoc_dark_grey;
+    color: #fff;
+
+    p {
+        text-align: center;
+        font-size: 1.5em;
+        margin: 0;
+    }
+
+    .loading-grid {
+        display: inline-block;
+        vertical-align: -0.4em;
+        width: 40px;
+        height: 40px;
+        margin-right: 1em;
+    }
+}
+
+.homepage-try-error {
+    padding: 3em 0;
+    text-align: center;
+    background-color: $color_mysoc_red;
+    color: #fff;
+}
+
+.homepage-try-result {
+    background-color: $color_mysoc_dark_grey;
+    color: #fff;
+    text-align: center;
+
+    .container {
+        padding-top: 2em;
+        padding-bottom: 2em;
+    }
+
+    h2 a {
+        color: #ddd;
+        text-decoration: none;
+        border-bottom: 1px solid #ddd;
+
+        &:hover,
+        &:focus {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+    }
+}
+
+.homepage-try-result__map {
+    width: 100%;
+    height: 20em;
+    border-top: 1px solid darken($colour_off_white, 20%);
+}
+
+.homepage-try-result__areas {
+    margin: 1em -0.5em;
+    text-align: left;
+
+    @include flexbox();
+    @include flex-wrap(wrap);
+}
+
+.homepage-try-result__area {
+    display: block;
+    padding: 0.5em 1em;
+    margin: 0.5em;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.3em;
+    background-color: rgba(255, 255, 255, 0.1);
+
+    @include flex(1 0 auto);
+
+    // Quick fix for Safari flex min-width bug
+    // http://stackoverflow.com/a/30792851/3096375
+    -webkit-flex: 1 0 25%;
+    flex: 1 0 auto;
+
+    @media (min-width: $large-screen) {
+        min-width: 25%;
+    }
+
+    &:hover,
+    &:focus {
+        border-color: rgba(255, 255, 255, 0.7);;
+        background-color: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+    }
+
+    &.selected {
+        border-color: $colour_brand;
+        background-color: rgba($colour_brand, 0.2);
+    }
+}
+
+.homepage-try-result__area__type {
+    font-size: 0.8em;
+    line-height: 1.4em;
+    display: block;
+}
+
+.homepage-try-result__area__name {
+    font-weight: bold;
+    display: block;
+}
+
+.homepage-try-result__close {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0 0.5em;
+
+    &:hover,
+    &:focus {
+        text-decoration: underline;
+    }
+
+    &:before {
+        content: "\00d7";
+        display: inline-block;
+        vertical-align: -0.1em;
+        margin-right: 0.3em;
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+}
+
+.homepage-cta {
+    text-align: center;
+
+    p {
+        margin: 0 0 1em 0;
+
+        @media (min-width: $medium-screen) {
+            margin: 0 2em 0 0;
+            display: inline-block;
+            vertical-align: middle;
+            max-width: 55%;
+            text-align: right;
+        }
+
+        @media (min-width: $large-screen) {
+            font-size: 1.2em;
+        }
+    }
+}
+
+.homepage-try-result__open {
+    color: inherit;
+    padding: 0 0.5em;
+
+    &:hover,
+    &:focus {
+        text-decoration: underline;
+    }
+
+    &:before {
+        content: "\29C9";
+        display: inline-block;
+        margin-right: 0.5em;
+        font-weight: bold;
+    }
+}

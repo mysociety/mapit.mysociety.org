@@ -80,10 +80,11 @@
     vertical-align: middle;
 }
 
-#try-mapit {
-    #try-mapit-pc {
+.homepage-try {
+    input[type="text"] {
         @extend .form-control;
         @extend .form-control--inline;
+        text-transform: uppercase;
     }
 
     .btn {
