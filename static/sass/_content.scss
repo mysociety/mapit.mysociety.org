@@ -13,6 +13,12 @@
 }
 
 .content--with-sidebar {
+    section + section {
+        margin-top: 2em;
+        padding-top: 2em;
+        border-top: 1px solid $colour_off_white;;
+    }
+
     @media (min-width: $medium-screen) {
         header {
             float: left;
@@ -48,8 +54,6 @@
 
 .content--api-docs {
     section {
-        padding-bottom: 2em;
-
         h3 {
             em {
                 display: block;
@@ -83,15 +87,14 @@
 
             h3 {
                 position: absolute;
-                top: 0;
                 left: 0;
                 width: 10em;
             }
         }
     }
+}
 
-    hr {
-        border-top-color: $colour_off_white;
-        margin: 2em 0;
-    }
+hr {
+    border-top-color: $colour_off_white;
+    margin: 2em 0;
 }

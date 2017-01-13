@@ -1,73 +1,229 @@
 {% extends "mapit/base.html" %}
 
-{% block title %}Usage and licensing{% endblock title %}
+{% block article-class %}content--with-sidebar{% endblock %}
+
+{% block title %}Terms and Conditions{% endblock title %}
 
 {% block content %}
 
-<h2>Technical queries</h2>
+<h1>Terms and conditions</h1>
+<hr>
 
-<p>Questions about how MapIt works, or the data? Drop a line to
-<a href="mailto:mapit&#64;mysociety.org">mapit&#64;mysociety.org</a>.</p>
+<header>
+    <nav class="toc">
+        <ol>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#usage">Usage</a></li>
+            <li><a href="#accounts">Accounts</a></li>
+            <li><a href="#termination">Termination</a></li>
+            <li><a href="#payment">Payment</a></li>
+            <li><a href="#copyright">Copyright</a></li>
+            <li><a href="#licensing">Licensing</a></li>
+            <li><a href="#attribution">Attribution</a></li>
+            <li><a href="#support">SLA and support</a></li>
+            <li><a href="#small-print">Small print</a></li>
+            <li><a href="#privacy">Privacy</a></li>
+        </ol>
+    </nav>
+</header>
 
-<h2>Terms of usage</h2>
-<p>
-    Low volume, charitable use of the API is free. This means direct use by
-    registered charities, or individuals pursuing a non&ndash;profit project on an
-    unpaid basis, with a volume of up to 50,000 calls per year. All other use
-    requires a licence, as a contribution towards the costs of providing this
-    service. Please email us at
-    <a href="mailto:enquiries&#64;mysociety.org">enquiries&#64;mysociety.org</a>
-    if your usage is likely to fall into the non&ndash;free bracket:
-    <strong>unlicensed users may be blocked without warning</strong>.
-</p>
+<section id="introduction">
 
-<h2>Pricing</h2>
-<p>
-    &pound;500 per year for up to 50,000 calls (free for charitable usage)<br/>
-    &pound;1000 per year for up to 100,000 calls<br/>
-    &pound;2000 per year for up to 200,000 calls<br/>
-    &pound;2500 per year for up to 300,000 calls<br/>
-    &pound;3000 per year for up to 500,000 calls<br/>
-    More than 500,000 calls, <a href="mailto:enquiries&#64;mysociety.org">get in touch</a><br/>
-</p>
-<p>In addition, we offer a 50% discount on the above rates for charitable usage.</p>
+<h2>Introduction</h2>
+<p>The MapIt API (“MapIt”, the “Service”) is operated by mySociety Ltd, company
+no. 5798215, of 483 Green Lanes, London N13 4BS (“mySociety”, “we” or “us).</p>
+<p>By using MapIt or signing up for an account, you’re agreeing to these Terms,
+which form a legally binding agreement. Please read them carefully - they
+define the conditions under which you’re allowed to use MapIt.</p>
+<P>In order to use MapIt, you must be at least 18 years old and legally able to
+enter into contracts. If you use MapIt on behalf of a company or organisation
+you warrant that you have the authority to accept these Terms on behalf of that
+company or organisation.</p>
+<p>mySociety reserves the right to update and change these Terms from time to
+time without notice and at its sole discretion.</p>
+</section>
 
-<h2>Credits</h2>
-
-<p>Please attribute us with the text “Powered by Mapit” and a link back to the MapIt
-front page.</p>
-
-<h2>Rate limiting</h2>
-
-<p>The standard paid service is limited to an average of 1 call per second in a
+<section id="usage">
+<h2>Usage</h2>
+<p>We reserve the right to block, without warning, usage which violates any
+of the following restrictions.</p>
+<h3 id="rate-limiting">Rate limiting</h3>
+<p>The ‘rate limit’ is the speed at which you make calls on the API.</p>
+<p>Anonymous usage of MapIt is permitted, but is rate limited to 50 calls per
+day, so we recommend that you create an account and use an API key.</p>
+<p>With an account, the rate limit is an average of 1 call per second in a
 rolling 3 minute period. If you need more than this, we can set you up a
-dedicated service. Please <a href="mailto:enquiries&#64;mysociety.org">get in touch</a>.</p>
+dedicated service, which may have additional terms or restrictions; please
+contact us to discuss.</p>
+<h3 id="call-limits">Call limits</h3>
+<p>The ‘call limit’ is the number of calls which can be made on the API in any
+one month.</p>
+<p>Call limits are described on our <a href="{% url "mapit_pricing" %}">pricing
+page</a>. When creating an account you can pick the most appropriate plan for
+your needs. In any one month, if you reach the call limit associated with your
+current plan, you will have to cease your usage until the next month, or
+upgrade to the next pricing level.</p>
+<h3 id="charitable-use">Charitable use</h3>
+<p>Low-volume charitable use of MapIt is free. This means direct use by
+registered charities (not paid contractors working on behalf of a charity) or
+by individuals pursuing a non-profit project on an unpaid basis, with a volume
+of up to 10,000 calls per month. Higher volume charitable users get a 50%
+discount off our standard pricing.</p>
+<p>You can request charitable status as part of the account creation process,
+and also at a later stage by updating your subscription (but we don’t provide
+the discount retroactively).</p>
+<p>You will be asked to provide charity registration details (if you represent
+a charity), or (if you're an individual) enough about you and your project to
+show us you meet the conditions above: you agree to provide true and complete
+information, and inform us if your circumstances change.</p>
+</section>
 
-<h2>Self&ndash;installed versions of MapIt</h2>
+<section id="accounts">
+<h2>Accounts</h2>
+<p>You must provide a valid email address in order to complete the signup
+process. This email address will be used if we need to contact you about
+anything relating to your MapIt account or usage - please ensure you keep your
+contact information up to date.</p>
+<p>You’re responsible for all activity that takes place under your account, so
+you must keep your password secure. mySociety cannot and will not be liable for
+any loss or damage from your failure to maintain the security of your account
+and password. You should immediately notify us if you become aware of any
+unauthorised use of your account.</p>
+</section>
 
-<p>Some organisations prefer to install their own internal version on MapIt. We
-are happy to help with this. Depending on your needs, we can advise your
-technical team on how to do this, or our developers can install it for you (for a fee).</p>
+<section id="termination">
+<h2>Termination, cancellation and suspension</h2>
+<p>You can terminate this agreement at any time and for any reason by ceasing
+use of MapIt and cancelling any subscription you have. You may also choose to
+ask us to close your account, if you have one.</p>
+<p>mySociety may suspend your access to MapIt if:</p>
+<ul>
+<li>You have failed to make any payment due;
+<li>mySociety reasonably believes you to be in material breach of any term of
+this agreement;
+<li>mySociety reasonably believes that it is necessary to do so in order to
+comply with any applicable law or the order of a court or other competent
+authority.
+</ul>
+<p>We also reserve the right to modify or terminate MapIt for any reason,
+without notice at any time.</p>
+</section>
 
-<h2>One&ndash;off data range searches</h2>
+<section id="payment">
+<h2>Payment</h2>
+<p>Our pricing is posted at <a href="{% url "mapit_pricing" %}
+">https://mapit.mysociety.org/pricing/</a> and is subject to change upon 30
+days notice from us.</p>
+<p>Your plan is billed in advance on a monthly basis and is non-refundable. You
+must at all times ensure we are provided with valid credit or debit card
+information and authorise us to deduct the monthly charges against that
+card.</p>
+<p>If we’re unable to process your payment we’ll try to contact you by email.
+We reserve the right to limit or suspend your account until we can take
+payment.</p>
+</section>
 
-<p>We also offer one&ndash;off look&ndash;ups for large data sets &ndash; this is useful when you
-don’t need to use the API but simply have data that you need matched (e.g. a
-list of postcodes to match to the constituencies they fall into). We can do
-this for you &ndash; <a href="mailto:enquiries&#64;mysociety.org">ask us for a quote</a>.</p>
+<section id="copyright">
 
-<h2>Geometry files</h2>
+<h2>Copyright</h2>
 
-<p>If you need to use the API to download the MapIt geometry files, you can do
-so for free for up to 50,000 files if you are a registered UK charity or an
-individual working on a non&ndash;profit project. If you are not, or need more than
-50,000 files, we can licence them to you. </p>
+<p>Nothing in these Terms is intended to transfer the ownership of any
+intellectual property from one party to the other.</p>
 
-<p>
-    <strong>For all enquiries about licensing, please
-    <a href="mailto:enquiries&#64;mysociety.org">drop us a line</a> with some
-    information about what you’re looking to do, and we’ll get in touch to
-    discuss how we can help you.</strong>
+<p>MapIt contains Ordnance Survey data © Crown copyright and database rights
+2010-17; NISRA data © Crown copyright; Royal Mail data © Royal Mail copyright
+and database rights (Code-Point Open) 2010-17; National Statistics data © Crown
+copyright and database rights 2010-17 (ONSPD) and © Crown copyright 2004 (Super
+Output Areas).</p>
+
+<p>The data is generated from sources outside mySociety and so mySociety
+cannot, and does not, warrant that it is accurate. mySociety accepts no
+liability for any errors. For the same reason, while we will take all
+reasonable steps to ensure that all data that is made available will continue
+to be available in the future, mySociety cannot, and does not, agree to keep
+the data up to date. We may, in our absolute discretion, add new data sources,
+data fields or other forms of information from time to time but we are under no
+obligation to do so.</p>
+
+</section>
+
+<section id="licensing">
+<h2>Licensing</h2>
+<p>mySociety believes that the data may be used in accordance with these
+licences given by third parties:</p>
+
+<ul>
+<li>Great Britain non-SOA data may be used under the terms of the
+    <a href="http://www.ordnancesurvey.co.uk/oswebsite/opendata/licence/">OS OpenData licence</a> (PDF).
+<li>Northern Ireland boundaries may be used under the
+    <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/open-government-licence.htm">Open Government Licence</a>.
+<li>Northern Ireland postcode data may be used under the terms of the
+    <a href="https://www.ons.gov.uk/methodology/geography/licences">Northern Ireland End User Licence</a>.
+<li>Great Britain Output Area and Super Output Area data may presumably be used under OS OpenData and the
+    <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/open-government-licence.htm">Open Government Licence</a>.
+</ul>
+
+<p>but mySociety cannot know whether those licences were validly given, and in
+consequence, gives no warranty as to the ownership of the data or the use to
+which it may be put.</p>
+
+<p>You must comply with the licence or licences relevant to the data you use,
+and you are responsible for satisfying yourself that any use for which you
+employ the data is lawful and does not infringe anyone’s intellectual property
+rights.</p>
+
+</section>
+
+<section id="attribution">
+<h2>Attribution</h2>
+<p>Please attribute us with the text “Powered by Mapit” and a link back to the
+MapIt front page. You must also give any appropriate attribution(s) required by
+the data licences.</p>
+</section>
+
+<section id="support">
+<h2>SLA and support</h2>
+<p>mySociety offers no guarantee as to the availability of MapIt, and will not
+be liable if MapIt is unavailable for any reason.</p>
+<p>If you need to contact us you can do so via our contact page.</p>
+</section>
+
+<section id="small-print">
+<h2>Small print</h2>
+<p>These Terms are subject to the law of England and Wales. They constitute all
+the terms and conditions agreed upon between you and mySociety and supersede
+any prior agreements, whether written or oral.</p>
+<p>You expressly understand and agree that to the maximum extent permitted by
+law mySociety excludes all liability and responsibility to you for any loss or
+damage resulting, directly or indirectly, from your use of or inability to use
+MapIt. In any event, our total liability for all claims made about MapIt in any
+month will be no more than what you paid us for the Service the month before.</p>
+<p>mySociety shall not be deemed to have waived its right to enforce any of its
+rights under this agreement merely because it has previously failed to enforce
+its rights under this agreement, or permitted you to breach any term of this
+agreement on one or more occasions.</p>
+<p>If a court, or other competent authority, finds that any term of this
+agreement is illegal or otherwise unenforceable, that term is to be treated as
+if it had been severed from this agreement. Its severance will be treated (as
+far as possible) as having no effect on the remainder of this agreement.</p>
+</section>
+
+<section id="privacy">
+<h2>Privacy</h2>
+<p>You can read mySociety’s general privacy policy here:
+<a href="https://www.mysociety.org/privacy/">https://www.mysociety.org/privacy/</a>.
 </p>
+
+<p>In summary, we take your privacy seriously. We will use the personal data
+that you provide to us solely for the purpose of administering the service, and
+we will not disclose it to anyone else unless we are obliged to by law. We’ll
+only ever send you emails in relation to your use of MapIt. Whilst we sometimes
+use cookies and Google Analytics to help us make our websites better, you can
+block this if you want to, and we provide information about how to do so.</p>
+
+<p>We use Stripe for processing payments. You can read about Stripe’s usage
+terms and privacy policy here: <a
+href="https://stripe.com/gb/privacy">https://stripe.com/gb/privacy</a>.</p>
+</section>
 
 {% endblock %}
