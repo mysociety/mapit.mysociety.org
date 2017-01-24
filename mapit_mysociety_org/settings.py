@@ -43,7 +43,6 @@ LOGIN_URL = '/account/login'
 # django-user-accounts settings
 # Emails must be unique because we use them as usernames
 ACCOUNT_EMAIL_UNIQUE = True
-ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
 CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
 DEFAULT_FROM_EMAIL = CONTACT_EMAIL
 ACCOUNT_USER_DISPLAY = lambda user: user.email
