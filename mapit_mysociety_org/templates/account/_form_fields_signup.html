@@ -5,9 +5,11 @@
   </div>
 {% endif %}
 
-{% include 'account/_form_field.html' with field=form.email %}
-{% include 'account/_form_field.html' with field=form.password %}
-{% include 'account/_form_field.html' with field=form.password_confirm %}
+{% if form.email %}
+    {% include 'account/_form_field.html' with field=form.email %}
+    {% include 'account/_form_field.html' with field=form.password %}
+    {% include 'account/_form_field.html' with field=form.password_confirm %}
+{% endif %}
 
 {% include 'account/_form_field.html' with field=form.plan %}
 {% include 'account/_form_field_checkbox.html' with field=form.charitable_tick %}
@@ -23,4 +25,6 @@
         <p>Sorry, you don’t qualify for a charitable discounted price; you should untick that box.</p>
     </div>
 </div>
-{% include 'account/_form_field_checkbox.html' with field=form.tandcs_tick %}
+{% if not stripe %}
+    {% include 'account/_form_field_checkbox.html' with field=form.tandcs_tick %}
+{% endif %}

@@ -29,6 +29,10 @@
                 <p>Next payment will be taken on {{ stripe.current_period_end|date }}.</p>
             {% endif %}
 
+            <ul class="unstyled-list inline-list">
+                <li><a href="{% url "subscription_update" %}" class="btn btn--small btn--primary">Change plan</a></li>
+            </ul>
+
             {% if stripe.customer.default_source %}
 
                 <hr>
@@ -42,9 +46,11 @@
 
         {% else %}
             <p>You are not currently subscribed to a plan.</p>
+            <p>
+                <a href="{% url "subscription_update" %}" class="btn btn--primary">Subscribe to a plan</a></p>
+            </p>
 
         {% endif %}
-
 
     </section>
 {% endblock %}

@@ -33,7 +33,8 @@ var handler = StripeCheckout.configure({
   }
 });
 
-document.getElementById('customButton').addEventListener('click', function(e) {
+var stripeButton = document.getElementById('customButton');
+stripeButton && stripeButton.addEventListener('click', function(e) {
   // Already got a token from Stripe (so password mismatch error or somesuch)
   var form = document.getElementById('signup_form');
   if (form.stripeToken.value) {
@@ -74,7 +75,7 @@ document.getElementById('customButton').addEventListener('click', function(e) {
   errors += err('id_charity_number', ctick && c && c.value === 'c');
   errors += err('id_description', ctick && c && c.value === 'i');
   var tandcs = document.getElementById('id_tandcs_tick');
-  errors += err_highlight(tandcs.parentNode, !tandcs.checked);
+  errors += tandcs && err_highlight(tandcs.parentNode, !tandcs.checked);
   if (errors) {
     return;
   }
@@ -96,7 +97,7 @@ document.getElementById('customButton').addEventListener('click', function(e) {
       }
     }
   }
-  if (num === 0) {
+  if (num === 0 || document.getElementById('js-payment').getAttribute('data-has-payment-data')) {
     form.submit();
     return;
   }
