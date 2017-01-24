@@ -1,0 +1,50 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block title %}{% trans "Subscription" %}{% endblock %}
+
+{% block content %}
+    {% include 'account/_logged_in_sidebar.html' %}
+    <section class="account-form">
+        <h2>{% trans "Subscription" %}</h2>
+        {% include 'account/_messages.html' %}
+
+        {% if stripe.plan %}
+
+            <p>Your current plan is <strong>{{ stripe.plan.name }}</strong> ({{ stripe.plan.id }}).</p>
+
+            <p>It costs you £{{ actual_paid|floatformat:-2 }}/mth.
+            {% if stripe.discount %}
+                (£{{ stripe.plan.amount|floatformat:-2 }}/mth with
+                {{ stripe.discount.coupon.percent_off }}% charitable discount applied.)
+            {% endif %}
+            </p>
+
+            <p>Subscription created on {{ stripe.created|date }}.</p>
+
+            {% if stripe.cancel_at_period_end %}
+                <p><strong>Subscription expires on {{ stripe.current_period_end|date }}.</strong></p>
+            {% elif actual_paid > 0 %}
+                <p>Next payment will be taken on {{ stripe.current_period_end|date }}.</p>
+            {% endif %}
+
+            {% if stripe.customer.default_source %}
+
+                <hr>
+
+                <h3>Your payment details</h3>
+
+                <p>Payment details we hold: {{ stripe.customer.default_source.brand }},
+                last four digits <code>{{ stripe.customer.default_source.last4 }}</code>.</p>
+
+            {% endif %}
+
+        {% else %}
+            <p>You are not currently subscribed to a plan.</p>
+
+        {% endif %}
+
+
+    </section>
+{% endblock %}
