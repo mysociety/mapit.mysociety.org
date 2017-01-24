@@ -1,14 +1,20 @@
 from django.shortcuts import redirect
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.http import Http404
 from django.views.generic import TemplateView
+import stripe
 
 import account.forms
 import account.views
+from subscriptions.views import SubscriptionUpdateMixin
 
 from . import forms
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class LoginView(account.views.LoginView):
@@ -26,10 +32,24 @@ class LogoutView(TemplateView):
 	return super(LogoutView, self).get(*args, **kwargs)
 
 
-class SignupView(account.views.SignupView):
+class SignupView(SubscriptionUpdateMixin, account.views.SignupView):
     """ Override account.views.SignupView to use our email-only SignupForm """
 
     form_class = forms.SignupForm
+
+    def get_initial(self):
+        initial = super(SignupView, self).get_initial()
+        initial['plan'] = self.request.GET.get('plan')
+        return initial
+
+    def get_context_data(self, **kwargs):
+        kwargs['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
+        return super(SignupView, self).get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        resp = self.update_subscription(form)
+        messages.add_message(self.request, messages.INFO, 'Thank you very much!')
+        return resp
 
     def generate_username(self, form):
         # Generate a random username (we used to use the email address

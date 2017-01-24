@@ -1,6 +1,8 @@
 <div class="account-form__field{% if field.errors %} account-form__field--error{% endif %}">
-    <div class="account-form__label">{{ field.label_tag }}</div>
-    <div class="account-form__input">{{ field }}</div>
+    <label class="account-form__label">
+        {{ field }}
+        {{ field.label }}
+    </label>
     {% if field.errors %}
         <div class="account-form__errors">{{ field.errors }}</div>
     {% endif %}
