@@ -74,7 +74,7 @@ document.getElementById('customButton').addEventListener('click', function(e) {
   errors += err('id_charity_number', ctick && c && c.value === 'c');
   errors += err('id_description', ctick && c && c.value === 'i');
   var tandcs = document.getElementById('id_tandcs_tick');
-  errors += err_highlight(tandcs.parentNode, !tandcs.checked);
+  errors += tandcs && err_highlight(tandcs.parentNode, !tandcs.checked);
   if (errors) {
     return;
   }

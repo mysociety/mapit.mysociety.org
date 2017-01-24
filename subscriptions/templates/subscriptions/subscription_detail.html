@@ -11,7 +11,9 @@
         {% include 'account/_messages.html' %}
 
         {% if stripe.plan %}
-            <p>Your current plan: {{ stripe.plan.id }}, {{ stripe.plan.name }}</p>
+            <p>Your current plan: {{ stripe.plan.id }}, {{ stripe.plan.name }}
+                <a href="{% url "subscription_update" %}">Change</a>
+            </p>
 
           {% if stripe.cancel_at_period_end %}
             <p>Expires on {{ stripe.current_period_end|date }}</p>
@@ -33,11 +35,13 @@
 
             <p>Subscription created on {{ stripe.created|date }}</p>
 
-       {% else %}
-       <p>You are not currently subscribed to a plan.
+        {% else %}
+        <p>You are not currently subscribed to a plan.</p>
+        <p>
+            <a href="{% url "subscription_update" %}" class="btn btn--primary">Subscribe to a plan</a></p>
+        </p>
 
-       {% endif %}
-
+        {% endif %}
 
     </section>
 {% endblock %}

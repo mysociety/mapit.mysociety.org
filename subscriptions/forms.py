@@ -34,16 +34,24 @@ class SubscriptionMixin(forms.Form):
         required=False)
     tandcs_tick = forms.BooleanField(
         label=mark_safe('I agree to the <a href="/legal" target="_blank">terms and conditions</a>'),
-        required=True)
+        required=False)
     stripeToken = forms.CharField(required=False, widget=forms.HiddenInput)
+
+    def __init__(self, has_payment_data=False, stripe=False, *args, **kwargs):
+        self.has_payment_data = has_payment_data
+        self.stripe = stripe
+        return super(SubscriptionMixin, self).__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super(SubscriptionMixin, self).clean()
         typ = cleaned_data.get('charitable')
 
-        if not cleaned_data.get('stripeToken') and not (
+        if not self.has_payment_data and not cleaned_data.get('stripeToken') and not (
           cleaned_data.get('plan') == settings.PRICING[0]['plan'] and typ in ('c', 'i')):
             self.add_error('plan', 'You need to submit payment')
+
+        if not self.stripe and not cleaned_data.get('tandcs_tick'):
+            self.add_error('tandcs_tick', 'Please agree to the terms and conditions')
 
         if not cleaned_data.get('charitable_tick'):
             self.cleaned_data['charitable'] = ''
@@ -54,3 +62,7 @@ class SubscriptionMixin(forms.Form):
             self.add_error('charity_number', 'Please provide your charity number')
         if typ == 'i' and not cleaned_data.get('description'):
             self.add_error('description', 'Please provide details of your project')
+
+
+class SubsForm(SubscriptionMixin):
+    pass
