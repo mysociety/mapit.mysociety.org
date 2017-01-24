@@ -48,6 +48,8 @@ CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
 DEFAULT_FROM_EMAIL = CONTACT_EMAIL
 ACCOUNT_USER_DISPLAY = lambda user: user.email
 ACCOUNT_LOGOUT_REDIRECT_URL = 'mapit_index'
+ACCOUNT_SIGNUP_REDIRECT_URL = '/account/subscription'
+ACCOUNT_LOGIN_REDIRECT_URL = '/account/subscription'
 # Enable authentication by email address not username
 AUTHENTICATION_BACKENDS = ('account.auth_backends.EmailAuthenticationBackend',
                            'django.contrib.auth.backends.ModelBackend')

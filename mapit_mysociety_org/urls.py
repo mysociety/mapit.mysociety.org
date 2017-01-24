@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^docs/', render, {'template_name': 'docs.html'}, 'mapit_docs'),
     url(r'^admin/', include(admin.site.urls)),
     url(r"^account/api_keys/", include("api_keys.urls")),
+    url(r"^account/subscription", include("subscriptions.urls")),
     # Override the login and signup views from the account app, so we can use
     # our versions which use an email address instead of a username.
     url(r"^account/signup/$", SignupView.as_view(), name="account_signup"),
