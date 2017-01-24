@@ -1,5 +1,6 @@
 {% extends "account/base.html" %}
 
+{% load static %}
 {% load i18n %}
 
 {% block title %}{% trans "Sign up" %}{% endblock %}
@@ -14,8 +15,12 @@
             {% csrf_token %}
             {% include 'account/_form_fields.html' %}
             <div class="account-form__field account-form__field--submit">
-                <button type="submit" class="btn btn--primary">{% trans "Sign up" %}</button>
+                <button id="customButton" class="btn btn--primary">{% trans "Sign up" %}</button>
             </div>
         </form>
+
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script id="js-payment" data-key="{{ STRIPE_PUBLIC_KEY }}" src="{% static "js/payment.js" %}"></script>
+
     </section>
 {% endblock %}

@@ -18,9 +18,21 @@
     }
 }
 
+.account-form__input {
+    & > ul {
+        @extend .unstyled-list;
+    }
+}
+
 .account-form__label {
     margin-bottom: 0.4em;
     font-weight: 600;
+
+    // Error class is applied by err_highlight() in payments.js
+    // TODO: BEM-ify this like `.account-form__input--error`
+    &.error {
+        color: #c00;
+    }
 }
 
  .account-form__input--error {

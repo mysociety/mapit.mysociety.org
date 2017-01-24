@@ -25,52 +25,55 @@
 
     <div class="pricing__option">
         <p class="pricing__option__name">Village</p>
-        <h2 class="pricing__option__cost">£20/mth</h2>
+        <h2 class="pricing__option__cost">£{{ PRICING.0.price }}/mth</h2>
         <p class="pricing__option__description">
             A great place to start if you’re integrating MapIt into a low traffic site.
         </p>
         <ul class="pricing__option__features">
-            <li>Max 10,000 calls per month</li>
+            <li>Max {{ PRICING.0.calls }} calls per month</li>
             <li><strong>Free</strong> for charitable users</li>
         </ul>
       {% if request.user.is_authenticated %}
         <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
       {% else %}
-        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan=mapit-10k">Sign up</a>
+      <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.0.plan }}">Sign up</a>
       {% endif %}
     </div>
 
     <div class="pricing__option pricing__option--featured">
         <p class="pricing__option__name">Town</p>
-        <h2 class="pricing__option__cost">£100/mth</h2>
+        <h2 class="pricing__option__cost">£{{ PRICING.1.price }}/mth</h2>
         <p class="pricing__option__description">
             Our most popular plan. Great for busier sites, or bulk boundary lookups.
         </p>
         <ul class="pricing__option__features">
-            <li>Max 100,000 calls per month</li>
+            <li>Max {{ PRICING.1.calls }} calls per month</li>
             <li><strong>50% off</strong> for charitable users</li>
         </ul>
       {% if request.user.is_authenticated %}
         <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
       {% else %}
-        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan=mapit-100k">Sign up</a>
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.0.plan }}">Sign up</a>
       {% endif %}
     </div>
 
     <div class="pricing__option">
         <p class="pricing__option__name">Metropolis</p>
-        <h2 class="pricing__option__cost">£300/mth</h2>
+        <h2 class="pricing__option__cost">£{{ PRICING.2.price }}/mth</h2>
         <p class="pricing__option__description">
             Super popular with heavy users like councils and government departments.
         </p>
         <ul class="pricing__option__features">
-            <li>Unlimited calls</li>
+            <li>{% if PRICING.2.calls == '0' %}Unlimited calls
+                {% else %}Max {{ PRICING.2.calls }} calls per month
+                {% endif %}
+            </li>
             <li><strong>50% off</strong> for charitable users</li>
         </ul>
       {% if request.user.is_authenticated %}
         <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
       {% else %}
-        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan=mapit-0k">Sign up</a>
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.2.plan }}">Sign up</a>
       {% endif %}
     </div>
 

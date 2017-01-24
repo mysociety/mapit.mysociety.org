@@ -5,7 +5,7 @@ from mapit_settings import *
 
 # Update a couple of things to suit our changes
 
-INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'api_keys'])
+INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'api_keys', 'subscriptions'])
 
 # Insert our project app before mapit and mapit_gb so that the templates
 # take precedence
@@ -16,7 +16,7 @@ WSGI_APPLICATION = 'mapit_mysociety_org.wsgi.application'
 old_context_processors = TEMPLATES[0]['OPTIONS']['context_processors']
 TEMPLATES[0]['OPTIONS']['context_processors'] = old_context_processors + (
     'account.context_processors.account',
-    'mapit_mysociety_org.context_processors.contact_email',
+    'mapit_mysociety_org.context_processors.add_settings',
 )
 
 MIDDLEWARE_CLASSES.extend([
@@ -87,3 +87,12 @@ API_THROTTLE_BLOCK_TIME = config.get('API_THROTTLE_BLOCK_TIME')
 # A list of api keys or IP addresses to exclude from rate limiting
 # Take this from Mapit's existing setting for now
 API_THROTTLE_UNLIMITED = MAPIT_RATE_LIMIT
+
+STRIPE_SECRET_KEY = config.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLIC_KEY = config.get('STRIPE_PUBLIC_KEY')
+
+PRICING = [
+    {'plan': 'mapit-10k', 'price': 20, 'calls': '10,000'},
+    {'plan': 'mapit-100k', 'price': 100, 'calls': '100,000'},
+    {'plan': 'mapit-0k', 'price': 300, 'calls': '0'},
+]
