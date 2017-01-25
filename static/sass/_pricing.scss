@@ -1,81 +1,126 @@
+.pricing__heading {
+    text-align: center;
+}
+
+.pricing__lead {
+    text-align: center;
+}
+
 .pricing {
+    @include clearfix();
+    margin: 2em 0;
+
+    // Arrange children into a single vertical line on narrow screens
     @include flexbox();
-    @include flex-wrap(wrap);
-    margin: 1em -0.5em;
+    @include flex-direction(column);
+    @include flex-align(center);
 }
 
 .pricing__option {
     display: block;
     text-align: center;
-    padding: 1em;
-    margin: 0.5em;
-    background-color: $colour_off_white;
-    border: 1px solid darken($colour_off_white, 5%);
-    border-radius: 0.2em;
-    color: inherit;
-    text-decoration: none;
-    transition: all 0.1s linear;
-    min-width: 10em;
+    padding: 1.5em 1em;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    max-width: 20em;
+    margin: -1px 1em 0 1em;
+}
 
-    @include flex(1 0 0);
+.pricing__option--ghostly {
+    border-style: dashed;
+    border-color: #ddd;
+    color: #777;
 
-    &:nth-child(1) {
-        $col: mix($color_mysoc_orange, #fff, 4%);
-        background-color: $col;
-        border-color: darken( $col, 5%);
-    }
+    // Send to bottom of the list on narrow screens
+    order: 1;
+    border-top-width: 0;
+    margin-top: 0;
+}
 
-    &:nth-child(2) {
-        $col: mix($color_mysoc_orange, #fff, 7%);
-        background-color: $col;
-        border-color: darken( $col, 5%);
-    }
+.pricing__option--featured {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0.5em 1em rgba(#000, 0.1);
 
-    &:nth-child(3) {
-        $col: mix($color_mysoc_orange, #fff, 10%);
-        background-color: $col;
-        border-color: darken( $col, 5%);
-    }
+    // Make this one stick out
+    max-width: 22em;
+    margin-left: 0;
+    margin-right: 0;
 
-    &:nth-child(4) {
-        $col: mix($color_mysoc_orange, #fff, 13%);
-        background-color: $col;
-        border-color: darken( $col, 5%);
-    }
+    background-color: mix($color_mysoc_orange, #fff, 15%);
+    border-color: mix($color_mysoc_orange, #ccc, 15%);
 
-    &:nth-child(5) {
-        $col: mix($color_mysoc_orange, #fff, 16%);
-        background-color: $col;
-        border-color: darken( $col, 5%);
-    }
-
-    &:hover,
-    &:focus {
-        box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.05);
-        transform: translate(0, -0.25em);
-        text-decoration: none;
-    }
-
-    & > :last-child {
-        margin-bottom: 0;
+    .pricing__option__name {
+        color: mix($color_mysoc_orange, #999, 15%);
     }
 }
 
-.pricing__option__calls {
-    font-size: 1.2em;
+@media (min-width: 45em) {
+    .pricing {
+        // Arrange children into a horizontal line now we have more space
+        @include flex-direction(row);
+        @include flex-align(auto);
 
-    small {
-        display: block;
-        font-size: (1em / 1.2);
+        margin: 3em 0;
+    }
+
+    .pricing__option {
+        width: 25%;
+        margin: 0 0 0 -1px; // overlap left border
+
+        // Expand up from 25% (magically compensates for -1px overlap)
+        @include flex(1 0 0);
+
+        // Arrange children onto a single vertical line
+        @include flexbox();
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        @include flex-align(center);
+    }
+
+    .pricing__option--featured {
+        top: -0.5em;
+        padding: 2em 1em;
+        margin-bottom: -0.5em*2;
+    }
+
+    .pricing__option--ghostly {
+        // Back to default DOM order
+        order: 0;
+        border-top-width: 1px;
+    }
+
+    // Margins on flex children don't collapse, so remove margin-tops
+    .pricing__option__description,
+    .pricing__option__features {
+        margin-top: 0;
     }
 }
 
-.pricing__option__price {
-    font-size: 1.6em;
-    margin: 0.5em 0;
-    color: rgba(0, 0, 0, 0.6);
 
-    strong {
-        color: #000;
+.pricing__option__name {
+    text-transform: uppercase;
+    color: #999;
+    margin-top: 0;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.pricing__option__cost {
+    margin: 0 0 0.66em 0;
+}
+
+.pricing__option__description {
+    font-style: italic;
+}
+
+.pricing__option__features {
+    text-align: left;
+    font-size: 0.9em;
+    line-height: 1.3em;
+    margin-bottom: 1.5em;
+
+    li + li {
+        margin-top: 0.5em;
     }
 }

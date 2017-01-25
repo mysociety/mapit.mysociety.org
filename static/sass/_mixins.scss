@@ -21,6 +21,18 @@
     align-items: $alignment;
 }
 
+@mixin flex-direction($direction) {
+    @if ($direction == column) {
+        -webkit-box-orient: vertical;
+    } @elseif ($direction == row) {
+        -webkit-box-orient: horizontal;
+    }
+    -moz-flex-direction: $direction;
+    -ms-flex-direction: $direction;
+    -webkit-flex-direction: $direction;
+    flex-direction: $direction;
+}
+
 @mixin justify-content($alignment) {
     -webkit-justify-content: $alignment;
     -moz-justify-content: $alignment;

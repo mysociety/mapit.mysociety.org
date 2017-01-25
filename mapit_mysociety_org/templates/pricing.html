@@ -4,67 +4,89 @@
 
 {% block content %}
 
-<h2>Pricing</h2>
+<h2 class="pricing__heading">Pricing</h2>
 
-<p>We love seeing people use our data for the public good. That’s why low-volume, charitable use of the MapIt API is completely free, and higher volume charitable users get a 50% discount off the standard commercial rate.</p>
-
-<p>All prices include VAT. Prices and call limits are per month.</p>
+<p class="pricing__lead">MapIt is an API. Your product or service can call the MapIt API to discover which boundaries a geographical point lies within. This look-up of a single point is what we term an “API call”. And our pricing tiers are based on the number of calls you can make per month.</p>
 
 <div class="pricing">
 
-    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
-        <h2 class="pricing__option__calls"><small>Up to</small> 5,000 calls</h2>
-        <p class="pricing__option__price"><strong>£50</strong>/mth</p>
-        <p class="pricing__option__price--charitable">Or <strong>free</strong> for charitable use</p>
-    </a>
+    <div class="pricing__option pricing__option--ghostly">
+        <p class="pricing__option__name">Sandbox</p>
+        <h2 class="pricing__option__cost">Free</h2>
+        <p class="pricing__option__description">
+            Limited key-less access, perfect for trying out the MapIt API before you buy.
+        </p>
+        <ul class="pricing__option__features">
+            <li>Max 50 calls per day</li>
+            <li>Free – no signup required</li>
+        </ul>
+        <a class="btn" href="{% url 'mapit_docs' %}">Read the docs</a>
+    </div>
 
-    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
-        <h2 class="pricing__option__calls"><small>Up to</small> 10,000 calls</h2>
-        <p class="pricing__option__price"><strong>£100</strong>/mth</p>
-        <p class="pricing__option__price--charitable">Or <strong>£50</strong>/mth for charitable use</p>
-    </a>
+    <div class="pricing__option">
+        <p class="pricing__option__name">Village</p>
+        <h2 class="pricing__option__cost">£20/mth</h2>
+        <p class="pricing__option__description">
+            A great place to start if you’re integrating MapIt into a low traffic site.
+        </p>
+        <ul class="pricing__option__features">
+            <li>Max 10,000 calls per month</li>
+            <li><strong>Free</strong> for charitable users</li>
+        </ul>
+      {% if request.user.is_authenticated %}
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
+      {% else %}
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan=mapit-10k">Sign up</a>
+      {% endif %}
+    </div>
 
-    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
-        <h2 class="pricing__option__calls"><small>Up to</small> 20,000 calls</h2>
-        <p class="pricing__option__price"><strong>£200</strong>/mth</p>
-        <p class="pricing__option__price--charitable">Or <strong>£100</strong>/mth for charitable use</p>
-    </a>
+    <div class="pricing__option pricing__option--featured">
+        <p class="pricing__option__name">Town</p>
+        <h2 class="pricing__option__cost">£100/mth</h2>
+        <p class="pricing__option__description">
+            Our most popular plan. Great for busier sites, or bulk boundary lookups.
+        </p>
+        <ul class="pricing__option__features">
+            <li>Max 100,000 calls per month</li>
+            <li><strong>50% off</strong> for charitable users</li>
+        </ul>
+      {% if request.user.is_authenticated %}
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
+      {% else %}
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan=mapit-100k">Sign up</a>
+      {% endif %}
+    </div>
 
-    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
-        <h2 class="pricing__option__calls"><small>Up to</small> 30,000 calls</h2>
-        <p class="pricing__option__price"><strong>£250</strong>/mth</p>
-        <p class="pricing__option__price--charitable">Or <strong>£125</strong>/mth for charitable use</p>
-    </a>
-
-    <a href="{% if request.user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_signup' %}{% endif %}" class="pricing__option">
-        <h2 class="pricing__option__calls"><small>Up to</small> 50,000 calls</h2>
-        <p class="pricing__option__price"><strong>£300</strong>/mth</p>
-        <p class="pricing__option__price--charitable">Or <strong>£150</strong>/mth for charitable use</p>
-    </a>
+    <div class="pricing__option">
+        <p class="pricing__option__name">Metropolis</p>
+        <h2 class="pricing__option__cost">£300/mth</h2>
+        <p class="pricing__option__description">
+            Super popular with heavy users like councils and government departments.
+        </p>
+        <ul class="pricing__option__features">
+            <li>Unlimited calls</li>
+            <li><strong>50% off</strong> for charitable users</li>
+        </ul>
+      {% if request.user.is_authenticated %}
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
+      {% else %}
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan=mapit-0k">Sign up</a>
+      {% endif %}
+    </div>
 
 </div>
 
-<p>Need more than 50,000 calls a month? <a href="#">Contact us for a price.</a></p>
+<p class="pricing__footnote">
+    All our prices include VAT. We consider “charitable users” to be
+    registered charities or individuals working unpaid on non-profit
+    projects – you will be asked for proof of charitable status during
+    signup.
+</p>
 
-<hr>
-
-<h2>This stuff came from the licensing page - if we’re going to keep it, it feels like it should be on the pricing page</h2>
-
-<h2>Self&ndash;installed versions of MapIt</h2>
-<p>Some organisations prefer to install their own internal version on MapIt. We
-are happy to help with this. Depending on your needs, we can advise your
-technical team on how to do this, or our developers can install it for you (for a fee).</p>
-
-<h2>One&ndash;off data range searches</h2>
-<p>We also offer one&ndash;off look&ndash;ups for large data sets &ndash; this is useful when you
-don’t need to use the API but simply have data that you need matched (e.g. a
-list of postcodes to match to the constituencies they fall into). We can do
-this for you &ndash; <a href="mailto:enquiries&#64;mysociety.org">ask us for a quote</a>.</p>
-
-<h2>Geometry files</h2>
-<p>If you need to use the API to download the MapIt geometry files, you can do
-so for free for up to 50,000 files if you are a registered UK charity or an
-individual working on a non&ndash;profit project. If you are not, or need more than
-50,000 files, we can licence them to you.</p>
+<p class="pricing__footnote">
+    Average of 1 call per second.
+    <a href="mailto:{{ CONTACT_EMAIL }}">Contact us</a>
+    if you’re going to need to be really busy.
+</p>
 
 {% endblock %}
