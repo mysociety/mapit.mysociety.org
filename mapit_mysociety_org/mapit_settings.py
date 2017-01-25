@@ -214,14 +214,16 @@ TEMPLATES = [{
         ),
         # List of callables that know how to import templates from various sources.
         'loaders': (
-            ('django.template.loaders.cached.Loader', (
-                'apptemplates.Loader',
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            )),
+            'apptemplates.Loader',
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
         ),
     },
 }]
+if not DEBUG:
+    TEMPLATES[0]['OPTIONS']['loaders'] = (
+        ('django.template.loaders.cached.Loader', TEMPLATES[0]['OPTIONS']['loaders']),
+    )
 
 INSTALLED_APPS = [
     'django.contrib.auth',
