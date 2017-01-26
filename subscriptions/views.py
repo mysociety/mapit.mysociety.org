@@ -1,14 +1,19 @@
 from __future__ import division
 
 from datetime import datetime
+import json
 import smtplib
 
 from django.conf import settings
 from django.contrib import messages
+from django.core import mail
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.views.generic import DetailView, FormView, DeleteView, View
-from django.http import HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.http import HttpResponseRedirect, HttpResponse
 import stripe
 
 from mapit_mysociety_org.mixins import NeverCacheMixin
@@ -183,3 +188,38 @@ class SubscriptionCancelView(StripeObjectMixin, DeleteView):
             stripe_sub.delete(at_period_end=True)
         messages.add_message(self.request, messages.INFO, 'Your subscription has been cancelled.')
         return HttpResponseRedirect(self.success_url)
+
+
+@require_POST
+@csrf_exempt
+def stripe_hook(request):
+    event_json = json.loads(request.body)
+    event = stripe.Event.retrieve(event_json["id"])
+    if event.type == 'customer.subscription.deleted':
+        subscription = event.data.object
+        try:
+            sub = Subscription.objects.get(stripe_id=subscription.id)
+            sub.delete()
+        except Subscription.DoesNotExist:
+            pass
+    elif event.type == 'invoice.payment_failed':
+        invoice = event.data.object
+        customer = stripe.Customer.retrieve(invoice.customer)
+        email = customer.email
+        if invoice.next_payment_attempt:
+            subject = 'Your payment to MapIt has failed'
+            message = render_to_string("subscriptions/email_payment_failed.txt", {})
+            mail.EmailMessage(subject, message, to=[email]).send()
+        else:
+            subject = 'Your subscription to MapIt has been cancelled'
+            message = render_to_string("subscriptions/email_cancelled.txt", {})
+            mail.EmailMessage(subject, message, to=[email], bcc=[settings.CONTACT_EMAIL]).send()
+    elif event.type == 'invoice.payment_succeeded':
+        invoice = event.data.object
+        try:
+            sub = Subscription.objects.get(stripe_id=invoice.subscription)
+        except Subscription.DoesNotExist:
+            subject = "Someone's subscription was not renewed properly"
+            message = "MapIt tried to reset the quota for subscription %s but couldn't find it" % invoice.subscription
+            mail.EmailMessage(subject, message, to=[settings.CONTACT_EMAIL]).send()
+    return HttpResponse(status=200)
