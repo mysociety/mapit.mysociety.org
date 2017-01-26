@@ -1,0 +1,10 @@
+Hi,
+
+I'm afraid that when we tried to take payment for your subscription to MapIt,
+it failed. We'll try again in three days time, but please could you log in to
+MapIt and check that your payment details are up to date.
+
+In the meantime, your quota has not been reset.
+
+Yours,
+mySociety

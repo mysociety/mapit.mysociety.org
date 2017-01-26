@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
-from .views import SubscriptionView, SubscriptionUpdateView, SubscriptionCardUpdateView, SubscriptionCancelView
+from .views import stripe_hook, SubscriptionView, SubscriptionUpdateView, SubscriptionCardUpdateView, SubscriptionCancelView
 
 urlpatterns = [
     url(
@@ -23,5 +23,10 @@ urlpatterns = [
         r'^/cancel$',
         login_required(SubscriptionCancelView.as_view()),
         name="subscription_cancel"
+    ),
+    url(
+        r'^/stripe-hook$',
+        stripe_hook,
+        name="stripe-hook"
     ),
 ]
