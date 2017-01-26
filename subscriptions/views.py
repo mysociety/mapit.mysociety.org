@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
-from django.views.generic import DetailView, FormView, DeleteView
+from django.views.generic import DetailView, FormView, DeleteView, View
 from django.http import HttpResponseRedirect
 import stripe
 
@@ -54,6 +54,11 @@ class StripeObjectMixin(object):
 class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
     model = Subscription
     context_object_name = 'stripe'
+
+    def get_context_data(self, **kwargs):
+        context = super(SubscriptionView, self).get_context_data(**kwargs)
+        context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
+        return context
 
 
 class SubscriptionUpdateMixin(object):
@@ -154,6 +159,18 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
         resp = self.update_subscription(form)
         messages.add_message(self.request, messages.INFO, 'Thank you very much!')
         return resp
+
+
+class SubscriptionCardUpdateView(StripeObjectMixin, View):
+    success_url = reverse_lazy('subscription')
+
+    def post(self, request, *args, **kwargs):
+        sub = self.get_object()
+        token = request.POST['stripeToken']
+        sub.customer.source = token
+        sub.customer.save()
+        messages.add_message(self.request, messages.INFO, 'Your card details have been updated.')
+        return HttpResponseRedirect(self.success_url)
 
 
 class SubscriptionCancelView(StripeObjectMixin, DeleteView):
