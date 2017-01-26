@@ -31,6 +31,9 @@
 
             <ul class="unstyled-list inline-list">
                 <li><a href="{% url "subscription_update" %}" class="btn btn--small btn--primary">Change plan</a></li>
+              {% if not stripe.cancel_at_period_end %}
+                <li><a href="{% url "subscription_cancel" %}" class="btn btn--small btn--danger">Cancel subscription</a></li>
+              {% endif %}
             </ul>
 
             {% if stripe.customer.default_source %}
