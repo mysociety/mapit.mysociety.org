@@ -99,8 +99,10 @@ class SubscriptionUpdateMixin(object):
                 self.object.delete_discount()
             self.object.metadata = metadata
             self.object.save()
+            self.subscription.redis_update_max(form_data['plan'])
             return super(SubscriptionUpdateMixin, self).form_valid(form)
         else:
+            # Create new Stripe customer and subscription
             cust_params = {'email': email}
             if form_data['stripeToken']:
                 cust_params['source'] = form_data['stripeToken']
@@ -123,8 +125,8 @@ class SubscriptionUpdateMixin(object):
                 user = self.created_user  # This now exists
             else:
                 user = self.request.user
-
-            Subscription.objects.create(user=user, stripe_id=stripe_id)
+            sub = Subscription.objects.create(user=user, stripe_id=stripe_id)
+            sub.redis_update_max(form_data['plan'])
 
             return resp
 
@@ -218,6 +220,7 @@ def stripe_hook(request):
         invoice = event.data.object
         try:
             sub = Subscription.objects.get(stripe_id=invoice.subscription)
+            sub.redis_reset_quota()
         except Subscription.DoesNotExist:
             subject = "Someone's subscription was not renewed properly"
             message = "MapIt tried to reset the quota for subscription %s but couldn't find it" % invoice.subscription

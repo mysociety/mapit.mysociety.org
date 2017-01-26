@@ -35,7 +35,7 @@ class APIKey(models.Model):
 
     def save_key_to_redis(self):
         r = redis_connection()
-        r.set(self.redis_key, '1')
+        r.set(self.redis_key, self.user.id)
 
     def delete_key_from_redis(self):
         r = redis_connection()
