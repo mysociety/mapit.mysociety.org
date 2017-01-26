@@ -27,4 +27,4 @@ class RedisStrings(object):
 
     @staticmethod
     def rate_limit_string(identity):
-        return "key:{0}:usage:{1}:max".format(identity, settings.REDIS_API_NAME)
+        return "key:{0}:ratelimit:{1}:max".format(identity, settings.REDIS_API_NAME)
