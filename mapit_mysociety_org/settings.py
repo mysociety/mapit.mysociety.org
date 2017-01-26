@@ -38,6 +38,8 @@ SITE_ID = 1
 SITE_BASE_URL = config.get('SITE_BASE_URL', '')
 SITE_NAME = config.get('SITE_NAME', 'MapIt')
 
+LOGIN_URL = '/account/login'
+
 # django-user-accounts settings
 # Emails must be unique because we use them as usernames
 ACCOUNT_EMAIL_UNIQUE = True
