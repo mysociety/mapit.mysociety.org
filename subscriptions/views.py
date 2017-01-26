@@ -7,7 +7,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
-from django.views.generic import DetailView, FormView
+from django.views.generic import DetailView, FormView, DeleteView
+from django.http import HttpResponseRedirect
 import stripe
 
 from mapit_mysociety_org.mixins import NeverCacheMixin
@@ -153,3 +154,15 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
         resp = self.update_subscription(form)
         messages.add_message(self.request, messages.INFO, 'Thank you very much!')
         return resp
+
+
+class SubscriptionCancelView(StripeObjectMixin, DeleteView):
+    template_name = 'subscriptions/cancel.html'
+    success_url = reverse_lazy('subscription')
+
+    def delete(self, request, *args, **kwargs):
+        stripe_sub = self.get_object()
+        if stripe_sub:
+            stripe_sub.delete(at_period_end=True)
+        messages.add_message(self.request, messages.INFO, 'Your subscription has been cancelled.')
+        return HttpResponseRedirect(self.success_url)

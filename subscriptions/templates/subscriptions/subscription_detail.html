@@ -13,10 +13,13 @@
         {% if stripe.plan %}
             <p>Your current plan: {{ stripe.plan.id }}, {{ stripe.plan.name }}
                 <a href="{% url "subscription_update" %}">Change</a>
+              {% if not stripe.cancel_at_period_end %}
+                <a href="{% url "subscription_cancel" %}">Cancel</a>
+              {% endif %}
             </p>
 
           {% if stripe.cancel_at_period_end %}
-            <p>Expires on {{ stripe.current_period_end|date }}</p>
+            <p><strong>Expires on {{ stripe.current_period_end|date }}</strong></p>
           {% else %}
             <p>Next payment on {{ stripe.current_period_end|date }}</p>
           {% endif %}
