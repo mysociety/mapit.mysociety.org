@@ -49,9 +49,9 @@ Vagrant.configure(2) do |config|
     # Install the packages from conf/packages.ubuntu-trusty
     xargs sudo apt-get install -qq -y < conf/packages.ubuntu-trusty
     # Install some of the other things we need that are just for dev
-    # ruby-dev for mailcatcher, git for installing mapit from the repo directly,
-    # and libvmod-redis
-    sudo apt-get install -qq -y ruby-dev git libvarnish-redis
+    # libsqlite3-dev and ruby-dev for mailcatcher, git for installing
+    # mapit from the repo directly, and libvmod-redis
+    sudo apt-get install -qq -y libsqlite3-dev ruby-dev git libvarnish-redis
 
     # Create a postgresql user
     sudo -u postgres psql -c "CREATE USER mapit SUPERUSER CREATEDB PASSWORD 'mapit'"
@@ -61,7 +61,9 @@ Vagrant.configure(2) do |config|
     sudo -u postgres psql -c "CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology;" -d mapit
 
     # Install mailcatcher to make dev email development easier
-    sudo gem install --no-rdoc --no-ri mailcatcher
+    # https://github.com/sj26/mailcatcher/issues/277#issuecomment-262435023
+    sudo gem install --no-rdoc --no-ri mime-types --version "< 3"
+    sudo gem install --no-rdoc --no-ri mailcatcher --conservative
 
     # Copy the example config file into place to get things going
     cp conf/general.yml-example conf/general.yml
