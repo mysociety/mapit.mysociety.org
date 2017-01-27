@@ -37,6 +37,10 @@ class Subscription(models.Model):
     def redis_key_blocked(self):
         return "{0}:blocked".format(self.redis_key)
 
+    @property
+    def redis_key_history(self):
+        return "{0}:history".format(self.redis_key)
+
     def redis_update_max(self, plan):
         m = re.match('mapit-(\d+)k', plan)
         max = int(m.group(1)) * 1000
@@ -46,7 +50,9 @@ class Subscription(models.Model):
 
     def redis_reset_quota(self):
         r = redis_connection()
-        r.delete(self.redis_key_count)
+        count = r.getset(self.redis_key_count, 0)
+        if count is not None:
+            r.rpush(self.redis_key_history, count)
         r.delete(self.redis_key_blocked)
 
     def delete_from_redis(self):
@@ -61,6 +67,7 @@ class Subscription(models.Model):
             'count': ensure_int(r.get(self.redis_key_count)),
             'blocked': ensure_int(r.get(self.redis_key_blocked)),
             'quota': ensure_int(r.get(self.redis_key_max)),
+            'history': r.lrange(self.redis_key_history, 0, -1),
         }
 
 

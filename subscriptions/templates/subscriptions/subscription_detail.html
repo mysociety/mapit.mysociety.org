@@ -74,6 +74,10 @@
                 </meter>
             {% endif %}
 
+            {% if quota_status.history %}
+                <p>Previous months: {{ quota_status.history }}</p>
+            {% endif %}
+
             {% if stripe.customer.default_source %}
 
                 <hr>
