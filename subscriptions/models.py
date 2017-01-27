@@ -7,6 +7,13 @@ from django.dispatch import receiver
 from api_keys.utils import redis_connection
 
 
+def ensure_int(s):
+    try:
+        return int(s)
+    except (ValueError, TypeError):
+        return 0
+
+
 class Subscription(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     stripe_id = models.CharField(max_length=100)
@@ -47,6 +54,14 @@ class Subscription(models.Model):
         r.delete(self.redis_key_max)
         r.delete(self.redis_key_count)
         r.delete(self.redis_key_blocked)
+
+    def redis_status(self):
+        r = redis_connection()
+        return {
+            'count': ensure_int(r.get(self.redis_key_count)),
+            'blocked': ensure_int(r.get(self.redis_key_blocked)),
+            'quota': ensure_int(r.get(self.redis_key_max)),
+        }
 
 
 @receiver(models.signals.pre_delete)

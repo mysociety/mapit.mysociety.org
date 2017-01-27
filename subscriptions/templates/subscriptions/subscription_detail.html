@@ -10,6 +10,21 @@
         <h2>{% trans "Subscription" %}</h2>
         {% include 'account/_messages.html' %}
 
+        {% if quota_status.blocked %}
+          {% if quota_status.quota > 0 and quota_status.count > quota_status.quota %}
+            <p class="attention-box warning">
+                You have used up your quota for the month.
+                Please <a href="{% url "subscription_update" %}">upgrade</a>
+                or <a href="{% url "mapit_contact" %}">contact us</a>.
+            </p>
+          {% else %}
+            <p class="attention-box warning">
+                Your account is currently suspended. Please
+                <a href="{% url "mapit_contact" %}">contact us</a>.
+            </p>
+          {% endif %}
+        {% endif %}
+
         {% if stripe.plan %}
 
             <p>Your current plan is <strong>{{ stripe.plan.name }}</strong> ({{ stripe.plan.id }}).</p>
@@ -35,6 +50,29 @@
                 <li><a href="{% url "subscription_cancel" %}" class="btn btn--small btn--danger">Cancel subscription</a></li>
               {% endif %}
             </ul>
+
+            <hr>
+
+            <h3>Your usage</h3>
+
+            <p>
+                This month:
+                {{ quota_status.count }}
+              {% if quota_status.quota > 0 %}
+                out of {{ quota_status.quota }}
+              {% endif %}
+                API calls
+            </p>
+
+            {% if quota_status.quota > 0 %}
+                <meter class="subscription-quota-meter"
+                    value="{{ quota_status.count }}"
+                    min="0"
+                    max="{{ quota_status.quota }}">
+                    {{ quota_status.count }} out of
+                    {{ quota_status.quota }} API calls
+                </meter>
+            {% endif %}
 
             {% if stripe.customer.default_source %}
 

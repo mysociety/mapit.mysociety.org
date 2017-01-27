@@ -63,6 +63,8 @@ class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(SubscriptionView, self).get_context_data(**kwargs)
         context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
+        if self.object:
+            context['quota_status'] = self.subscription.redis_status()
         return context
 
 
