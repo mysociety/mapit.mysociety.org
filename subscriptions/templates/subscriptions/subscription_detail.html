@@ -10,12 +10,25 @@
         <h2>{% trans "Subscription" %}</h2>
         {% include 'account/_messages.html' %}
 
+        {% if quota_status.blocked %}
+            {% if quota_status.count > quota_status.quota %}
+            <p>You have used up your quota for the month.
+            Please <a href="{% url "subscription_update" %}">upgrade</a> or contact us.</p>
+            {% else %}
+                <p>Your account is currently suspended. Please contact us.</p>
+            {% endif %}
+        {% endif %}
+
         {% if stripe.plan %}
             <p>Your current plan: {{ stripe.plan.id }}, {{ stripe.plan.name }}
                 <a href="{% url "subscription_update" %}">Change</a>
               {% if not stripe.cancel_at_period_end %}
                 <a href="{% url "subscription_cancel" %}">Cancel</a>
               {% endif %}
+            </p>
+
+            <p>Current usage:
+                {{ quota_status.count }} out of {{ quota_status.quota|default:"?" }}
             </p>
 
           {% if stripe.cancel_at_period_end %}
