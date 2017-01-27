@@ -31,6 +31,10 @@
                 {{ quota_status.count }} out of {{ quota_status.quota|default:"?" }}
             </p>
 
+            {% if quota_status.history %}
+                <p>Historical usage per month: {{ quota_status.history }}</p>
+            {% endif %}
+
           {% if stripe.cancel_at_period_end %}
             <p><strong>Expires on {{ stripe.current_period_end|date }}</strong></p>
           {% else %}
