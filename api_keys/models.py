@@ -33,6 +33,15 @@ class APIKey(models.Model):
     def redis_key(self):
         return "key:{0}:api:{1}".format(self.key, settings.REDIS_API_NAME)
 
+    @property
+    def redis_key_quota(self):
+        return "key:{0}:quota:{1}:count".format(self.key, settings.REDIS_API_NAME)
+
+    @property
+    def usage_count(self):
+        r = redis_connection()
+        return r.get(self.redis_key_quota)
+
     def save_key_to_redis(self):
         r = redis_connection()
         r.set(self.redis_key, self.user.id)
@@ -40,6 +49,7 @@ class APIKey(models.Model):
     def delete_key_from_redis(self):
         r = redis_connection()
         r.delete(self.redis_key)
+        r.delete(self.redis_key_quota)
 
     @staticmethod
     def generate_key(size=40, chars=string.ascii_letters + string.digits):
