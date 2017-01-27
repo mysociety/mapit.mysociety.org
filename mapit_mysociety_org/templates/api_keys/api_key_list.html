@@ -24,6 +24,9 @@
                   <li>{% blocktrans with datetime=api_key.created_at %}
                     Created: {{datetime}}
                   {% endblocktrans %}</li>
+                  {% if api_key.usage_count %}
+                    <li>({{ api_key.usage_count }} call{{ api_key.usage_count|pluralize }})</li>
+                  {% endif %}
                     <li><a href="{% url 'api_keys_delete_key' api_key.pk %}" class="btn btn--danger btn--small">
                         {% trans 'Delete this API Key' %}
                     </a></li>
