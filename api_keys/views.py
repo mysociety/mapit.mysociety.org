@@ -4,9 +4,10 @@ from django.views.generic.base import View
 from django.http import Http404, HttpResponseRedirect
 
 from .models import APIKey
+from mapit_mysociety_org.mixins import NeverCacheMixin
 
 
-class APIKeyListView(ListView):
+class APIKeyListView(NeverCacheMixin, ListView):
     template_name = 'api_keys/api_key_list.html'
     context_object_name = 'api_keys'
     model = APIKey
