@@ -56,3 +56,4 @@ python manage.py create_default_site
 # settings
 python manage.py api_keys_restrict_api
 python manage.py api_keys_throttle_api
+python manage.py subscription_default_quota

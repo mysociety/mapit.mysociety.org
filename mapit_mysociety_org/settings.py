@@ -83,6 +83,10 @@ API_THROTTLE_DEFAULT_LIMIT = config.get('API_THROTTLE_DEFAULT_LIMIT')
 # How long should users who go over the rate limit be blocked for? (Seconds)
 API_THROTTLE_BLOCK_TIME = config.get('API_THROTTLE_BLOCK_TIME')
 
+# What is the default quota limit? As above with rate limiting, this can be
+# varied per key or IP address.
+API_QUOTA_DEFAULT_LIMIT = config.get('API_QUOTA_DEFAULT_LIMIT')
+
 # A list of api keys or IP addresses to exclude from rate limiting
 # Take this from Mapit's existing setting for now
 API_THROTTLE_UNLIMITED = MAPIT_RATE_LIMIT
