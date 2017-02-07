@@ -51,24 +51,31 @@
 .api-keys {
     @extend .unstyled-list;
 
-    li {
+    & > li {
         margin: 1em 0 2em 0;
-    }
-
-    .api-key__key {
-        font-family: Consolas, 'Liberation Mono', Courier, monospace;
         padding: 1em;
         border: 2px solid $colour_off_white;
         border-radius: 0.3em;
     }
 
+    .api-key__key {
+        font-family: Consolas, 'Liberation Mono', Courier, monospace;
+    }
+
     .api-key__meta {
-        margin-top: 1em;
+        @extend .unstyled-list;
+        @extend .inline-list;
+
+        margin-top: 0.5em;
         font-size: 0.8em;
 
         .btn {
-            float: right;
-            margin-top: -0.2em;
+            vertical-align: 0.2em;
         }
     }
+}
+
+.subscription-quota-meter {
+    width: 10em;
+    max-width: 100%;
 }
