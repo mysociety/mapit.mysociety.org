@@ -41,14 +41,13 @@ document.getElementById('customButton').addEventListener('click', function(e) {
   }
   e.preventDefault();
 
-  function err_highlight(id, err) {
+  function err_highlight(labelElement, err) {
+    var $field = $(labelElement).closest('.account-form__field');
     if (err) {
-      if (id.className.search(/(?:^|\s)error(?!\S)/) === -1) {
-        id.className += " error";
-      }
+      $field.addClass('account-form__field--error');
       return 1;
     } else {
-      id.className = id.className.replace(/(?:^|\s)error(?!\S)/, '')
+      $field.removeClass('account-form__field--error');
       return 0;
     }
   }

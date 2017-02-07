@@ -1,4 +1,4 @@
-<div class="account-form__field">
+<div class="account-form__field{% if field.errors %} account-form__field--error{% endif %}">
     <label class="account-form__label">
         {{ field }}
         {{ field.label }}
