@@ -1,5 +1,6 @@
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.views.generic.base import RedirectView
 
 from django.shortcuts import render
 
@@ -22,5 +23,6 @@ urlpatterns = [
     # Override the confirm_email view from the account app, so we can sign
     # people in immediately after they confirm.
     url(r"^account/confirm_email/(?P<key>\w+)/$", ConfirmEmailView.as_view(), name="account_confirm_email"),
+    url(r"^account/$", RedirectView.as_view(pattern_name='subscription', permanent=True)),
     url(r"^account/", include("account.urls")),
 ]
