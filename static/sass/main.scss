@@ -1,14 +1,13 @@
 @import "variables";
 @import "mixins";
-@import "../../theme/sass/global";
+
+// See bin/mapit_make_css
+@import "core";
 
 @import "header";
-@import "content";
-@import "area";
 @import "homepage";
 @import "accounts";
 @import "overview";
 @import "messages";
 @import "pricing";
-@import "forms";
 @import "loading-grid";

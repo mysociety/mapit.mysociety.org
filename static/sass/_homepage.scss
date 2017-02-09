@@ -49,33 +49,6 @@
     }
 }
 
-.homepage-section {
-    padding: 3em 0;
-}
-
-.homepage-section--no-padding-top {
-    padding-top: 0;
-}
-
-.homepage-section--contrasting {
-    background-color: $colour_off_white;
-}
-
-.homepage-section--primary {
-    background-color: $colour_brand;
-    color: #fff;
-
-    .btn {
-        background-color: #fff;
-        color: darken($colour_brand, 5%);
-
-        &:hover,
-        &:focus {
-            background-color: mix(#fff, $colour_brand, 95%);
-        }
-    }
-}
-
 .homepage-process {
     background: transparent url(../img/mapit-machine.png) 50% 47% no-repeat;
     background-size: 100% auto;
@@ -219,34 +192,10 @@
 }
 
 .homepage-try__form {
-    text-align: center;
-
-    input[type="text"] {
-        width: 8em !important;
-        max-width: 50%;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 0.5em;
-    }
-
-    @media (min-width: $mediumish-screen) {
-        label {
-            display: inline;
-            margin-bottom: 0;
-        }
-    }
-
     @media (min-width: $large-screen) {
+        // Needs a bigger label to compete with huge hero
         label {
             font-size: 1.3em;
-            vertical-align: middle;
-        }
-
-        input[type="text"] {
-            margin: 0 1em;
-            width: 10em !important;
         }
     }
 }
@@ -379,26 +328,6 @@
         margin-right: 0.3em;
         font-weight: bold;
         font-size: 1.3em;
-    }
-}
-
-.homepage-cta {
-    text-align: center;
-
-    p {
-        margin: 0 0 1em 0;
-
-        @media (min-width: $medium-screen) {
-            margin: 0 2em 0 0;
-            display: inline-block;
-            vertical-align: middle;
-            max-width: 55%;
-            text-align: right;
-        }
-
-        @media (min-width: $large-screen) {
-            font-size: 1.2em;
-        }
     }
 }
 

@@ -20,5 +20,6 @@
 .DS_Store
 
 /static/css
+/static/sass/core.scss
 /static/down.html
 .vagrant

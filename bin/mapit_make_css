@@ -5,8 +5,15 @@
 
 import os
 import subprocess
+import mapit
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Add a shim file that our custom mapit.scss can import, to get to the mapit core styles
+with open(os.path.join(parent_dir, 'static', 'sass', 'core.scss'), 'w') as core_file:
+    core_file.write("""@import "{}";""".format(
+        os.path.join(os.path.dirname(mapit.__file__), 'static', 'mapit', 'sass', 'mapit.scss')
+    ))
 
 subprocess.check_call([
     "mkdir", "-p", "%s/static/css" % parent_dir

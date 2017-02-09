@@ -1,25 +1,15 @@
-.site-header {
-    color: #fff;
+// MapIt UK hides the h1 (using height:0 and overflow:hidden)
+// and displays a logo instead.
 
-    a {
-        color: inherit;
-    }
-
-    .container {
-        position: relative; // for positioning .site-nav on large screens
-    }
-}
-
-// TODO: Logo image replacement
 .site-title {
     display: block;
-    width: 170px;
+    width: $site-logo-width;
     height: 0;
-    padding-top: 40px;
+    padding-top: $site-logo-height;
     overflow: hidden;
 
     background: transparent url("../img/site-logo.png");
-    background-size: 170px 40px;
+    background-size: $site-logo-width $site-logo-height;
 
     @media ($high-dpi-screen) {
         background-image: url("../img/site-logo@2x.png");
@@ -27,74 +17,5 @@
 
     @media (all) {
         background-image: url("../img/site-logo.svg"), none;
-    }
-}
-
-.site-nav {
-    ul {
-        @extend .unstyled-list;
-        margin: 0.5em -0.5em 0 -0.5em;
-
-        // Wrap items on narrow screens
-        @include flexbox();
-        @include flex-wrap(wrap);
-    }
-
-    li {
-        @include flex(1 0 auto);
-    }
-
-    a {
-        display: block;
-        padding: 0.25em 0.5em;
-    }
-
-    // We could potentially increase this breakpoint,
-    // if there are too many items in the nav.
-    @media (min-width: $medium-screen) {
-        ul {
-            @include clearfix();
-            display: block; // no more flexbox!
-        }
-
-        li {
-            display: inline;
-            float: left; // no more flexbox!
-        }
-    }
-
-    @media (min-width: $large-screen) {
-        position: absolute;
-        right: 180px; // leave space for mysociety tab
-        top: 50%;
-        margin-top: (1em + (28em/18)) * -0.5; // vertically centre
-
-        ul {
-            margin: 0 -1em;
-        }
-
-        a {
-            padding: 0.5em 1em;
-        }
-    }
-}
-
-.site-nav--hidden {
-    display: none;
-
-    @media (min-width: $medium-screen) {
-        display: block;
-    }
-}
-
-.site-nav-toggle {
-    color: #fff;
-    padding: 0.5em 1em;
-    background: transparent;
-    border: 1px solid transparentize(#fff, 0.8);
-    border-radius: 0.2em;
-
-    @media (min-width: $medium-screen) {
-        display: none;
     }
 }
