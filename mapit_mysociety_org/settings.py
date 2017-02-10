@@ -18,6 +18,7 @@ TEMPLATES[0]['OPTIONS']['context_processors'] = old_context_processors + (
 )
 
 MIDDLEWARE_CLASSES.extend([
+    'django.middleware.csrf.CsrfViewMiddleware',
     "account.middleware.LocaleMiddleware",
     "account.middleware.TimezoneMiddleware",
 ])
