@@ -1,0 +1,18 @@
+{% extends "mapit/base.html" %}
+
+{% block title %}Bulk Lookups{% endblock %}
+
+{% block content %}
+    {% block content_text %}{% endblock %}
+    <form action="" method="post" class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {% include "account/_form_fields.html" with form=wizard.form %}
+        <input type="submit" id="btn-submit" class="btn btn-primary" value="Next &rarr;">
+      {% if wizard.steps.step0 > 1 %}
+        <p><button class="btn" name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">&larr; Previous</button>
+      {% endif %}
+        {% block extra_form_end %}{% endblock %}
+    </form>
+    {% block extra_end %}{% endblock %}
+{% endblock %}

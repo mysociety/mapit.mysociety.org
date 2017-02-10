@@ -1,0 +1,36 @@
+{% extends 'bulk_lookup/base.html' %}
+
+{% load get_item %}
+
+{% block title %}Choose postcode field{% endblock %}
+
+{% block content_text %}
+    <h1>Now tell us where the postcodes are</h1>
+{% endblock %}
+
+{% block extra_end %}
+<hr>
+<h2>This is what your file looks like</h2>
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th></th>
+          {% for field in bulk_lookup.field_names %}
+            <th>{{field}}</th>
+          {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+      {% for row in bulk_lookup.example_rows %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+          {# Extracting fields by field_names list makes sure #}
+          {# they're in the same order we printed headers above #}
+          {% for field in bulk_lookup.field_names %}
+            <td>{{ row|get_item:field }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
