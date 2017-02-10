@@ -3,3 +3,4 @@
 PATH=/usr/local/bin:/usr/bin:/bin
 
 0 0 * * * /path/to/virtualenv/bin/python /path/to/manage.py reset_ip_quotas
+*/5 * * * * /path/to/virtualenv/bin/python /path/to/manage.py process_bulk_lookups

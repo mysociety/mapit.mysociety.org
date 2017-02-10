@@ -1,0 +1,60 @@
+{% extends 'bulk_lookup/base.html' %}
+
+{% block title %}Where should we send the results?{% endblock %}
+
+{% block content_text %}
+    <h1>Step 4: Where should we send the results?</h1>
+{% endblock %}
+
+{% block content_pre_buttons %}
+  {% if price %}
+    <p>
+        We’ll match {{ num_good_rows }} postcodes and the cost will be
+        &pound;{{ price }}.
+        <br>You can pay via credit or debit card.
+        Payment is handled by Stripe, a secure online service.
+    </p>
+  {% else %}
+    <p>We’ll match {{ num_good_rows }} postcodes.</p>
+  {% endif %}
+{% endblock %}
+
+{% block extra_form_end %}
+{% if price %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+var handler = StripeCheckout.configure({
+  key: '{{ STRIPE_PUBLIC_KEY }}',
+  image: 'https://s3.amazonaws.com/stripe-uploads/acct_19EbqNIbP0iBLddtmerchant-icon-1479145884111-mysociety-wheel-logo.png',
+  locale: 'auto',
+  name: 'MapIt bulk lookup',
+  zipCode: true,
+  currency: 'gbp',
+  allowRememberMe: false,
+  token: function(token) {
+    document.getElementById('id_personal_details-stripeToken').value = token.id;
+    document.forms[0].submit();
+  }
+});
+
+document.getElementById('btn-submit').addEventListener('click', function(e) {
+  e.preventDefault();
+  var email = document.getElementById('id_personal_details-email'),
+      desc = document.getElementById('id_personal_details-description');
+  if (!email.value) {
+    $(email).parents('.account-form__field').addClass('account-form__field--error');
+    $(email).parent().after('<div class="account-form__errors">Please provide your email</div>');
+    return;
+  }
+  handler.open({
+    description: desc.value,
+    email: email.value,
+    amount: {{ price }} * 100
+  });
+});
+window.addEventListener('popstate', function() {
+  handler.close();
+});
+</script>
+{% endif %}
+{% endblock %}

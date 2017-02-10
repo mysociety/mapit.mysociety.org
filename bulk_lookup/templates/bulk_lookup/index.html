@@ -1,0 +1,26 @@
+{% extends 'bulk_lookup/base.html' %}
+
+{% block title %}CSV data mapper{% endblock %}
+
+{% block content_text %}
+
+<h1>CSV data mapper</h1>
+
+<p>If you have a CSV file (Excel can save as CSV files) including a column of
+postcodes, upload it here, and MapIt will automatically match the postcodes and
+add columns for the administrative areas (councils, constituencies, CCGs, etc.)
+you request, sending you the results by email.</p>
+
+<p>This service is free for ‘Metropolis’ MapIt subscribers: for all others
+there is a charge of £20 per file processed. You will be charged at the end of
+the upload process: payment is by debit or credit card.</p>
+{% endblock %}
+
+{% block content_pre_buttons %}
+<ul>
+    <li>The first row of your file will be counted as the header row: do not
+        include a postcode in this row.</li>
+    <li>The file can include other columns too; you will confirm which column
+        holds postcode data in the next step.</li>
+</ul>
+{% endblock %}

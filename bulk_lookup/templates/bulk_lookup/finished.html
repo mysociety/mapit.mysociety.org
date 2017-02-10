@@ -1,0 +1,27 @@
+{% extends 'bulk_lookup/base.html' %}
+
+{% block title %}Thanks!{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xs-12">
+        <h1>Thanks!</h1>
+
+      {% if bulklookup.finished %}
+        <p>
+            Your job has been completed, download your enhanced CSV here:
+            <a href="{{ bulklookup.output_file.url }}">{{ bulklookup.output_file_name }}</a>
+        </p>
+      {% else %}
+        <p>
+            Your job is in the queue and will be processed as soon as our
+            robots can get to it.
+        </p>
+        <p>
+            You'll receive an email to {{ bulklookup.email }} as soon as it's
+            ready to download, or come back to this page later.
+        </p>
+      {% endif %}
+    </div>
+</div>
+{% endblock %}

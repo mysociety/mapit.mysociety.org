@@ -4,4 +4,7 @@
     {% if field.errors %}
         <div class="account-form__errors">{{ field.errors }}</div>
     {% endif %}
+    {% if field.help_text %}
+        <div class="account-form__help_text">{{ field.help_text }}</div>
+    {% endif %}
 </div>

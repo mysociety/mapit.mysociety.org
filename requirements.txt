@@ -1,4 +1,4 @@
-Django==1.8.15
+Django==1.8.18
 -e git://github.com/mysociety/mapit.git@master#egg=django-mapit
 django-user-accounts==1.3.1
 mock==1.3.0
@@ -6,3 +6,8 @@ mockredispy==2.9.0.12
 redis==2.10.5
 django-apptemplates==1.2
 stripe==1.46.0
+
+# Bulk lookup
+django-formtools==2.0
+unicodecsv==0.14.1
+requests==2.13.0

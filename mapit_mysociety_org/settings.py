@@ -7,7 +7,7 @@ from mapit_settings import *  # noqa
 
 # Update a couple of things to suit our changes
 
-INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'api_keys', 'subscriptions'])
+INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'api_keys', 'subscriptions', 'bulk_lookup'])
 
 # Insert our project app before mapit and mapit_gb so that the templates
 # take precedence
@@ -31,6 +31,9 @@ old_staticfiles_dirs = STATICFILES_DIRS
 STATICFILES_DIRS = old_staticfiles_dirs + (
     os.path.join(BASE_DIR, 'static'),
 )
+
+MEDIA_ROOT = os.path.join(PARENT_DIR, 'uploaded_files')
+MEDIA_URL = '/uploads/'
 
 # New mapit.mysociety.org settings
 
@@ -103,6 +106,11 @@ API_THROTTLE_UNLIMITED = MAPIT_RATE_LIMIT
 STRIPE_SECRET_KEY = config.get('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = config.get('STRIPE_PUBLIC_KEY')
 
+# Bulk lookup
+MAX_RETRIES = 3
+RETRY_INTERVAL = 0
+
+# API subscriptions
 PRICING = [
     {'plan': 'mapit-10k', 'price': 20, 'calls': '10,000'},
     {'plan': 'mapit-100k', 'price': 100, 'calls': '100,000'},

@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^legal/', render, {'template_name': 'mapit/licensing.html'}, 'mapit_legal'),
     url(r'^docs/', render, {'template_name': 'docs.html'}, 'mapit_docs'),
     url(r'^admin/', include(admin.site.urls)),
+    url(r"^bulk/", include("bulk_lookup.urls")),
     url(r"^account/api_keys/", include("api_keys.urls")),
     url(r"^account/subscription", include("subscriptions.urls")),
     # Override the login and signup views from the account app, so we can use
