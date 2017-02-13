@@ -1,7 +1,6 @@
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.defaults import page_not_found
-admin.autodiscover()
 
 from django.shortcuts import render
 

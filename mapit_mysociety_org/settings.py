@@ -1,3 +1,5 @@
+import os
+
 # Import MapIt's settings
 from mapit_settings import *
 
