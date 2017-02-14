@@ -1,8 +1,9 @@
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.http import Http404
+from django.views.generic import TemplateView
 
 import account.forms
 import account.views
@@ -14,6 +15,15 @@ class LoginView(account.views.LoginView):
     """ Override account.views.LoginView to use the email-only version """
 
     form_class = account.forms.LoginEmailForm
+
+
+class LogoutView(TemplateView):
+    template_name = "account/logout.html"
+
+    def get(self, *args, **kwargs):
+        if self.request.user.is_authenticated():
+            logout(self.request)
+	return super(LogoutView, self).get(*args, **kwargs)
 
 
 class SignupView(account.views.SignupView):
