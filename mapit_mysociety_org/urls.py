@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^', include('mapit.urls')),
     url(r'^pricing/', render, {'template_name': 'pricing.html'}, 'mapit_pricing'),
     url(r'^legal/', render, {'template_name': 'mapit/licensing.html'}, 'mapit_legal'),
+    url(r'^contact$', render, {'template_name': 'mapit/contact.html'}, 'mapit_contact'),
     url(r'^docs/', render, {'template_name': 'docs.html'}, 'mapit_docs'),
     url(r'^admin/', include(admin.site.urls)),
     url(r"^account/api_keys/", include("api_keys.urls")),

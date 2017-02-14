@@ -15,11 +15,12 @@
             <p class="attention-box warning">
                 You have used up your quota for the month.
                 Please <a href="{% url "subscription_update" %}">upgrade</a>
-                or contact us.
+                or <a href="{% url "mapit_contact" %}">contact us</a>.
             </p>
           {% else %}
             <p class="attention-box warning">
-                Your account is currently suspended. Please contact us.
+                Your account is currently suspended. Please
+                <a href="{% url "mapit_contact" %}">contact us</a>.
             </p>
           {% endif %}
         {% endif %}

@@ -10,7 +10,7 @@
         <h2>{% trans "Close account" %}</h2>
 
         <p>To entirely close your account, please
-            <a href="mailto:{{ CONTACT_EMAIL }}">email us</a>. Please note you
+            <a href="{% url "mapit_contact" %}">contact us</a>. Please note you
             can cancel your subscription at any time from your account page;
             closing your account will remove all your API keys and details from
             the system.
