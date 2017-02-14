@@ -2,18 +2,12 @@
 
 {% load i18n %}
 
-{% block title %}{% trans "Log out" %}{% endblock %}
+{% block title %}{% trans "Logged out" %}{% endblock %}
 
 {% block content %}
-    {% include 'account/_logged_in_sidebar.html' %}
+    {% include 'account/_login_sidebar.html' %}
     <section class="account-form">
-        <h2>{% trans "Log out" %}</h2>
-        <form method="POST" action="{% url "account_logout" %}">
-            {% csrf_token %}
-            <p>{% trans "Are you sure you want to log out?" %}</p>
-            <div class="account-form__field account-form__field--submit">
-                <button type="submit" class="btn">{% trans "Log out" %}</button>
-            </div>
-        </form>
+        <h2>{% trans "Logged out" %}</h2>
+        <p>You are now logged out, thanks for using MapIt.</p>
     </section>
 {% endblock %}
