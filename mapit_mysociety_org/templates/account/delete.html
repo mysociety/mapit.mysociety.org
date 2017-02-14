@@ -2,21 +2,20 @@
 
 {% load i18n %}
 
-{% block title %}{% trans "Delete Account" %}{% endblock %}
+{% block title %}{% trans "Close account" %}{% endblock %}
 
 {% block content %}
     {% include 'account/_logged_in_sidebar.html' %}
     <section class="account-form">
-        <h2>{% trans "Delete Account" %}</h2>
+        <h2>{% trans "Close account" %}</h2>
 
-        <p>{% blocktrans %}If you go ahead and delete your account, your information will be <b>expunged within {{ ACCOUNT_DELETION_EXPUNGE_HOURS }} hours</b>.{% endblocktrans %}</p>
+        <p>To entirely close your account, please
+            <a href="mailto:{{ CONTACT_EMAIL }}">email us</a>. Please note you
+            can cancel your subscription at any time from your account page;
+            closing your account will remove all your API keys and details from
+            the system.
+        </p>
 
-        <form method="post" action="{% url "account_delete" %}" autocapitalize="off">
-            {% csrf_token %}
-            <div class="account-form__field account-form__field--submit">
-                <button type="submit" class="btn">{% trans "Delete My Account" %}</button>
-            </div>
-        </form>
     </section>
 
 {% endblock %}
