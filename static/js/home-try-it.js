@@ -95,6 +95,7 @@ $(function() {
 
             $('.homepage-try-result__area').on('click', function(e){
                 e.preventDefault();
+
                 var id = $(this).data('areaid');
 
                 if (id in layers) {
