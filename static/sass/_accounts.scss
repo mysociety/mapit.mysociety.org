@@ -41,3 +41,30 @@
         margin-top:-1.1em;
     }
 }
+
+.api-keys {
+    @extend .unstyled-list;
+
+    & > li {
+        margin: 1em 0 2em 0;
+        padding: 1em;
+        border: 2px solid $colour_off_white;
+        border-radius: 0.3em;
+    }
+
+    .api-key__key {
+        font-family: Consolas, 'Liberation Mono', Courier, monospace;
+    }
+
+    .api-key__meta {
+        @extend .unstyled-list;
+        @extend .inline-list;
+
+        margin-top: 0.5em;
+        font-size: 0.8em;
+
+        .btn {
+            vertical-align: 0.2em;
+        }
+    }
+}
