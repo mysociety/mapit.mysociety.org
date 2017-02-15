@@ -1,0 +1,114 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block title %}{% trans "Subscription" %}{% endblock %}
+
+{% block content %}
+    {% include 'account/_logged_in_sidebar.html' %}
+    <section class="account-form">
+        <h2>{% trans "Subscription" %}</h2>
+        {% include 'account/_messages.html' %}
+
+        {% if quota_status.blocked %}
+          {% if quota_status.quota > 0 and quota_status.count > quota_status.quota %}
+            <p class="attention-box warning">
+                You have used up your quota for the month.
+                Please <a href="{% url "subscription_update" %}">upgrade</a>
+                or <a href="{% url "mapit_contact" %}">contact us</a>.
+            </p>
+          {% else %}
+            <p class="attention-box warning">
+                Your account is currently suspended. Please
+                <a href="{% url "mapit_contact" %}">contact us</a>.
+            </p>
+          {% endif %}
+        {% endif %}
+
+        {% if stripe.plan %}
+
+            <p>Your current plan is <strong>{{ stripe.plan.name }}</strong> ({{ stripe.plan.id }}).</p>
+
+            <p>It costs you £{{ actual_paid|floatformat:-2 }}/mth.
+            {% if stripe.discount %}
+                (£{{ stripe.plan.amount|floatformat:-2 }}/mth with
+                {{ stripe.discount.coupon.percent_off }}% charitable discount applied.)
+            {% endif %}
+            </p>
+
+            <p>Subscription created on {{ stripe.created|date }}.</p>
+
+            {% if stripe.cancel_at_period_end %}
+                <p><strong>Subscription expires on {{ stripe.current_period_end|date }}.</strong></p>
+            {% elif actual_paid > 0 %}
+                <p>Next payment will be taken on {{ stripe.current_period_end|date }}.</p>
+            {% endif %}
+
+            <ul class="unstyled-list inline-list">
+                <li><a href="{% url "subscription_update" %}" class="btn btn--small btn--primary">Change plan</a></li>
+              {% if not stripe.cancel_at_period_end %}
+                <li><a href="{% url "subscription_cancel" %}" class="btn btn--small btn--danger">Cancel subscription</a></li>
+              {% endif %}
+            </ul>
+
+            <hr>
+
+            <h3>Your usage</h3>
+
+            <p>
+                This month:
+                {{ quota_status.count }}
+              {% if quota_status.quota > 0 %}
+                out of {{ quota_status.quota }}
+              {% endif %}
+                API calls
+            </p>
+
+            {% if quota_status.quota > 0 %}
+                <meter class="subscription-quota-meter"
+                    value="{{ quota_status.count }}"
+                    min="0"
+                    max="{{ quota_status.quota }}">
+                    {{ quota_status.count }} out of
+                    {{ quota_status.quota }} API calls
+                </meter>
+            {% endif %}
+
+            {% if quota_status.history %}
+                <p>Previous months: {{ quota_status.history }}</p>
+            {% endif %}
+
+            {% if stripe.customer.default_source %}
+
+                <hr>
+
+                <h3>Your payment details</h3>
+
+                <p>Payment details we hold: {{ stripe.customer.default_source.brand }},
+                last four digits <code>{{ stripe.customer.default_source.last4 }}</code>.</p>
+
+                <form action="{% url "subscription_card_update" %}" method="POST">
+                    <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                        data-key="{{ STRIPE_PUBLIC_KEY }}"
+                        data-image="https://s3.amazonaws.com/stripe-uploads/acct_19EbqNIbP0iBLddtmerchant-icon-1479145884111-mysociety-wheel-logo.png"
+                        data-name="mySociety"
+                        data-panel-label="Update Card Details"
+                        data-label="Update Card Details"
+                        data-allow-remember-me=false
+                        data-locale="auto"
+                        data-email="{{ request.user.email }}">
+                  </script>
+                </form>
+
+            {% endif %}
+
+        {% else %}
+            <p>You are not currently subscribed to a plan.</p>
+            <p>
+                <a href="{% url "subscription_update" %}" class="btn btn--primary">Subscribe to a plan</a></p>
+            </p>
+
+        {% endif %}
+
+    </section>
+{% endblock %}

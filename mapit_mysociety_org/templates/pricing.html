@@ -1,0 +1,95 @@
+{% extends "mapit/base.html" %}
+
+{% block title %}Pricing{% endblock title %}
+
+{% block content %}
+
+<h2 class="pricing__heading">Pricing</h2>
+
+<p class="pricing__lead">MapIt is an API. Your product or service can call the MapIt API to discover which boundaries a geographical point lies within. This look-up of a single point is what we term an “API call”. And our pricing tiers are based on the number of calls you can make per month.</p>
+
+<div class="pricing">
+
+    <div class="pricing__option pricing__option--ghostly">
+        <p class="pricing__option__name">Sandbox</p>
+        <h2 class="pricing__option__cost">Free</h2>
+        <p class="pricing__option__description">
+            Limited key-less access, perfect for trying out the MapIt API before you buy.
+        </p>
+        <ul class="pricing__option__features">
+            <li>Max 50 calls per day</li>
+            <li>Free – no signup required</li>
+        </ul>
+        <a class="btn" href="{% url 'mapit_docs' %}">Read the docs</a>
+    </div>
+
+    <div class="pricing__option">
+        <p class="pricing__option__name">Village</p>
+        <h2 class="pricing__option__cost">£{{ PRICING.0.price }}/mth</h2>
+        <p class="pricing__option__description">
+            A great place to start if you’re integrating MapIt into a low traffic site.
+        </p>
+        <ul class="pricing__option__features">
+            <li>Max {{ PRICING.0.calls }} calls per month</li>
+            <li><strong>Free</strong> for charitable users</li>
+        </ul>
+      {% if request.user.is_authenticated %}
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
+      {% else %}
+      <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.0.plan }}">Sign up</a>
+      {% endif %}
+    </div>
+
+    <div class="pricing__option pricing__option--featured">
+        <p class="pricing__option__name">Town</p>
+        <h2 class="pricing__option__cost">£{{ PRICING.1.price }}/mth</h2>
+        <p class="pricing__option__description">
+            Our most popular plan. Great for busier sites, or bulk boundary lookups.
+        </p>
+        <ul class="pricing__option__features">
+            <li>Max {{ PRICING.1.calls }} calls per month</li>
+            <li><strong>50% off</strong> for charitable users</li>
+        </ul>
+      {% if request.user.is_authenticated %}
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
+      {% else %}
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.0.plan }}">Sign up</a>
+      {% endif %}
+    </div>
+
+    <div class="pricing__option">
+        <p class="pricing__option__name">Metropolis</p>
+        <h2 class="pricing__option__cost">£{{ PRICING.2.price }}/mth</h2>
+        <p class="pricing__option__description">
+            Super popular with heavy users like councils and government departments.
+        </p>
+        <ul class="pricing__option__features">
+            <li>{% if PRICING.2.calls == '0' %}Unlimited calls
+                {% else %}Max {{ PRICING.2.calls }} calls per month
+                {% endif %}
+            </li>
+            <li><strong>50% off</strong> for charitable users</li>
+        </ul>
+      {% if request.user.is_authenticated %}
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}">Switch plan</a>
+      {% else %}
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.2.plan }}">Sign up</a>
+      {% endif %}
+    </div>
+
+</div>
+
+<p class="pricing__footnote">
+    All our prices include VAT. We consider “charitable users” to be
+    registered charities or individuals working unpaid on non-profit
+    projects – you will be asked for proof of charitable status during
+    signup.
+</p>
+
+<p class="pricing__footnote">
+    Average of 1 call per second.
+    <a href="{% url "mapit_contact" %}">Contact us</a>
+    if you’re going to need to be really busy.
+</p>
+
+{% endblock %}

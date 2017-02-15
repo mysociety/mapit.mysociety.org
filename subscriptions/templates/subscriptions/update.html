@@ -1,0 +1,35 @@
+{% extends "account/base.html" %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% if stripe %}{% trans "Change plan" %}{% else %}{% trans "Add plan" %}{% endif %}{% endblock %}
+
+{% block content %}
+    {% include 'account/_logged_in_sidebar.html' %}
+    <section class="account-form">
+        <h2>{% if stripe %}{% trans "Change plan" %}{% else %}{% trans "Add plan" %}{% endif %}</h2>
+
+      {% if stripe.cancel_at_period_end %}
+        <p>Your plan is curently set to expire on {{ stripe.current_period_end|date }}.
+        If you update your plan below, it will be reactivated.
+        </p>
+      {% endif %}
+
+        <form id="signup_form" method="post" action="{% url "subscription_update" %}" autocapitalize="off">
+            {% csrf_token %}
+            {% include 'account/_form_fields.html' %}
+            <div class="account-form__field account-form__field--submit">
+                <button
+                 {% if not has_payment_data %}
+                    id="customButton"
+                 {% endif %}
+                    class="btn btn--primary">{% if stripe %}{% trans "Change plan" %}{% else %}{% trans "Add plan" %}{% endif %}</button>
+            </div>
+        </form>
+
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script id="js-payment" data-key="{{ STRIPE_PUBLIC_KEY }}" data-email="{{ request.user.email }}" src="{% static "js/payment.js" %}"></script>
+
+    </section>
+{% endblock %}

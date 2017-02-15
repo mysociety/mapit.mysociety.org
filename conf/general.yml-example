@@ -27,6 +27,10 @@ AREA_SRID: 27700
 # Set this to a random string -- the longer, the better.
 DJANGO_SECRET_KEY: 'gu^&xc)hoibh3x&s+9009jbn4d$!nq0lz+syx-^x8%z24!kfs4'
 
+# Keys for accepting money via Stripe
+STRIPE_SECRET_KEY: ''
+STRIPE_PUBLIC_KEY: ''
+
 # Mapped to Django's DEBUG and TEMPLATE_DEBUG settings. Optional, defaults to True.
 DEBUG: True
 
@@ -74,3 +78,7 @@ API_THROTTLE_DEFAULT_LIMIT: 360
 
 # How long should users who go over the rate limit be blocked for? (Seconds)
 API_THROTTLE_BLOCK_TIME: 360
+
+# What is the default quota limit? As above with rate limiting, this can be
+# varied per key or IP address.
+API_QUOTA_DEFAULT_LIMIT: 50

@@ -1,0 +1,95 @@
+{% extends "mapit/base.html" %}
+{% load i18n %}
+
+{% block article-class %}content--with-sidebar content--api-docs{% endblock %}
+
+{% block title %}{% trans "MapIt API Documentation" %}{% endblock %}
+
+{% block content %}
+
+    <h2>{% trans "MapIt API Documentation" %}</h2>
+
+    {% blocktrans trimmed %}
+      <p>The documentation below is for developers who want
+      to use MapIt as a web service, describing its REST
+      API. If that&rsquo;s all Greek to you, please see
+      <a href="/overview">our page for non-developers</a>.</p>
+    {% endblocktrans %}
+
+    <hr>
+
+    <header>
+
+        <h2>{% trans "MapIt API" %}</h2>
+
+        <nav class="toc">
+
+            <p>{% trans "Lookups" %}</p>
+            <ol>
+                {% if postcodes_available %}
+                <li><a href="#api-by_postcode">{% trans "Postcode" %}</a></li>
+                {% if partial_postcodes_available %}
+                <li><a href="#api-by_partial_postcode">{% trans "Partial postcode" %}</a></li>
+                {% endif %}
+                {% endif %}
+                <li><a href="#api-by_point">{% trans "Point" %}</a></li>
+                {% if postcodes_available %}
+                <li><a href="#api-nearest">{% trans "Nearest postcode" %}</a></li>
+                {% endif %}
+                <li><a href="#api-by_area_id">{% trans "Area" %}</a></li>
+                <li><a href="#api-related_areas">{% trans "Related areas" %}</a></li>
+                <li><a href="#api-multiple_areas">{% trans "Multiple areas" %}</a></li>
+                <li><a href="#api-code">{% trans "Code" %}</a></li>
+                <li><a href="#api-generations">{% trans "Generations" %}</a></li>
+            </ol>
+
+            <p>{% trans "Information" %}</p>
+            <ul>
+                <li><a href="#general">{% trans "General information" %}</a></li>
+                <li><a href="https://github.com/mysociety/mapit">{% trans "Source code" %}</a></li>
+            </ul>
+
+            {% block extra_nav %}{% endblock %}
+
+        </nav>
+
+    </header>
+
+    {% if postcodes_available %}
+      {% include "mapit/api/postcode.html" %}
+    {% endif %}
+    {% include "mapit/api/point.html" %}
+    {% include "mapit/api/area.html" %}
+    {% include "mapit/api/areas.html" %}
+    {% include "mapit/api/code.html" %}
+    {% include "mapit/api/generations.html" %}
+
+    <section id="general">
+        <h3>{% trans "General information" %}</h3>
+        <dl>
+            <dt>{% trans "Format" %}</dt>
+            <dd>
+
+            {% blocktrans trimmed %}
+            <p>All calls return JSON, you can generally get an HTML representation
+            by sticking .html on the end.</p>
+            {% endblocktrans %}
+
+            {% blocktrans trimmed %}
+            <p>Whenever an area is returned from MapIt, it is as a
+            dictionary with the following keys: id, name, country, type,
+            parent_area, generation_low, generation_high, codes.</p>
+            {% endblocktrans %}
+            </dd>
+            <dt>{% trans "Historical areas" %}</dt>
+            <dd>
+                {% blocktrans trimmed %}
+            By default, calls will return active areas; for some calls
+            you may specify a previous generation to look up instead.
+            {% endblocktrans %}
+            {% include "mapit/index-general-extra.html" %}
+            </dd>
+        </dl>
+    </section>
+
+{% endblock %}

@@ -44,13 +44,17 @@ Using the Redis CLI, you can find things out about your api and keys, for
 example:
 
 - Does the API require keys? `GET api:mapit:restricted`
-- Can my key access the api? `GET key:<key>:api:mapit` (Should return "1")
+- Can my key access the api? `GET key:<key>:api:mapit` (Returns user ID)
 - Does the API throttle requests? `GET api:mapit:throttled`
 - How long will people be blocked for if they exceed the throttle limit? `GET api:mapit:blocked:time`
 - How long a window will we count requests over? `GET api:mapit:counter:time`
 - How many requests can they make in that window by default? `GET api:mapit:default_max`
-- How many requests can a specific key make to the api? `GET key:<key>:usage:mapit:max` ("0" means no limit)
-- Is my key blocked? `GET key:<key>:usage:mapit:blocked` ("1" means it's blocked)
-- How much longer is it blocked for? `TTL key:<key>:usage:mapit:blocked`
-- How many hits have I made in the current count window? `GET key:<key>:usage:mapit:count`
-- How long until the count window resets? `TTL key:<key>:usage:mapit:reset`
+- How many requests can a specific key make to the api? `GET key:<key>:ratelimit:mapit:max` ("0" means no limit)
+- Is my key blocked? `GET key:<key>:ratelimit:mapit:blocked` ("1" means it's blocked)
+- How much longer is it blocked for? `TTL key:<key>:ratelimit:mapit:blocked`
+- How many hits have I made in the current count window? `GET key:<key>:ratelimit:mapit:count`
+- How long until the count window resets? `TTL key:<key>:ratelimit:mapit:reset`
+
+- What is the user's quota limit? `GET user:<user>:quota:mapit:max`
+- What is the user's quota count? `GET user:<user>:quota:mapit:count`
+- Is the user blocked for exceeding quota? `GET user:<user>:quota:mapit:blocked`

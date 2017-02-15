@@ -24,7 +24,8 @@ class RedisStrings(object):
     API_THROTTLE_COUNTER = 'api:{0}:counter:time'.format(settings.REDIS_API_NAME)
     API_THROTTLE_BLOCKED = 'api:{0}:blocked:time'.format(settings.REDIS_API_NAME)
     API_THROTTLE_DEFAULT_LIMIT = 'api:{0}:default_max'.format(settings.REDIS_API_NAME)
+    API_QUOTA_DEFAULT_LIMIT = 'api:{0}:default_quota_limit'.format(settings.REDIS_API_NAME)
 
     @staticmethod
     def rate_limit_string(identity):
-        return "key:{0}:usage:{1}:max".format(identity, settings.REDIS_API_NAME)
+        return "key:{0}:ratelimit:{1}:max".format(identity, settings.REDIS_API_NAME)

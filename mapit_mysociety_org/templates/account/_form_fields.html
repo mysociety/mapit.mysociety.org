@@ -1,14 +1,15 @@
 {% if form.non_field_errors %}
-<div class="account-form__errors">
+  <div class="account-form__errors">
     {{ form.non_field_errors }}
-</div>
-</div>
+  </div>
 {% endif %}
 {% comment %}
 This template is used for several different forms, and we want to specify the
 ordering of the fields, so we list each field separately
 {% endcomment %}
-{% if form.email %}
+{% if form.charitable_tick %}
+    {% include 'account/_form_fields_signup.html' %}
+{% elif form.email %}
     {% include 'account/_form_field.html' with field=form.email %}
     {% include 'account/_form_field.html' with field=form.password %}
     {% include 'account/_form_field.html' with field=form.password_confirm %}

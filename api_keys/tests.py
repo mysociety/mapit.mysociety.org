@@ -209,7 +209,7 @@ class APIKeyModelTest(PatchedRedisTestCase):
         r = redis_connection()
         self.assertIsNone(r.get(expected_key))
         key = APIKey.objects.create(user=self.user, key="test_key")
-        self.assertEqual(r.get(expected_key), '1')
+        self.assertEqual(r.get(expected_key), str(self.user.id))
         key.delete()
 
     @override_settings(REDIS_API_NAME='test_api')
@@ -217,7 +217,7 @@ class APIKeyModelTest(PatchedRedisTestCase):
         expected_key = "key:test_key:api:test_api"
         r = redis_connection()
         key = APIKey.objects.create(user=self.user, key="test_key")
-        self.assertEqual(r.get(expected_key), '1')
+        self.assertEqual(r.get(expected_key), str(self.user.id))
         key.delete()
         self.assertIsNone(r.get(expected_key))
 
@@ -226,7 +226,7 @@ class APIKeyModelTest(PatchedRedisTestCase):
         expected_key = "key:test_key:api:test_api"
         key = APIKey.objects.create(user=self.user, key="test_key")
         r = redis_connection()
-        self.assertEqual(r.get(expected_key), '1')
+        self.assertEqual(r.get(expected_key), str(self.user.id))
         self.user.delete()
         with self.assertRaises(APIKey.DoesNotExist):
             APIKey.objects.get(pk=key.pk)

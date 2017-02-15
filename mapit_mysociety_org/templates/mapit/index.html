@@ -1,23 +1,197 @@
-{% extends "mapit:mapit/index.html" %}
+{% extends "mapit/base.html" %}
+{% load static from staticfiles %}
+{% load i18n %}
 
-{% block extra_intro %}
-    {% if not request.user.is_authenticated %}
-        <p>
-            We recommend that you use an api key to access this service –
-        {% if ACCOUNT_OPEN_SIGNUP %}
-          <a href="{% url 'account_login' %}">log in</a> or <a href="{% url 'account_signup' %}">create an account</a>
-        {% else %}
-            <a href="{% url 'account_login' %}">log in to your account</a>
-        {% endif %}
-             to get yours.
-        </p>
-    {% endif %}
+{% block fulltitle %}
+    {% trans "MapIt : map postcodes and geographical points to administrative areas" %}
 {% endblock %}
 
-{% block extra_nav %}
-    {% if request.user.is_authenticated %}
-        {% include 'account/_logged_in_nav.html' %}
-    {% else %}
-        {% include 'account/_signup_nav.html' %}
-    {% endif %}
+{% block content_outer %}
+
+    <div class="homepage-hero">
+        <div class="container">
+            <h1>The easy way to match points to boundaries</h1>
+            <p>
+                If your app or website needs to connect UK locations with areas like constituencies or counties, MapIt can save you a lot of time.
+            </p>
+            <p>
+                MapIt is mature, trusted and widely deployed — and it is designed to fit right into your website or app, quickly and simply.
+            </p>
+        </div>
+    </div>
+
+    <div class="homepage-try homepage-section homepage-section--contrasting">
+        <form method="post" action="{% url "mapit_index" %}{% if postcodes_available %}postcode{% else %}point{% endif %}/" class="homepage-try__form">
+            <div class="container">
+                <label for="try-mapit-pc">Try it out – enter a postcode</label>
+                <input type="text" name="pc" id="pc">
+                <input class="btn" type="submit" value="{% trans "Look up" %}">
+            </div>
+        </form>
+    </div>
+
+    <div class="homepage-section">
+        <div class="container">
+
+            <div class="homepage-feature-grid">
+                <div>
+                    <h2>What is MapIt?</h2>
+                </div>
+                <div>
+                    <h3>It matches geographic points with areas</h3>
+                    <p>Input a postcode, and MapIt knows which constituency, parish, council area it’s in – and lots more.</p>
+                </div>
+                <div>
+                    <h3>It’s an API you can call from websites and apps</h3>
+                    <p>MapIt’s stable, well documented API makes it easy to integrate into a range of software solutions.</p>
+                </div>
+                <div>
+                    <h3>And all with a clear, hassle-free subscription</h3>
+                    <p>Signing up is quick and easy, with automatic monthly payments and no lengthy tie-ins. <a href="{% url 'mapit_pricing' %}">See our pricing plans.</a></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="homepage-section homepage-section--no-padding-top">
+        <div class="container">
+
+            <div class="homepage-process">
+                <div class="homepage-process__input">
+                    <h3>Your user inputs any of these…</h3>
+                    <ul>
+                        <li>A UK postcode</li>
+                        <li>Their position via GPS</li>
+                        <li>A pin on a map</li>
+                        <li>An OS grid reference</li>
+                    </ul>
+                </div>
+                <span class="homepage-process__mapit"></span>
+                <div class="homepage-process__output">
+                    <h3>You show them any of these…</h3>
+                    <ul>
+                        <li>Who their MP is</li>
+                        <li>Which council is responsible for that area</li>
+                        <li>Services available in their neighbourhood</li>
+                        <li>The office that serves that region</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="homepage-section homepage-section--primary">
+        <div class="container">
+            <div class="homepage-cta">
+                <p>
+                    MapIt API access starts at £{{ PRICING.0.price }}/mth,<br>
+                    and is free for low-volume non-profit use.
+                </p>
+                <a href="{% url 'mapit_pricing' %}" class="btn">Show pricing</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="homepage-section">
+        <div class="container">
+
+            <div class="homepage-feature-grid">
+                <div>
+                    <h2>How could you use&nbsp;MapIt?</h2>
+                </div>
+                <div>
+                    <h3>Show your users what’s available in their area</h3>
+                    <p>MapIt can display the nearest branch, office or resources to the user, based on their postcode.</p>
+                    <h4>See it in action</h4>
+                    <a href="http://socialcareinfo.net">
+                        <img src="{% static 'img/socialcareinfo.jpg' %}" width="600" height="337" alt="">
+                    </a>
+                    <p><a href="http://socialcareinfo.net">Socialcareinfo</a> gives details of the support available within each user’s local area.</p>
+                </div>
+                <div>
+                    <h3>Personalise your campaigning tool</h3>
+                    <p>Make your campaigns more powerful, with targeted location-based messaging.</p>
+                    <h4>See it in action</h4>
+                    <a href="https://bettercare.prostatecanceruk.org/">
+                        <img src="{% static 'img/pcuk.jpg' %}" width="600" height="337" alt="">
+                    </a>
+                    <p>Prostate Cancer UK’s site shows <a href="https://bettercare.prostatecanceruk.org/">what care is available</a> in your own region – then encourages you to campaign for better.</p>
+                </div>
+                <div>
+                    <h3>Match your users to the right part of the web</h3>
+                    <p>When different users need sending to different places, MapIt can guide the way.</p>
+                    <h4>See it in action</h4>
+                    <a href="https://www.gov.uk/rubbish-collection-day">
+                        <img src="{% static 'img/govuk.jpg' %}" width="600" height="337" alt="">
+                    </a>
+                    <p>The UK Government uses MapIt to <a href="https://www.gov.uk/rubbish-collection-day">match users with their local council</a>, so they can check on services like recycling or allotment applications.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="homepage-section homepage-section--contrasting">
+        <div class="container">
+            <div class="homepage-cta">
+                <p>
+                    Want to know more before you sign up?<br>
+                    Read all about MapIt for non-developers.
+                </p>
+                <a href="/overview" class="btn btn--primary">Read more</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script type="text/html" id="try-loading">
+    <div class="homepage-try-loading">
+        <div class="container">
+            <p>
+                <span class="loading-grid">
+                    <span></span> <span></span> <span></span>
+                    <span></span> <span></span> <span></span>
+                    <span></span> <span></span> <span></span>
+                </span>
+                Fetching boundaries…
+            </p>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="try-error">
+    <div class="homepage-try-error">
+        <div class="container">
+            <p><%= error %></p>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="try-result">
+    <div class="homepage-try-result">
+        <div class="homepage-try-result__map" id="homepage-leaflet"></div>
+        <div class="container">
+            <h2>Areas covering <a href="/postcode/<%= encodeURIComponent(postcode) %>.html"><%= postcode %></a></h2>
+            <div class="homepage-try-result__areas">
+              <% _.each(areas, function(area) { %>
+                <a class="homepage-try-result__area" href="/area/<%= area.id %>.html" data-areatype="<%= area.type %>" data-areaid="<%= area.id %>">
+                    <span class="homepage-try-result__area__type"><%= area.type_name %></span>
+                    <span class="homepage-try-result__area__name"><%= area.name %></span>
+                </a>
+              <% }); %>
+            </div>
+            <a class="homepage-try-result__open" href="/postcode/<%= encodeURIComponent(postcode) %>.html">Show full results</a>
+            <button class="homepage-try-result__close">Close</button>
+        </div>
+    </div>
+</script>
+
+{{ block.super }}
+<script src="{% static "js/underscore-1.8.3.min.js" %}"></script>
+<script src="{% static "js/home-try-it.js" %}"></script>
 {% endblock %}

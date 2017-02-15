@@ -1,0 +1,30 @@
+{% if form.errors %}
+  <div class="account-form__errors">
+    We have safely stored your payment information, and you have not yet been charged.
+    Please correct the issues below, you will not need to reenter your card details.
+  </div>
+{% endif %}
+
+{% if form.email %}
+    {% include 'account/_form_field.html' with field=form.email %}
+    {% include 'account/_form_field.html' with field=form.password %}
+    {% include 'account/_form_field.html' with field=form.password_confirm %}
+{% endif %}
+
+{% include 'account/_form_field.html' with field=form.plan %}
+{% include 'account/_form_field_checkbox.html' with field=form.charitable_tick %}
+<div id="charitable-qns"{% if not form.charitable_tick.value %} style="display:none"{% endif %}>
+    {% include 'account/_form_field.html' with field=form.charitable %}
+    <div id="charity-number"{% if not form.charity_number.value and not form.charity_number.errors %} style="display:none"{% endif %}>
+        {% include 'account/_form_field.html' with field=form.charity_number %}
+    </div>
+    <div id="charitable-desc"{% if not form.description.value and not form.description.errors %} style="display:none"{% endif %}>
+        {% include 'account/_form_field.html' with field=form.description %}
+    </div>
+    <div id="charitable-neither" style="display:none" class="account-form__errors">
+        <p>Sorry, you don’t qualify for a charitable discounted price; you should untick that box.</p>
+    </div>
+</div>
+{% if not stripe %}
+    {% include 'account/_form_field_checkbox.html' with field=form.tandcs_tick %}
+{% endif %}

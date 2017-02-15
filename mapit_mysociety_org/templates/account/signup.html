@@ -1,5 +1,6 @@
 {% extends "account/base.html" %}
 
+{% load static %}
 {% load i18n %}
 
 {% block title %}{% trans "Sign up" %}{% endblock %}
@@ -7,26 +8,19 @@
 {% block content %}
     {% include 'account/_signup_sidebar.html' %}
     <section class="account-form">
-        <h2>{% trans "Sign up" %}</h2>
-        <p>
-            We recommend that you register for an account and obtain an api
-            key if you're going to use the API. Anonymous usage of the API is
-            permitted, but is rate limited to 10 calls a minute. The free
-            usage limit for non-profit users is 50,000 calls to the API per
-            year. All other uses need to
-            <a href="/licensing">acquire a licence</a>.
-        </p>
-        <p>
-            Find out if you need a licence or
-            <a href="mailto:{{ CONTACT_EMAIL }}">get in touch</a> so we
-            can discuss how we can provide you with the service you require.
-        </p>
+        <h2>{% trans "Get started" %}</h2>
+        <p>Create a MapIt account to obtain an API key.</p>
+
         <form id="signup_form" method="post" action="{% url "account_signup" %}" autocapitalize="off" {% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
             {% csrf_token %}
             {% include 'account/_form_fields.html' %}
             <div class="account-form__field account-form__field--submit">
-                <button type="submit" class="btn">{% trans "Sign up" %}</button>
+                <button id="customButton" class="btn btn--primary">{% trans "Sign up" %}</button>
             </div>
         </form>
+
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script id="js-payment" data-key="{{ STRIPE_PUBLIC_KEY }}" src="{% static "js/payment.js" %}"></script>
+
     </section>
 {% endblock %}

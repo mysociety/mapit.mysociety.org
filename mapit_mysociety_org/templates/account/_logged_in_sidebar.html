@@ -1,6 +1,19 @@
-<header class="account-header">
-    <h2>MapIt API</h2>
+{% load i18n %}
+
+<header>
+    <h2>Your Account</h2>
     <nav class="toc">
-        {% include 'account/_logged_in_nav.html' %}
+        <p>Settings</p>
+        <ul>
+            <li><a href="{% url 'subscription' %}">{% trans "Subscription" %}</a></li>
+            <li><a href="{% url 'api_keys_keys' %}">{% trans "API Keys" %}</a></li>
+            <li><a href="{% url 'account_settings' %}">{% trans "Change email" %}</a></li>
+            <li><a href="{% url 'account_password' %}">{% trans "Change password" %}</a></li>
+        </ul>
+        <p>Actions</p>
+        <ul>
+            <li><a href="{% url 'account_logout' %}">{% trans "Log out" %}</a></li>
+            <li><a href="{% url 'account_delete' %}">{% trans "Close account" %}</a></li>
+        </ul>
     </nav>
 </header>

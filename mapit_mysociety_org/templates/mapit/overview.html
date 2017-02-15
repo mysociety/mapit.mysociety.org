@@ -1,0 +1,168 @@
+{% extends "mapit/base.html" %}
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block title %}MapIt for non-developers{% endblock title %}
+
+{% block article-class %}content--with-sidebar content--overview{% endblock %}
+
+{% block content %}
+
+    <h2>MapIt for non-developers</h2>
+
+    <hr>
+
+    <header>
+        <nav class="toc">
+
+            <p>About MapIt</p>
+            <ol>
+                <li><a href="#general">What is MapIt?</a></li>
+                <li><a href="#examples">Other examples</a></li>
+                <li><a href="#inputs-outputs">Inputs and outputs</a></li>
+            </ol>
+
+            <p>Next steps</p>
+            <ul>
+                <li><a href="{% url 'mapit_pricing' %}">Pricing</a></li>
+                <li><a href="{% url 'mapit_docs' %}">Technical documentation</a></li>
+            </ul>
+
+        </nav>
+    </header>
+
+    <section id="general">
+        <h3>What is MapIt?</h3>
+        <p>
+            There's one quick and easy way to understand MapIt if you’re
+            someone who doesn’t code: take a look at one of the sites that
+            uses it, like our own <a href="https://www.writetothem.com">WriteToThem</a>.
+        </p>
+        <p>
+            WriteToThem asks you to input your postcode, then shows you who
+            represents you politically, from councillors to MPs and MEPs.
+        </p>
+        <p>
+            How does it do this? By sending the postcode to MapIt, which
+            checks which boundaries it falls within (ward, constituency,
+            borough, etc), then returns those areas so that the WriteToThem
+            code can display the politicians for each one.
+        </p>
+        <p>
+            Similarly, our site <a href="https://www.fixmystreet.com">FixMyStreet</a>
+            takes the geographic point where a user has spotted a problem
+            such as fly tipping or a pothole, and asks MapIt to match it
+            to the right council to deal with it.
+        </p>
+        <p>
+            So, in a nutshell: MapIt is a system that sends data about
+            administrations and other location-related data in response to
+            requests from a website or service.
+        </p>
+        <p>
+            This is useful if you are building services that require these data,
+            for example, to identify things like:
+        </p>
+        <ul>
+            <li>which ward a postcode is in</li>
+            <li>what the nearest postcode is to a point on a map</li>
+            <li>what the boundaries of an administrative area are</li>
+            <li>and many, many others.</li>
+        </ul>
+        <p>
+            In technical terms MapIt is classed as an
+            <a href="http://www.webopedia.com/TERM/A/API.html">API</a> which
+            stands for Application Programming Interface. It allows an
+            external service to query data held in a database and return
+            results. This removes the need to build such a database
+            yourself – you can simply use MapIt in your application or site.
+        </p>
+    </section>
+
+    <section id="examples">
+        <h3>Other examples</h3>
+        <p>
+            <strong>We’ve seen how MapIt works for us – now let’s take
+            a look at how others are using it.</strong>
+        </p>
+        <img class="floated-image" src="{% static 'img/pepysrd.jpg' %}" width="200" height="150">
+        <p>
+            <a href="http://pepysrd.com/"><strong>PepysRd.com</strong></a>
+            is an innovative marketing site for the novel Capital by John
+            Lanchester, released by Faber in 2012 – the site’s still active today.
+        </p>
+        <p>
+            Give it a go, and you’ll see how Pepys Rd uses data you input
+            and live data to reflect on the role of markets and infrastructure
+            in our lives, signing you up to a ten-day adventure via email.
+            The site’s developers, Storythings, used MapIt for a number of
+            the components, with its location data providing real-time story
+            elements for the project.
+        </p>
+
+        <img class="floated-image" src="{% static 'img/govuk-rubbish.jpg' %}" width="200" height="150">
+        <p>
+            <a href="https://www.gov.uk/"><strong>GOV.UK</strong></a>
+            – the UK Government’s digital portal – uses an installation of
+            MapIt to enable visitors to its website find the right information
+            on local public services based on their postcode.
+        </p>
+        <p>
+            See their page on
+            <a href="https://www.gov.uk/browse/housing-local-services/local-councils">
+            local councils and services</a>: from applying for an allotment
+            to checking when your recycling is collected, MapIt connects
+            you to the information relevant to your area.
+        </p>
+
+        <img class="floated-image" src="{% static 'img/pcuk-warning.jpg' %}" width="200" height="150">
+        <p>
+            <a href="https://bettercare.prostatecanceruk.org/"><strong>Prostate Cancer UK</strong></a>
+            used MapIt as part of their campaigning tool: input your postcode
+            and you’ll see what provision is available for those with prostate
+            cancer in your Heath Board area.
+        </p>
+        <p>
+            MapIt can do this because it knows the boundaries of each CCG
+            (Clinical Commissioning Group) region. When data is personalised
+            like this, users can see its relevance to their own lives,
+            and it becomes a very powerful campaigning tool.
+        </p>
+    </section>
+
+    <section id="inputs-outputs">
+        <h3>Inputs and outputs</h3>
+        <p>
+            <strong>MapIt matches points and boundaries.</strong> It can be
+            used with:
+        </p>
+        <ul>
+            <li>postcodes and partial postcodes</li>
+            <li>latitudes and longitudes</li>
+            <li>National Grid co-ordinates</li>
+            <li>administrative areas such as wards, super output areas, parliamentary constituencies and more</li>
+        </ul>
+        <p>
+            It can take any of those and give you:
+        </p>
+        <ul>
+            <li>the administrative area a point is contained within</li>
+            <li>boundaries of those administrative areas, in e.g. WKT, GeoJSON or KML formats, for use with maps and/or geographic information systems</li>
+            <li>the nearest postcode to the input point</li>
+            <li>an example postcode from the administrative area</li>
+            <li>related areas: look up which administrative areas are contained within an area (e.g. all wards of a council), which areas it borders with, covers and/or overlaps with.</li>
+        </ul>
+        <p>
+            It can deal with multiple areas at once, so for example you can
+            get information about every type of area within a category
+            (e.g. city council) or containing a given string in its name
+            (e.g. “Leicester”).
+        </p>
+        <p>
+            You can even query historical data, by calling a list of updates
+            to MapIt information, with a unique number for each update
+            (or “generation”).
+        </p>
+    </section>
+
+{% endblock %}

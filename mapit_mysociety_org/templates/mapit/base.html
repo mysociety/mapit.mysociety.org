@@ -1,0 +1,14 @@
+{% extends "mapit:mapit/base.html" %}
+
+{% load static from staticfiles %}
+
+{% block main_css %}<link href="{% static "css/main.css" %}" rel="stylesheet">{% endblock %}
+
+{% block extra_css %}
+<link rel="shortcut icon" href="{% static "img/favicon.ico" %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static "js/jquery-1.12.4.min.js" %}"></script>
+<script src="{% static "js/analytics.js" %}"></script>
+{% endblock %}

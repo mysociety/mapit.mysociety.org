@@ -1,0 +1,15 @@
+$color_mysoc_blue: #4FADED;
+$color_mysoc_orange: #F4A140;
+$color_mysoc_red: #E04B4B;
+$color_mysoc_dark_grey: #6C6B68;
+
+$color_error_red: #CC0000;
+
+$theme_dir: '/static/mapit/'; // tell docs-theme what to use in image urls
+$logo_path: ''; // tell docs-theme not to put a logo in the header
+$colour_brand: $color_mysoc_blue; // used in docs-theme .site-header
+
+$site-logo-width: 170px; // user in _header.scss
+$site-logo-height: 40px; // user in _header.scss
+
+$mysoc-footer-donate-button-background-color: $color_mysoc_blue;
