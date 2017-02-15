@@ -116,4 +116,10 @@ $(function(){
             eventCategory: 'pricing__docs-button'
         });
     });
+
+    $('.area-info__signup a').on('click', function(e){
+        analytics.trackLinkClick(e, {
+            eventCategory: 'area__business-cta'
+        });
+    });
 });
