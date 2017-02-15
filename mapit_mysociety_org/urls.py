@@ -9,6 +9,9 @@ urlpatterns = [
     url(r'^changelog$', render, {'template_name': 'changelog.html'}, 'mapit_changelog'),
     url(r'^', include('mapit.urls')),
     url(r'^contact$', render, {'template_name': 'mapit/contact.html'}, 'mapit_contact'),
+    url(r'^pricing/', render, {'template_name': 'pricing.html'}, 'mapit_pricing'),
+    url(r'^legal/', render, {'template_name': 'mapit/licensing.html'}, 'mapit_legal'),
+    url(r'^docs/', render, {'template_name': 'docs.html'}, 'mapit_docs'),
     url(r'^admin/', include(admin.site.urls)),
     url(r"^account/api_keys/", include("api_keys.urls")),
     # Override the login and signup views from the account app, so we can use
