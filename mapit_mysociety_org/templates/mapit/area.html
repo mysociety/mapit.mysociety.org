@@ -1,0 +1,9 @@
+{% extends "mapit:mapit/area.html" %}
+{% load i18n %}
+
+{% block area_info_extra %}
+<p class="area-info__signup">
+    <strong>Business user?</strong> Call the MapIt API with our
+    <a href="{% url 'mapit_pricing' %}">powerful paid plans</a>.
+</p>
+{% endblock %}
