@@ -6,6 +6,7 @@
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
     ga('create', '{{ GOOGLE_ANALYTICS }}', 'auto');
+    ga('set', 'anonymizeIp', true);
     ga('set', 'dimension1', {% if request.user.is_authenticated %}'Authenticated'{% else %}'Anonymous'{% endif %});
     ga('send', 'pageview');
 </script>
