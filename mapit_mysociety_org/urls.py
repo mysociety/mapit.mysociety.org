@@ -9,6 +9,7 @@ from .views import LoginView, LogoutView, SignupView, ConfirmEmailView
 urlpatterns = [
     url(r'^changelog$', render, {'template_name': 'changelog.html'}, 'mapit_changelog'),
     url(r'^', include('mapit.urls')),
+    url(r'^contact$', render, {'template_name': 'mapit/contact.html'}, 'mapit_contact'),
     url(r'^admin/', include(admin.site.urls)),
     url(r"^account/api_keys/", include("api_keys.urls")),
     # Turn off the settings url from the account app, as we don't want it.
