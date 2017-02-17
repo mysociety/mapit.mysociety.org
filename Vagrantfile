@@ -70,6 +70,7 @@ Vagrant.configure(2) do |config|
 
     # Run post-deploy actions script to create a virtualenv, install the
     # python packages we need, migrate the db and generate the sass etc
+    conf/pre_deploy_actions.bash
     conf/post_deploy_actions.bash
 
     # Get the VCL from the varnish-api-key project

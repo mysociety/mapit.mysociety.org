@@ -16,6 +16,7 @@
 .sass-cache
 
 .venv
+.static
 
 .DS_Store
 
