@@ -30,6 +30,8 @@ STATICFILES_DIRS = old_staticfiles_dirs + (
 
 # New mapit.mysociety.org settings
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Config for Django's sites framework, needed so that we can send emails from
 # django-user-accounts with fully qualifed urls in
 SITE_ID = 1
