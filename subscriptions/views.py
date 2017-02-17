@@ -150,6 +150,8 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
             initial['charitable'] = self.object.metadata.get('charitable', '')
             initial['charity_number'] = self.object.metadata.get('charity_number', '')
             initial['description'] = self.object.metadata.get('description', '')
+        else:
+            initial['plan'] = self.request.GET.get('plan')
         return initial
 
     def get_form_kwargs(self):
