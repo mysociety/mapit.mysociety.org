@@ -1,6 +1,6 @@
 {% extends "account/base.html" %}
 
-{% load static %}
+{% load static from staticfiles %}
 {% load i18n %}
 
 {% block title %}{% if stripe %}{% trans "Change plan" %}{% else %}{% trans "Add plan" %}{% endif %}{% endblock %}
