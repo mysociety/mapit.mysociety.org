@@ -260,8 +260,10 @@
     margin: 1em -0.5em;
     text-align: left;
 
-    @include flexbox();
-    @include flex-wrap(wrap);
+    @media (min-width: $medium-screen) {
+        @include flexbox();
+        @include flex-wrap(wrap);
+    }
 }
 
 .homepage-try-result__area {
@@ -273,15 +275,13 @@
     border-radius: 0.3em;
     background-color: rgba(255, 255, 255, 0.1);
 
-    @include flex(1 0 auto);
-
-    // Quick fix for Safari flex min-width bug
-    // http://stackoverflow.com/a/30792851/3096375
-    -webkit-flex: 1 0 25%;
-    flex: 1 0 auto;
+    @media (min-width: $medium-screen) {
+        width: 33%; // two will fit onto a line
+        @include flex(1 0 auto);
+    }
 
     @media (min-width: $large-screen) {
-        min-width: 25%;
+        width: 25%; // three will fit onto a line
     }
 
     &:hover,
