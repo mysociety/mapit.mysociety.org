@@ -53,20 +53,28 @@ analytics = {
         // tracking clicks on a link that would normally lead to
         // a new page, and waiting until the event has been tracked
         // before continuing to the new page.
-        e.preventDefault();
         var _this = this;
         var href = $(e.currentTarget).attr('href');
+
+        var callback;
+        if (e.metaKey || e.ctrlKey) {
+            callback = function() {};
+        } else {
+            e.preventDefault();
+            callback = function() {
+                if (href) {
+                    window.location.href = href;
+                }
+            };
+        }
+
         var defaults = {
             eventAction: e.type
         }
 
         _this.trackEvent(
             $.extend(defaults, params)
-        ).done(function() {
-            if (href) {
-                window.location.href = href;
-            }
-        });
+        ).done(callback);
     }
 }
 
