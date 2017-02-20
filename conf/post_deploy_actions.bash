@@ -11,12 +11,7 @@ cd "$(dirname $BASH_SOURCE)"/..
 PYTHONDONTWRITEBYTECODE=""
 
 # create the virtual environment; we always want system packages
-virtualenv_version="$(virtualenv --version)"
-virtualenv_args=""
-if [ "$(echo -e '1.7\n'$virtualenv_version | sort -V | head -1)" = '1.7' ]; then
-    virtualenv_args="--system-site-packages"
-fi
-
+virtualenv_args="--system-site-packages"
 virtualenv_dir='../virtualenv-mapit_mysociety_org'
 virtualenv_activate="$virtualenv_dir/bin/activate"
 
