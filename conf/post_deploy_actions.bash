@@ -27,6 +27,8 @@ source $virtualenv_activate
 # Revert to the line above once we can get a newer setuptools from Debian, or
 # pip ceases to need such a recent one.
 curl -L -s https://raw.github.com/mysociety/commonlib/master/bin/get_pip.bash | bash
+# Improve SSL behaviour
+pip install 'pyOpenSSL>=0.14'
 
 # Install all the packages
 pip install -r requirements.txt
