@@ -43,6 +43,8 @@ class StripeObjectMixin(object):
         data = self.object
         for fld in ['current_period_start', 'current_period_end', 'created', 'start']:
             data[fld] = datetime.fromtimestamp(data[fld])
+        if data['discount'] and data['discount']['end']:
+            data['discount']['end'] = datetime.fromtimestamp(data['discount']['end'])
 
         # Amounts in pounds, not pence
         data['plan']['amount'] /= 100

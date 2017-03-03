@@ -32,9 +32,13 @@
             <p>It costs you £{{ actual_paid|floatformat:-2 }}/mth.
             {% if stripe.discount %}
                 (£{{ stripe.plan.amount|floatformat:-2 }}/mth with
-                {{ stripe.discount.coupon.percent_off }}% charitable discount applied.)
+                {{ stripe.discount.coupon.percent_off }}% discount applied.)
             {% endif %}
             </p>
+
+            {% if stripe.discount.end %}
+                <p>Your discount will expire on {{ stripe.discount.end|date }}.</p>
+            {% endif %}
 
             <p>Subscription created on {{ stripe.created|date }}.</p>
 
