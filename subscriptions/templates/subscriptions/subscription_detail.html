@@ -78,30 +78,30 @@
                 <p>Previous months: {{ quota_status.history }}</p>
             {% endif %}
 
+            <hr>
+
+            <h3>Your payment details</h3>
+
             {% if stripe.customer.default_source %}
-
-                <hr>
-
-                <h3>Your payment details</h3>
-
                 <p>Payment details we hold: {{ stripe.customer.default_source.brand }},
                 last four digits <code>{{ stripe.customer.default_source.last4 }}</code>.</p>
-
-                <form action="{% url "subscription_card_update" %}" method="POST">
-                    {% csrf_token %}
-                    <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-                        data-key="{{ STRIPE_PUBLIC_KEY }}"
-                        data-image="https://s3.amazonaws.com/stripe-uploads/acct_19EbqNIbP0iBLddtmerchant-icon-1479145884111-mysociety-wheel-logo.png"
-                        data-name="mySociety"
-                        data-panel-label="Update Card Details"
-                        data-label="Update Card Details"
-                        data-allow-remember-me=false
-                        data-locale="auto"
-                        data-email="{{ request.user.email }}">
-                  </script>
-                </form>
-
+            {% else %}
+                <p>We do not currently hold any payment details for you.</p>
             {% endif %}
+
+            <form action="{% url "subscription_card_update" %}" method="POST">
+                {% csrf_token %}
+                <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                    data-key="{{ STRIPE_PUBLIC_KEY }}"
+                    data-image="https://s3.amazonaws.com/stripe-uploads/acct_19EbqNIbP0iBLddtmerchant-icon-1479145884111-mysociety-wheel-logo.png"
+                    data-name="mySociety"
+                    data-panel-label="Update Card Details"
+                    data-label="Update Card Details"
+                    data-allow-remember-me=false
+                    data-locale="auto"
+                    data-email="{{ request.user.email }}">
+              </script>
+            </form>
 
         {% else %}
             <p>You are not currently subscribed to a plan.</p>
