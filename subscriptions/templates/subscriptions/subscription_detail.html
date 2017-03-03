@@ -40,13 +40,15 @@
                 <p>Your discount will expire on {{ stripe.discount.end|date }}.</p>
             {% endif %}
 
-            <p>Subscription created on {{ stripe.created|date }}.</p>
-
+            <p>Subscription created on {{ stripe.created|date }};
             {% if stripe.cancel_at_period_end %}
-                <p><strong>Subscription expires on {{ stripe.current_period_end|date }}.</strong></p>
+                <strong>it expires on {{ stripe.current_period_end|date }}.</strong>
             {% elif actual_paid > 0 %}
-                <p>Next payment will be taken on {{ stripe.current_period_end|date }}.</p>
+                your next payment will be taken on {{ stripe.current_period_end|date }}.
+            {% else %}
+                your next invoice date is {{ stripe.current_period_end|date }}.
             {% endif %}
+            </p>
 
             <ul class="unstyled-list inline-list">
                 <li><a href="{% url "subscription_update" %}" class="btn btn--small btn--primary">Change plan</a></li>
