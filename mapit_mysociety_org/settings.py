@@ -51,6 +51,7 @@ ACCOUNT_USER_DISPLAY = lambda user: user.email
 ACCOUNT_LOGOUT_REDIRECT_URL = 'mapit_index'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/account/subscription'
 ACCOUNT_LOGIN_REDIRECT_URL = '/account/subscription'
+DEFAULT_HTTP_PROTOCOL = 'https'
 # Enable authentication by email address not username
 AUTHENTICATION_BACKENDS = ('account.auth_backends.EmailAuthenticationBackend',
                            'django.contrib.auth.backends.ModelBackend')
