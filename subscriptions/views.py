@@ -210,6 +210,13 @@ def stripe_hook(request):
             sub.delete()
         except Subscription.DoesNotExist:
             pass
+    elif event.type == 'customer.subscription.updated':
+        subscription = event.data.object
+        try:
+            sub = Subscription.objects.get(stripe_id=subscription.id)
+            sub.redis_update_max(subscription.plan.id)
+        except Subscription.DoesNotExist:
+            pass
     elif event.type == 'invoice.payment_failed':
         invoice = event.data.object
         customer = stripe.Customer.retrieve(invoice.customer)
