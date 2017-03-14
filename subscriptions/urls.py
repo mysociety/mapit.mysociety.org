@@ -1,7 +1,8 @@
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
-from .views import stripe_hook, SubscriptionView, SubscriptionUpdateView, SubscriptionCardUpdateView, SubscriptionCancelView
+from .views import (
+    stripe_hook, SubscriptionView, SubscriptionUpdateView, SubscriptionCardUpdateView, SubscriptionCancelView)
 
 urlpatterns = [
     url(

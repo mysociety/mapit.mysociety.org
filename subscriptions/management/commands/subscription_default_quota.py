@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
         # Respect any clients that are excluded from quotas
         for identity in settings.API_THROTTLE_UNLIMITED:
-	    key = "user:{0}:quota:{1}:max".format(identity, settings.REDIS_API_NAME)
+            key = "user:{0}:quota:{1}:max".format(identity, settings.REDIS_API_NAME)
             r.set(key, '0')
             if options['verbosity'] > 1:
                 self.stdout.write("Excluded {0} from quota".format(identity))

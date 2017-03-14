@@ -1,5 +1,9 @@
-# Import MapIt's settings
-from mapit_settings import *
+import os
+
+# Import MapIt's settings (first time to quiet flake8)
+from mapit_settings import (
+    config, INSTALLED_APPS, TEMPLATES, MIDDLEWARE_CLASSES, STATICFILES_DIRS, BASE_DIR, MAPIT_RATE_LIMIT)
+from mapit_settings import *  # noqa
 
 # Update a couple of things to suit our changes
 
@@ -47,7 +51,7 @@ LOGIN_URL = '/account/login'
 ACCOUNT_EMAIL_UNIQUE = True
 CONTACT_EMAIL = config.get('CONTACT_EMAIL', '')
 DEFAULT_FROM_EMAIL = CONTACT_EMAIL
-ACCOUNT_USER_DISPLAY = lambda user: user.email
+ACCOUNT_USER_DISPLAY = lambda user: user.email  # noqa
 ACCOUNT_LOGOUT_REDIRECT_URL = 'mapit_index'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/account/subscription'
 ACCOUNT_LOGIN_REDIRECT_URL = '/account/subscription'

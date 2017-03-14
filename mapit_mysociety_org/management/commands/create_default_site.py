@@ -28,10 +28,12 @@ class Command(BaseCommand):
                 default_site.name = settings.SITE_NAME
                 default_site.save()
                 if verbosity >= 1:
-                    self.stdout.write("Updated Site id=1 to have name: {0}, domain: {1}\n".format(settings.SITE_NAME, base_domain))
+                    self.stdout.write("Updated Site id=1 to have name: {0}, domain: {1}\n".format(
+                        settings.SITE_NAME, base_domain))
             except Site.DoesNotExist:
                 Site.objects.create(name=settings.SITE_NAME, domain=base_domain)
                 if verbosity >= 1:
-                    self.stdout.write("Created Site id=1 with name: {0}, domain: {1}\n".format(settings.SITE_NAME, base_domain))
+                    self.stdout.write("Created Site id=1 with name: {0}, domain: {1}\n".format(
+                        settings.SITE_NAME, base_domain))
         else:
             raise CommandError("settings.SITE_BASE_URL or settings.SITE_NAME have not been set")

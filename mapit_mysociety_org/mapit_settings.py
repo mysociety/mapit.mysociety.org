@@ -4,13 +4,13 @@ import yaml
 
 if sys.version_info[:2] >= (3, 4):
     import importlib
-    find_module = lambda c: importlib.machinery.PathFinder.find_spec(c)
+    find_module = lambda c: importlib.machinery.PathFinder.find_spec(c)  # noqa
 elif sys.version_info[:2] >= (3, 1):
     import importlib
-    find_module = lambda c: importlib.machinery.PathFinder.find_module(c)
+    find_module = lambda c: importlib.machinery.PathFinder.find_module(c)  # noqa
 else:
     import imp
-    find_module = lambda c: imp.find_module(c)
+    find_module = lambda c: imp.find_module(c)  # noqa
 
 # Path to here is something like
 # .../<repo>/<project_name>/settings.py
