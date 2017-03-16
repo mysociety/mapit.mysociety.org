@@ -1,4 +1,4 @@
-MapIt GB
+MapIt UK
 ========
 
 This repository houses a Django project which runs
