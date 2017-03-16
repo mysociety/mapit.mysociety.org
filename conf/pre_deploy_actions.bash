@@ -42,10 +42,6 @@ bin/mapit_make_css
 # gather all the static files in one place
 python manage.py collectstatic --noinput --link
 
-# Configure the default site's base url, so that link-building using the sites
-# framework works.
-python manage.py create_default_site
-
 # Make sure the Redis api key checking/throttling is set up as-per the config
 # settings
 python manage.py api_keys_restrict_api
