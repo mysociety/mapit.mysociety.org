@@ -208,14 +208,14 @@ def stripe_hook(request):
         try:
             sub = Subscription.objects.get(stripe_id=subscription.id)
             sub.delete()
-        except Subscription.DoesNotExist:
+        except Subscription.DoesNotExist:  # pragma: no cover
             pass
     elif event.type == 'customer.subscription.updated':
         subscription = event.data.object
         try:
             sub = Subscription.objects.get(stripe_id=subscription.id)
             sub.redis_update_max(subscription.plan.id)
-        except Subscription.DoesNotExist:
+        except Subscription.DoesNotExist:  # pragma: no cover
             pass
     elif event.type == 'invoice.payment_failed':
         invoice = event.data.object
@@ -229,7 +229,7 @@ def stripe_hook(request):
             subject = 'Your subscription to MapIt has been cancelled'
             message = render_to_string("subscriptions/email_cancelled.txt", {})
             mail.EmailMessage(subject, message, to=[email], bcc=[settings.CONTACT_EMAIL]).send()
-    elif event.type == 'invoice.payment_succeeded':
+    elif event.type == 'invoice.payment_succeeded':  # pragma: no branch
         invoice = event.data.object
         try:
             sub = Subscription.objects.get(stripe_id=invoice.subscription)

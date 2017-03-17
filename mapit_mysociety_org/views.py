@@ -62,7 +62,6 @@ class SignupView(SubscriptionUpdateMixin, account.views.SignupView):
         if index > 0:
             username = "{0}_{1}".format(username, str(index))
         try:
-            print("Trying username: {0}".format(username))
             User.objects.get(username=username)
             # If we get here, the username already exists, so we have to try
             # a different one.
