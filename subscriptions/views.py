@@ -148,7 +148,7 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
         initial = super(SubscriptionUpdateView, self).get_initial()
         if self.object:
             initial['plan'] = self.object.plan.id
-            initial['charitable_tick'] = self.object.discount
+            initial['charitable_tick'] = True if self.object.discount else False
             initial['charitable'] = self.object.metadata.get('charitable', '')
             initial['charity_number'] = self.object.metadata.get('charity_number', '')
             initial['description'] = self.object.metadata.get('description', '')
