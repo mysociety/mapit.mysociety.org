@@ -19,7 +19,9 @@ ordering of the fields, so we list each field separately
     {% include 'account/_form_field.html' with field=form.password_new_confirm %}
 {% else %}
     {% for field in form %}
-        {% include 'account/_form_field.html' with field=field %}
+        {% if not field.is_hidden %}
+            {% include 'account/_form_field.html' with field=field %}
+        {% endif %}
     {% endfor %}
 {% endif %}
 {% for field in form %}
