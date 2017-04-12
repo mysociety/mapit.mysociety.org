@@ -37,6 +37,10 @@ class SignupView(SubscriptionUpdateMixin, account.views.SignupView):
 
     form_class = forms.SignupForm
 
+    def __init__(self, *args, **kwargs):
+        self.messages.pop('email_confirmation_sent', None)
+        super(SignupView, self).__init__(*args, **kwargs)
+
     def get_initial(self):
         initial = super(SignupView, self).get_initial()
         initial['plan'] = self.request.GET.get('plan')
