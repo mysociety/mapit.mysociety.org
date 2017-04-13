@@ -7,7 +7,7 @@ from mapit_settings import *  # noqa
 
 # Update a couple of things to suit our changes
 
-INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'api_keys', 'subscriptions', 'bulk_lookup'])
+INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'mailer', 'api_keys', 'subscriptions', 'bulk_lookup'])
 
 # Insert our project app before mapit and mapit_gb so that the templates
 # take precedence
@@ -69,6 +69,7 @@ REDIS_DB_PORT = config.get('REDIS_DB_PORT')
 REDIS_DB_NUMBER = config.get('REDIS_DB_NUMBER')
 REDIS_DB_PASSWORD = config.get('REDIS_DB_PASSWORD')
 
+EMAIL_BACKEND = "mailer.backend.DbBackend"
 # Configurable email port, to make it easier to develop email sending
 EMAIL_PORT = config.get('EMAIL_PORT', 25)
 

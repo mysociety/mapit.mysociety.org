@@ -5,6 +5,7 @@ from mock import patch
 
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
+from django.core import mail
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
@@ -33,6 +34,7 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
         self.assertContains(resp, 'Your current plan is <strong>MapIt, unlimited calls</strong>')
         self.assertContains(
             resp, u'<p>It costs you £150/mth. (£300/mth with 50% discount applied.)</p>', html=True)
+        self.assertEqual(len(mail.outbox), 1)
         self.client.get(reverse('account_logout'))
 
 
