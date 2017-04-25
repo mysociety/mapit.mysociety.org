@@ -116,6 +116,7 @@ class SubscriptionUpdateMixin(object):
             assert form_data['stripeToken'] or (
                 form_data['plan'] == settings.PRICING[0]['plan'] and coupon == 'charitable100')
             obj = stripe.Subscription.create(
+                tax_percent=20,
                 customer=customer, plan=form_data['plan'], coupon=coupon, metadata=metadata)
             stripe_id = obj.id
 
