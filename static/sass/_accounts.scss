@@ -1,9 +1,15 @@
 .account-form__field {
     margin-bottom: 1em;
 
-    input {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
         @extend .form-control;
     }
+}
+
+input[type="file"] {
+    line-height: 1em;
 }
 
 .account-form__field--error {
