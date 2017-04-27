@@ -113,7 +113,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         pc_data = self.get_cleaned_data_for_step('postcode_field')
         if not pc_data:
             raise WizardError
-        context['num_good_rows'] = bulk_lookup.num_rows() - pc_data['bad_rows']
+        context['num_good_rows'] = pc_data['num_rows'] - pc_data['bad_rows']
         if self.steps.current == 'personal_details':
             context['price'] = self.amount
             context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
@@ -127,6 +127,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
             data.update(form_obj.cleaned_data)
 
         output_options = data.pop('output_options')
+        data.pop('num_rows')
         bulk_lookup = BulkLookup.objects.create(**data)
         bulk_lookup.output_options.add(*output_options)
         return redirect('finished', pk=bulk_lookup.id, token=bulk_lookup.charge_id)

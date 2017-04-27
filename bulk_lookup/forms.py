@@ -31,6 +31,7 @@ class PostcodeFieldForm(forms.Form):
         label='Please confirm the column which contains the postcodes you’d like to match',
         required=True)
     bad_rows = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    num_rows = forms.IntegerField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         self.bulk_lookup = kwargs.pop('bulk_lookup')
@@ -44,18 +45,30 @@ class PostcodeFieldForm(forms.Form):
         if not postcode_field:
             return cleaned_data
 
-        skip_bad_rows = cleaned_data.get('skip_bad_rows')
-        bad_rows = 0
+        skip_bad_rows = cleaned_data.pop('skip_bad_rows')
+        bad_rows = cleaned_data.get('bad_rows')
+        num_rows = cleaned_data.get('num_rows')
+        if num_rows and not (bad_rows > 0 and not skip_bad_rows):
+            return cleaned_data
+
         bad_row_numbers = []
-        for i, row in enumerate(self.bulk_lookup.original_file_reader()):
-            postcode = clean_postcode(row[postcode_field])
-            if not is_valid_postcode(postcode):
-                bad_rows += 1
-                bad_row_numbers.append(str(i + 1))
+        if not num_rows:
+            bad_rows = num_rows = 0
+            for i, row in enumerate(self.bulk_lookup.original_file_reader()):
+                postcode = clean_postcode(row[postcode_field])
+                num_rows += 1
+                if not is_valid_postcode(postcode):
+                    bad_rows += 1
+                    bad_row_numbers.append(str(i + 1))
+            self.data['postcode_field-num_rows'] = num_rows
+            self.data['postcode_field-bad_rows'] = bad_rows
+
         if not skip_bad_rows and bad_rows > 0:
             # Make sure the skip checkbox is shown next time
             self.fields['skip_bad_rows'].widget = forms.CheckboxInput()
-            if bad_rows == 1:
+            if not bad_row_numbers:
+                msg = 'Please confirm you wish to skip the invalid rows.'
+            elif bad_rows == 1:
                 msg = 'Row: '
                 msg += ', '.join(bad_row_numbers)
                 msg += ' doesn\'t seem to be a valid postcode.'
@@ -66,9 +79,7 @@ class PostcodeFieldForm(forms.Form):
                 msg += ' don\'t seem to be valid postcodes.'
                 msg += ' Do you want us to skip them?'
             raise forms.ValidationError(msg)
-        else:
-            cleaned_data['bad_rows'] = bad_rows
-            del cleaned_data['skip_bad_rows']
+
         return cleaned_data
 
 

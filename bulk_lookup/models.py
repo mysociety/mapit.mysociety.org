@@ -99,9 +99,6 @@ class BulkLookup(models.Model):
             self.created
         )
 
-    def num_rows(self):
-        return sum(1 for row in self.original_file_reader())
-
     def postcode_field_choices(self):
         return [(f, f) for f in self.field_names]
 
