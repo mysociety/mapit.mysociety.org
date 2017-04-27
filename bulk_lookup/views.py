@@ -124,7 +124,10 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         return context
 
     def done(self, form_list, form_dict, **kwargs):
-        data = self.get_all_cleaned_data()
+        data = {}
+        for form_obj in form_list:
+            data.update(form_obj.cleaned_data)
+
         output_options = data.pop('output_options')
         bulk_lookup = BulkLookup.objects.create(**data)
         bulk_lookup.output_options.add(*output_options)
