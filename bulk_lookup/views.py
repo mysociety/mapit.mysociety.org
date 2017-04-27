@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.views.generic import DetailView
 from formtools.wizard.views import SessionWizardView
 
-from .models import BulkLookup
+from .models import BulkLookup, cache
 from .forms import CSVForm, PostcodeFieldForm, OutputOptionsForm, PersonalDetailsForm
 
 from mapit_mysociety_org.mixins import NeverCacheMixin
@@ -54,17 +54,17 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
     def get_template_names(self):
         return [self.TEMPLATES[self.steps.current]]
 
+    @cache
     def get_cleaned_csv_data(self):
         dat = self.get_cleaned_data_for_step('csv')
         if not dat:
             raise WizardError
-        return dat
+        return BulkLookup(**dat)
 
     def get_form_kwargs(self, step):
         kwargs = super(WizardView, self).get_form_kwargs(step)
         if step == 'postcode_field':
-            dat = self.get_cleaned_csv_data()
-            kwargs['bulk_lookup'] = BulkLookup(**dat)
+            kwargs['bulk_lookup'] = self.get_cleaned_csv_data
         elif step == 'personal_details':
             kwargs['amount'] = self.amount
             kwargs['free'] = False
@@ -78,9 +78,8 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
     def get_form_initial(self, step):
         initial = super(WizardView, self).get_form_initial(step)
         if step == 'postcode_field':
-            dat = self.get_cleaned_csv_data()
-            bulk_lookup = BulkLookup(**dat)
-            for choice in bulk_lookup.field_names():
+            bulk_lookup = self.get_cleaned_csv_data
+            for choice in bulk_lookup.field_names:
                 if re.match(r'post(\s)*code', choice, flags=re.IGNORECASE):
                     initial['postcode_field'] = choice
                     break
@@ -101,12 +100,11 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         if self.steps.current == 'csv':
             return context
 
-        csv_data = self.get_cleaned_csv_data()
-        bulk_lookup = BulkLookup(**csv_data)
+        bulk_lookup = self.get_cleaned_csv_data
 
         if self.steps.current == 'postcode_field':
             context['bulk_lookup'] = {
-                'field_names': bulk_lookup.field_names(),
+                'field_names': bulk_lookup.field_names,
                 'example_rows': bulk_lookup.example_rows(),
             }
             return context

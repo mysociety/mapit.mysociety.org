@@ -10,6 +10,34 @@ from django.conf import settings
 from django.utils.crypto import get_random_string
 
 
+class cache(object):
+    '''Computes attribute value and caches it in the instance.
+    Python Cookbook (Denis Otkidach) http://stackoverflow.com/users/168352/denis-otkidach
+    This decorator allows you to create a property which can be computed once and
+    accessed many times. Sort of like memoization.
+
+    '''
+    def __init__(self, method, name=None):
+        # record the unbound-method and the name
+        self.method = method
+        self.name = name or method.__name__
+        self.__doc__ = method.__doc__
+
+    def __get__(self, inst, cls):
+        # self: <__main__.cache object at 0xb781340c>
+        # inst: <__main__.Foo object at 0xb781348c>
+        # cls: <class '__main__.Foo'>
+        if inst is None:
+            # instance attribute accessed on class, return self
+            # You get here if you write `Foo.bar`
+            return self
+        # compute, cache and return the instance's attribute value
+        result = self.method(inst)
+        # setattr redefines the instance's attribute so this doesn't get called again
+        setattr(inst, self.name, result)
+        return result
+
+
 def original_file_upload_to(instance, filename):
     return random_folder_path('original_files', filename)
 
@@ -75,8 +103,9 @@ class BulkLookup(models.Model):
         return sum(1 for row in self.original_file_reader())
 
     def postcode_field_choices(self):
-        return [(f, f) for f in self.field_names()]
+        return [(f, f) for f in self.field_names]
 
+    @cache
     def field_names(self):
         return self.original_file_reader().fieldnames
 
@@ -90,7 +119,7 @@ class BulkLookup(models.Model):
         return os.path.basename(self.output_file.name)
 
     def output_field_names(self):
-        names = self.field_names()
+        names = self.field_names
         for option in self.output_options.all():
             names += option.output_field_names()
         return names
