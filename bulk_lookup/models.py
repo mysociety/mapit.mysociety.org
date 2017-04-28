@@ -142,7 +142,7 @@ class OutputOption(models.Model):
         for id, area in response['areas'].iteritems():
             if area['type'] == self.mapit_area_type:
                 fields["{0} - Name".format(self.name)] = area['name']
-                fields["{0} - GSS Code".format(self.name)] = area['codes']['gss']  # NOQA
+                fields["{0} - GSS Code".format(self.name)] = area['codes'].get('gss', '')  # NOQA
                 fields["{0} - MapIt ID".format(self.name)] = id
                 break
         return fields
