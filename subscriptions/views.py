@@ -76,69 +76,78 @@ class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
 
 
 class SubscriptionUpdateMixin(object):
-    def update_subscription(self, form):
-        form_data = form.cleaned_data
+    def _update_subscription(self, form_data):
+        if form_data['stripeToken']:
+            self.object.customer.source = form_data['stripeToken']
+            self.object.customer.save()
+
+        # Update Stripe subscription
+        self.object.plan = form_data['plan']
+        if form_data['coupon']:
+            self.object.coupon = form_data['coupon']
+        elif self.object.discount:
+            self.object.delete_discount()
+        self.object.metadata = form_data['metadata']
+        self.object.save()
+        return super(SubscriptionUpdateMixin, self).form_valid(form_data['form'])
+
+    def _add_subscription(self, form_data):
         if hasattr(self.request.user, 'email'):
             email = self.request.user.email
         else:
             email = form_data['email'].strip()
 
-        coupon = None
-        if form_data['charitable'] in ('c', 'i'):
-            coupon = 'charitable50'
-            if form_data['plan'] == settings.PRICING[0]['plan']:
-                coupon = 'charitable100'
+        # Create new Stripe customer and subscription
+        cust_params = {'email': email}
+        if form_data['stripeToken']:
+            cust_params['source'] = form_data['stripeToken']
+        obj = stripe.Customer.create(**cust_params)
+        customer = obj.id
 
-        metadata = {
+        assert form_data['stripeToken'] or (
+            form_data['plan'] == settings.PRICING[0]['plan'] and form_data['coupon'] == 'charitable100')
+        obj = stripe.Subscription.create(
+            tax_percent=20,
+            customer=customer, plan=form_data['plan'], coupon=form_data['coupon'], metadata=form_data['metadata'])
+        stripe_id = obj.id
+
+        # Now create the user (signup) or get redirect (update)
+        try:
+            resp = super(SubscriptionUpdateMixin, self).form_valid(form_data['form'])
+        except smtplib.SMTPException:
+            # A problem sending a confirmation email, don't fail out.
+            resp = redirect(self.get_success_url())
+        if hasattr(self, 'created_user'):
+            user = self.created_user  # This now exists
+        else:
+            user = self.request.user
+        self.subscription = Subscription.objects.create(user=user, stripe_id=stripe_id)
+        return resp
+
+    def update_subscription(self, form):
+        form_data = form.cleaned_data
+        form_data['form'] = form
+
+        form_data['coupon'] = None
+        if form_data['charitable'] in ('c', 'i'):
+            form_data['coupon'] = 'charitable50'
+            if form_data['plan'] == settings.PRICING[0]['plan']:
+                form_data['coupon'] = 'charitable100'
+
+        form_data['metadata'] = {
             'charitable': form_data['charitable'],
             'charity_number': form_data['charity_number'],
             'description': form_data['description'],
         }
 
         if hasattr(self, 'object') and self.object:
-            if form_data['stripeToken']:
-                self.object.customer.source = form_data['stripeToken']
-                self.object.customer.save()
-
-            # Update Stripe subscription
-            self.object.plan = form_data['plan']
-            if coupon:
-                self.object.coupon = coupon
-            elif self.object.discount:
-                self.object.delete_discount()
-            self.object.metadata = metadata
-            self.object.save()
-            self.subscription.redis_update_max(form_data['plan'])
-            return super(SubscriptionUpdateMixin, self).form_valid(form)
+            resp = self._update_subscription(form_data)
         else:
-            # Create new Stripe customer and subscription
-            cust_params = {'email': email}
-            if form_data['stripeToken']:
-                cust_params['source'] = form_data['stripeToken']
-            obj = stripe.Customer.create(**cust_params)
-            customer = obj.id
+            resp = self._add_subscription(form_data)
 
-            assert form_data['stripeToken'] or (
-                form_data['plan'] == settings.PRICING[0]['plan'] and coupon == 'charitable100')
-            obj = stripe.Subscription.create(
-                tax_percent=20,
-                customer=customer, plan=form_data['plan'], coupon=coupon, metadata=metadata)
-            stripe_id = obj.id
-
-            # Now create the user (signup) or get redirect (update)
-            try:
-                resp = super(SubscriptionUpdateMixin, self).form_valid(form)
-            except smtplib.SMTPException:
-                # A problem sending a confirmation email, don't fail out.
-                resp = redirect(self.get_success_url())
-            if hasattr(self, 'created_user'):
-                user = self.created_user  # This now exists
-            else:
-                user = self.request.user
-            sub = Subscription.objects.create(user=user, stripe_id=stripe_id)
-            sub.redis_update_max(form_data['plan'])
-
-            return resp
+        self.subscription.redis_update_max(form_data['plan'])
+        messages.add_message(self.request, messages.INFO, 'Thank you very much!')
+        return resp
 
 
 class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCacheMixin, FormView):
@@ -175,9 +184,7 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
         return super(SubscriptionUpdateView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
-        resp = self.update_subscription(form)
-        messages.add_message(self.request, messages.INFO, 'Thank you very much!')
-        return resp
+        return self.update_subscription(form)
 
 
 class SubscriptionCardUpdateView(StripeObjectMixin, View):

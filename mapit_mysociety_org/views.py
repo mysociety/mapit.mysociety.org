@@ -51,9 +51,7 @@ class SignupView(SubscriptionUpdateMixin, account.views.SignupView):
         return super(SignupView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
-        resp = self.update_subscription(form)
-        messages.add_message(self.request, messages.INFO, 'Thank you very much!')
-        return resp
+        return self.update_subscription(form)
 
     def generate_username(self, form):
         # Generate a random username (we used to use the email address
