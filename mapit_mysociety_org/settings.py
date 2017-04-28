@@ -113,7 +113,7 @@ RETRY_INTERVAL = 0
 
 # API subscriptions
 PRICING = [
-    {'plan': 'mapit-10k', 'price': 20, 'calls': '10,000'},
-    {'plan': 'mapit-100k', 'price': 100, 'calls': '100,000'},
-    {'plan': 'mapit-0k', 'price': 300, 'calls': '0'},
+    {'plan': 'mapit-10k-v', 'price': 20, 'calls': '10,000'},
+    {'plan': 'mapit-100k-v', 'price': 100, 'calls': '100,000'},
+    {'plan': 'mapit-0k-v', 'price': 300, 'calls': '0'},
 ]

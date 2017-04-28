@@ -56,9 +56,9 @@ class PatchedStripeMixin(object):
             },
             'customer': Mock(spec_set=['default_source', 'source', 'save']),
             'plan': {
-                'id': 'mapit-0k',
+                'id': 'mapit-0k-v',
                 'name': 'MapIt, unlimited calls',
-                'amount': 30000,
+                'amount': 25000,
             },
         }, None, None)
         self.MockStripe.Customer.create.return_value = convert_to_stripe_object({
@@ -107,7 +107,7 @@ class SubsFormTest(TestCase):
         data.update({'tandcs_tick': True})
         form = SubsForm(data=data)
         self.assertEqual(form.errors, {"plan": ["This field is required.", "You need to submit payment"]})
-        data.update({'plan': 'mapit-10k'})
+        data.update({'plan': 'mapit-10k-v'})
         form = SubsForm(data=data)
         self.assertEqual(form.errors, {"plan": ["You need to submit payment"]})
         data.update({'charitable_tick': True, 'charitable': 'c'})
@@ -121,7 +121,7 @@ class SubsFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_update_plan(self):
-        data = {'plan': 'mapit-10k'}
+        data = {'plan': 'mapit-10k-v'}
         form = SubsForm(stripe=True, data=data)
         self.assertEqual(form.errors, {"plan": ["You need to submit payment"]})
         data.update({'stripeToken': 'TOKEN'})
@@ -129,7 +129,7 @@ class SubsFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_update_plan_has_payment(self):
-        form = SubsForm(stripe=True, has_payment_data=True, data={'plan': 'mapit-0k'})
+        form = SubsForm(stripe=True, has_payment_data=True, data={'plan': 'mapit-0k-v'})
         self.assertTrue(form.is_valid())
 
 
@@ -185,7 +185,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.get(reverse('subscription_update'))
-        self.assertEqual(response.context['form']['plan'].value(), 'mapit-0k')
+        self.assertEqual(response.context['form']['plan'].value(), 'mapit-0k-v')
         self.assertEqual(bool(response.context['form']['charitable_tick'].value()), True)
         self.assertEqual(response.context['form']['tandcs_tick'].value(), None)
         self.assertNotContains(response, 'tandcs_tick')
@@ -194,13 +194,13 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
             'tandcs_tick': '1',
-            'plan': 'mapit-100k',
+            'plan': 'mapit-100k-v',
             'stripeToken': 'TOKEN',
         }, follow=True)
         self.assertRedirects(response, reverse('subscription'))
         self.MockStripe.Customer.create.assert_called_once_with(email='test@example.com', source='TOKEN')
         self.MockStripe.Subscription.create.assert_called_once_with(
-            customer='CUSTOMER-ID', plan='mapit-100k', coupon=None,
+            customer='CUSTOMER-ID', plan='mapit-100k-v', coupon=None, tax_percent=20,
             metadata={'charitable': '', 'description': '', 'charity_number': ''})
         sub = Subscription.objects.get(user=self.user)
         self.assertEqual(sub.stripe_id, 'SUBSCRIPTION-ID-CREATE')
@@ -210,7 +210,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
             'tandcs_tick': '1',
-            'plan': 'mapit-10k',
+            'plan': 'mapit-10k-v',
             'charitable_tick': '1',
             'charitable': 'c',
             'charity_number': '123',
@@ -218,7 +218,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.assertRedirects(response, reverse('subscription'))
         self.MockStripe.Customer.create.assert_called_once_with(email='test@example.com')
         self.MockStripe.Subscription.create.assert_called_once_with(
-            customer='CUSTOMER-ID', plan='mapit-10k', coupon='charitable100',
+            customer='CUSTOMER-ID', plan='mapit-10k-v', coupon='charitable100', tax_percent=20,
             metadata={'charitable': 'c', 'description': '', 'charity_number': '123'})
         sub = Subscription.objects.get(user=self.user)
         self.assertEqual(sub.stripe_id, 'SUBSCRIPTION-ID-CREATE')
@@ -231,7 +231,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
-            'plan': 'mapit-100k',
+            'plan': 'mapit-100k-v',
             'stripeToken': 'TOKEN',
             'charitable_tick': 1,
             'charitable': 'c',
@@ -240,7 +240,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.assertEqual(response.status_code, 302)
         # The real code refetches from stripe after the redirect
         # Our test, the plan is no longer a dict so we need to make it so
-        self.assertEqual(sub.plan, 'mapit-100k')
+        self.assertEqual(sub.plan, 'mapit-100k-v')
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 10000}
         self.client.get(response['Location'])
 
@@ -255,7 +255,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
-            'plan': 'mapit-10k',
+            'plan': 'mapit-10k-v',
             'charitable_tick': 1,
             'charitable': 'c',
             'charity_number': 123,
@@ -263,11 +263,11 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.assertEqual(response.status_code, 302)
         sub.customer.save.assert_not_called()
         sub.save.assert_called_once_with()
-        self.assertEqual(sub.plan, 'mapit-10k')
+        self.assertEqual(sub.plan, 'mapit-10k-v')
         self.assertEqual(sub.coupon, 'charitable100')
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
-        sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 2000}
+        sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 1667}
         sub.discount.coupon.percent_off = 100
         response = self.client.get(response['Location'])
         self.assertContains(
@@ -281,16 +281,16 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
-            'plan': 'mapit-100k',
+            'plan': 'mapit-100k-v',
         })
         self.assertEqual(response.status_code, 302)
         sub.customer.save.assert_not_called()
         sub.delete_discount.assert_called_once_with()
         sub.save.assert_called_once_with()
-        self.assertEqual(sub.plan, 'mapit-100k')
+        self.assertEqual(sub.plan, 'mapit-100k-v')
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
-        sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 10000}
+        sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 8333}
         sub.discount = None
         response = self.client.get(response['Location'])
         self.assertContains(response, u'<p>It costs you £100/mth.</p>', html=True)
@@ -341,7 +341,7 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
             'id': 'EVENT-ID-UPDATED',
             'type': 'customer.subscription.updated',
-            'data': {'object': {'id': 'ID', 'plan': {'id': 'mapit-10k'}}}
+            'data': {'object': {'id': 'ID', 'plan': {'id': 'mapit-10k-v'}}}
         }, None, None)
         self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': [], 'quota': 0, 'blocked': 0})
         self.post_to_hook('EVENT-ID-UPDATED')

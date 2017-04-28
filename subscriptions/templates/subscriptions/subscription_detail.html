@@ -27,7 +27,7 @@
 
         {% if stripe.plan %}
 
-            <p>Your current plan is <strong>{{ stripe.plan.name }}</strong> ({{ stripe.plan.id }}).</p>
+            <p>Your current plan is <strong>{{ stripe.plan.name }}</strong>.</p>
 
             <p>It costs you £{{ actual_paid|floatformat:-2 }}/mth.
             {% if stripe.discount %}

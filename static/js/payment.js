@@ -82,9 +82,9 @@ stripeButton && stripeButton.addEventListener('click', function(e) {
 
   plan = plan.value;
   var num = 20;
-  if (plan === 'mapit-100k') {
+  if (plan === 'mapit-100k-v') {
     num = 100;
-  } else if (plan === 'mapit-0k') {
+  } else if (plan === 'mapit-0k-v') {
     num = 300;
   }
   if (ctick) {

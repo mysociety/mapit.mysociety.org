@@ -21,6 +21,11 @@ from .forms import SubsForm
 from .models import Subscription
 
 
+def add_vat(pence):
+    """Add VAT and convert pounds to pence."""
+    return round(pence * 1.2 / 100, 2)
+
+
 class StripeObjectMixin(object):
     def get_object(self):
         try:
@@ -46,13 +51,13 @@ class StripeObjectMixin(object):
         if data['discount'] and data['discount']['end']:
             data['discount']['end'] = datetime.fromtimestamp(data['discount']['end'])
 
-        # Amounts in pounds, not pence
-        data['plan']['amount'] /= 100
-
         # Calculate actual amount paid, including discount
         if data['discount'] and data['discount']['coupon'] and data['discount']['coupon']['percent_off']:
-            context['actual_paid'] = data['plan']['amount'] * (100 - data['discount']['coupon']['percent_off']) / 100
+            context['actual_paid'] = add_vat(int(
+                data['plan']['amount'] * (100 - data['discount']['coupon']['percent_off']) / 100))
+            data['plan']['amount'] = add_vat(data['plan']['amount'])
         else:
+            data['plan']['amount'] = add_vat(data['plan']['amount'])
             context['actual_paid'] = data['plan']['amount']
 
         return context
@@ -116,6 +121,7 @@ class SubscriptionUpdateMixin(object):
             assert form_data['stripeToken'] or (
                 form_data['plan'] == settings.PRICING[0]['plan'] and coupon == 'charitable100')
             obj = stripe.Subscription.create(
+                tax_percent=20,
                 customer=customer, plan=form_data['plan'], coupon=coupon, metadata=metadata)
             stripe_id = obj.id
 
