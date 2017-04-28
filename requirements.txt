@@ -11,4 +11,3 @@ stripe==1.46.0
 # Bulk lookup
 django-formtools==2.0
 unicodecsv==0.14.1
-requests==2.13.0

@@ -1,5 +1,6 @@
 import os
 import tempfile
+import traceback
 import unicodecsv as csv
 
 from django.conf import settings
@@ -10,17 +11,20 @@ from django.core.files import File
 from django.core.mail import send_mail
 from django.contrib.sites.shortcuts import get_current_site
 
-import requests
 from ukpostcodeutils.validation import is_valid_postcode
 
 from ...models import BulkLookup
 from ...forms import clean_postcode
+
+from mapit.models import Postcode, Area, Generation
+from mapit.views.areas import add_codes
 
 
 class Command(BaseCommand):
     help = "Processes all the bulk lookup jobs that need processing"
 
     def handle(self, *args, **options):
+        self.generation = Generation.objects.current()
         for bulk_lookup in BulkLookup.objects.needs_processing():
             self.process_job(bulk_lookup)
 
@@ -34,6 +38,7 @@ class Command(BaseCommand):
                 bulk_lookup.save()
                 self.send_success_email(bulk_lookup)
         except Exception, e:
+            traceback.print_exc()
             bulk_lookup.started = None
             bulk_lookup.finished = None
             bulk_lookup.error_count += 1
@@ -59,20 +64,16 @@ class Command(BaseCommand):
     def lookup_row(self, row, postcode_field, output_options):
         postcode = clean_postcode(row[postcode_field])
         if is_valid_postcode(postcode):
-            url = u"https://{0}/postcode/{1}".format(get_current_site(None).domain, postcode)
-            response = requests.get(url)
-            self.process_mapit_response(response, row, output_options)
-
-    def process_mapit_response(self, response, row, output_options):
-        if response.status_code == 200:
             try:
-                json = response.json()
-                for output_option in output_options:
-                    row.update(output_option.get_from_mapit_response(json))
-            except ValueError:
-                # Requests raises a ValueError if the response is
-                # not json so we just skip looking up this row
+                pc = Postcode.objects.get(postcode=postcode)
+                areas = list(add_codes(Area.objects.by_postcode(pc, self.generation)))
+                self.process_mapit_response(areas, row, output_options)
+            except Postcode.DoesNotExist:
                 pass
+
+    def process_mapit_response(self, areas, row, output_options):
+        for output_option in output_options:
+            row.update(output_option.get_from_mapit_response(areas))
 
     def send_success_email(self, bulk_lookup):
         url = ''.join([

@@ -136,13 +136,13 @@ class OutputOption(models.Model):
             "{0} - MapIt ID".format(self.name)
         ]
 
-    def get_from_mapit_response(self, response):
-        """ Extract the right data from mapit's response JSON """
+    def get_from_mapit_response(self, areas):
+        """ Extract the right data from mapit's data """
         fields = {f: "" for f in self.output_field_names()}
-        for id, area in response['areas'].iteritems():
-            if area['type'] == self.mapit_area_type:
-                fields["{0} - Name".format(self.name)] = area['name']
-                fields["{0} - GSS Code".format(self.name)] = area['codes'].get('gss', '')  # NOQA
-                fields["{0} - MapIt ID".format(self.name)] = id
+        for area in areas:
+            if area.type.code == self.mapit_area_type:
+                fields["{0} - Name".format(self.name)] = area.name
+                fields["{0} - GSS Code".format(self.name)] = area.all_codes.get('gss', '')  # NOQA
+                fields["{0} - MapIt ID".format(self.name)] = area.id
                 break
         return fields
