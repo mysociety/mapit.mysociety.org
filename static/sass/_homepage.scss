@@ -1,3 +1,9 @@
+.homepage-section {
+    .container {
+        @include clearfix();
+    }
+}
+
 .homepage-hero {
     color: #fff;
     background: #333 url(../img/hero.jpg) 0% 50% no-repeat;
@@ -346,4 +352,14 @@
         margin-right: 0.5em;
         font-weight: bold;
     }
+}
+
+.homepage-cta__pricing {
+    width: 50%;
+    float: left;
+}
+
+.homepage-cta__bulk {
+    width: 50%;
+    float: left;
 }
