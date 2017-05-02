@@ -85,11 +85,18 @@
     <div class="homepage-section homepage-section--primary">
         <div class="container">
             <div class="homepage-cta">
-                <p>
-                    MapIt API access starts at £{{ PRICING.0.price }}/mth,<br>
-                    and is free for low-volume non-profit use.
-                </p>
-                <a href="{% url 'mapit_pricing' %}" class="btn">Show pricing</a>
+                <div class="homepage-cta__pricing">
+                    <p>
+                        MapIt API access starts at £{{ PRICING.0.price }}/mth and is free for low-volume non-profit use.
+                    </p>
+                    <a href="{% url 'mapit_pricing' %}" class="btn">Show pricing</a>
+                </div>
+                <div class="homepage-cta__bulk">
+                    <p>
+                        One-off data mapping. Upload your postcodes and we'll return them matched to our dataset.
+                    </p>
+                    <a href="{% url 'home' %}" class="btn">Data mapper</a>
+                </div>
             </div>
         </div>
     </div>
