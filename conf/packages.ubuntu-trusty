@@ -7,6 +7,10 @@ redis-server
 libhiredis-dev
 varnish
 
+libffi-dev
+libssl-dev
+python-dev
+
 python-psycopg2
 python-shapely
 python-yaml
