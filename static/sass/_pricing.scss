@@ -9,7 +9,6 @@
 .pricing {
     @include clearfix();
     margin: 2em 0;
-
     // Arrange children into a single vertical line on narrow screens
     @include flexbox();
     @include flex-direction(column);
@@ -122,5 +121,32 @@
 
     li + li {
         margin-top: 0.5em;
+    }
+}
+
+.pricing__bonus {
+    width: 100%;
+    max-width: 20em;
+    padding: 1.5em 1em;
+    border: 1px solid #ccc;
+    margin: 2em auto 1em;
+    @include clearfix;
+    @media (min-width: $large-screen) {
+        max-width: none;
+    }
+}
+
+.pricing__bonus__column {
+    @media (min-width: $large-screen) {
+        width: 25%;
+        float: left;
+        padding-right: 1em;
+    }
+}
+
+.pricing__bonus__column + .pricing__bonus__column {
+    @media (min-width: $large-screen) {
+        width: 75%;
+        float: left;
     }
 }
