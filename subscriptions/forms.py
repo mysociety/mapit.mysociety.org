@@ -28,10 +28,10 @@ class SubscriptionMixin(forms.Form):
     ), label='Are you?', widget=forms.RadioSelect)
     charity_number = forms.CharField(
         label='If charity, please provide your registered charity number',
-        required=False)
+        max_length=500, required=False)
     description = forms.CharField(
         label='If an individual, please provide details of your project',
-        required=False)
+        max_length=500, required=False)
     tandcs_tick = forms.BooleanField(
         label=mark_safe('I agree to the <a href="/legal" target="_blank">terms and conditions</a>'),
         required=False)
@@ -58,9 +58,9 @@ class SubscriptionMixin(forms.Form):
             self.cleaned_data['charity_number'] = ''
             self.cleaned_data['description'] = ''
             return
-        if typ == 'c' and not cleaned_data.get('charity_number'):
+        if typ == 'c' and not self.has_error('charity_number') and not cleaned_data.get('charity_number'):
             self.add_error('charity_number', 'Please provide your charity number')
-        if typ == 'i' and not cleaned_data.get('description'):
+        if typ == 'i' and not self.has_error('description') and not cleaned_data.get('description'):
             self.add_error('description', 'Please provide details of your project')
 
 
