@@ -4,7 +4,9 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.http import Http404
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
+from django.views.decorators.debug import sensitive_post_parameters
 import stripe
 
 import account.forms
@@ -40,6 +42,10 @@ class SignupView(SubscriptionUpdateMixin, account.views.SignupView):
     def __init__(self, *args, **kwargs):
         self.messages.pop('email_confirmation_sent', None)
         super(SignupView, self).__init__(*args, **kwargs)
+
+    @method_decorator(sensitive_post_parameters('password', 'password_confirm'))
+    def dispatch(self, *args, **kwargs):
+        return super(SignupView, self).dispatch(*args, **kwargs)
 
     def get_initial(self):
         initial = super(SignupView, self).get_initial()
