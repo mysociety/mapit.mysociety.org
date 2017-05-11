@@ -6,9 +6,11 @@ from django.test import TestCase
 
 class BulkLookupViewTest(TestCase):
     def test_resubmission(self):
+        csv_file = StringIO('ID,Postcode\n1,SW1A1AA\n2,EH11BB')
+        csv_file.content_type = 'text/csv'
         response = self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',
-            'csv-original_file': StringIO('ID,Postcode\n1,SW1A1AA\n2,EH11BB'),
+            'csv-original_file': csv_file,
         })
         self.assertEqual(len(response.context['form'].errors), 0)
         response = self.client.post(reverse('home'), {
@@ -22,9 +24,11 @@ class BulkLookupViewTest(TestCase):
             'postcode_field-postcode_field': 'Postcode',
         })
         self.assertEqual(len(response.context['form'].errors), 0)
+        csv_file = StringIO('ID,Different\n1,SW1A1AA\n2,EH11BB')
+        csv_file.content_type = 'text/csv'
         response = self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',
-            'csv-original_file': StringIO('ID,Different\n1,SW1A1AA\n2,EH11BB'),
+            'csv-original_file': csv_file,
         })
         self.assertContains(response, 'Different')
         self.assertEqual(len(response.context['form'].errors), 0)
