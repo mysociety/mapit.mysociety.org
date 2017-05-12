@@ -1,7 +1,9 @@
+from collections import defaultdict, OrderedDict
 import os
 import tempfile
 import traceback
-import unicodecsv as csv
+import pyexcel
+import defusedxml
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -18,6 +20,8 @@ from ...forms import clean_postcode
 
 from mapit.models import Postcode, Area, Generation
 from mapit.views.areas import add_codes
+
+defusedxml.defuse_stdlib()
 
 
 class Command(BaseCommand):
@@ -37,7 +41,7 @@ class Command(BaseCommand):
                 bulk_lookup.finished = timezone.now()
                 bulk_lookup.save()
                 self.send_success_email(bulk_lookup)
-        except Exception, e:
+        except Exception:
             traceback.print_exc()
             bulk_lookup.started = None
             bulk_lookup.finished = None
@@ -46,19 +50,22 @@ class Command(BaseCommand):
             bulk_lookup.save()
 
     def do_lookup(self, bulk_lookup):
+        self.column_names = bulk_lookup.output_field_names()
+
         with tempfile.TemporaryFile() as f:
-            writer = csv.DictWriter(f, bulk_lookup.output_field_names())
-            writer.writeheader()
             postcode_field = bulk_lookup.postcode_field
             output_options = bulk_lookup.output_options.all()
-            for row in bulk_lookup.original_file_reader():
-                self.lookup_row(row, postcode_field, output_options)
-                writer.writerow(row)
+            self.header_row_done = False
+            rows = (self.lookup_row(row, postcode_field, output_options)
+                    for row in bulk_lookup.original_file_reader())
             original_filename = os.path.basename(
                 bulk_lookup.original_file.name
             )
             base_filename, extension = os.path.splitext(original_filename)
-            output_filename = '%s-mapit%s' % (base_filename, extension)
+            output_filename = '%s-mapit.csv' % base_filename
+            pyexcel.isave_as(
+                dest_file_stream=f, dest_file_type='csv', records=rows,
+                auto_detect_float=False, auto_detect_int=False)
             bulk_lookup.output_file.save(output_filename, File(f))
 
     def lookup_row(self, row, postcode_field, output_options):
@@ -70,6 +77,15 @@ class Command(BaseCommand):
                 self.process_mapit_response(areas, row, output_options)
             except Postcode.DoesNotExist:
                 pass
+        row = defaultdict(lambda: "", row)
+        if not self.header_row_done:
+            # The writer gets the column order by the first row being ordered
+            self.header_row_done = True
+            ret = OrderedDict()
+            for key in self.column_names:
+                ret[key] = row[key]
+            return ret
+        return row
 
     def process_mapit_response(self, areas, row, output_options):
         for output_option in output_options:

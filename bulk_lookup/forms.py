@@ -17,19 +17,16 @@ def clean_postcode(pc):
 
 class CSVForm(forms.Form):
     original_file = forms.FileField(
-        label='Step 1: Upload a CSV file which includes a column of the postcodes you wish to match')
+        label='Step 1: Upload a CSV, Excel or OpenDocument file which includes a column of the postcodes you wish to match')
 
     def clean_original_file(self):
         original_file = self.cleaned_data['original_file']
         if original_file:
             file_type = original_file.content_type
             # e.g. application/ vnd.ms-excel, vnd.openxmlformats-officedocument.spreadsheetml.sheet
-            if 'excel' in file_type or 'xls' in file_type or 'spreadsheet' in file_type:
-                raise forms.ValidationError(
-                    'I’m afraid we do not support Excel or spreadsheet files directly. '
-                    'Please export your spreadsheet as a CSV file first.')
-            elif 'csv' not in file_type:
-                raise forms.ValidationError('I’m afraid we only support CSV files.')
+            if 'excel' not in file_type and 'xls' not in file_type and \
+                    'spreadsheet' not in file_type and 'csv' not in file_type:
+                raise forms.ValidationError('I’m afraid we only support CSV, Excel or OpenDocument files.')
         return original_file
 
 
