@@ -73,3 +73,11 @@ class BulkLookupViewTest(TestCase):
                 reader = csv.PyExcelReader(File(fp))
                 self.assertEqual(reader.fieldnames, ['ID', 'Name', 'Postcode'])
                 self.assertEqual(list(reader), data)
+
+    def test_null_byte(self):
+        csv_file = StringIO('ID,Postcode\n1,SW1A1AA\n2,EH11BB\0')
+        csv_file.content_type = 'text/csv'
+        response = self.client.post(reverse('home'), {
+            'wizard_view-current_step': 'csv',
+            'csv-original_file': csv_file,
+        })

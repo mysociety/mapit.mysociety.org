@@ -7,6 +7,23 @@ import defusedxml
 defusedxml.defuse_stdlib()
 
 
+class file_without_nulls(object):
+    """An object that behaves like a provided file object,
+    but strips any NULL bytes when read() is called."""
+    def __init__(self, f):
+        object.__setattr__(self, '_file', f)
+
+    def __getattr__(self, name):
+        return getattr(self._file, name)
+
+    def __setattr__(self, name, value):
+        return setattr(self._file, name, value)
+
+    def read(self, *args):
+        # Remove null bytes from any underlying data
+        return self._file.read(*args).replace('\0', '')
+
+
 class PyExcelReader(object):
     # Set up an iterator for reading in a CSV/XLS/XLSX/ODS file
     def __init__(self, file_field):
@@ -18,7 +35,9 @@ class PyExcelReader(object):
         # The XLS reader doesn't accept a stream, but does accept an mmap file...
         if ext in ('xls', 'xlsx'):
             kwargs['file_content'] = mmap.mmap(file_field.fileno(), 0, access=mmap.ACCESS_READ)
-        else:  # CSV or ODS
+        elif ext == 'csv':
+            kwargs['file_stream'] = file_without_nulls(file_field)
+        else:  # ODS
             kwargs['file_stream'] = file_field
         self.reader = self.iget_records(**kwargs)
 
