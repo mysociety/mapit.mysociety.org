@@ -10,4 +10,8 @@ stripe==1.46.0
 
 # Bulk lookup
 django-formtools==2.0
-unicodecsv==0.14.1
+defusedxml==0.5.0
+pyexcel==0.4.5
+pyexcel-io==0.3.4.1
+pyexcel-odsr==0.3.2
+pyexcel-xls==0.3.2

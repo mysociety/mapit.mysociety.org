@@ -2,12 +2,12 @@ import os
 import itertools
 from datetime import timedelta
 
-import unicodecsv as csv
-
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
 from django.utils.crypto import get_random_string
+
+from .csv import PyExcelReader
 
 
 class cache(object):
@@ -110,7 +110,7 @@ class BulkLookup(models.Model):
         return itertools.islice(self.original_file_reader(), 5)
 
     def original_file_reader(self):
-        return csv.DictReader(self.original_file)
+        return PyExcelReader(self.original_file)
 
     def output_file_name(self):
         return os.path.basename(self.output_file.name)

@@ -68,7 +68,7 @@
                 {% else %}Max {{ PRICING.2.calls }} calls per month
                 {% endif %}
             </li>
-            <li><strong>Free</strong> use of our <a href="{% url "home" %}">CSV data mapper</a></li>
+            <li><strong>Free</strong> use of our <a href="{% url "home" %}">data mapper</a></li>
             <li><strong>50% off</strong> for charitable users</li>
         </ul>
       {% if request.user.is_authenticated %}
@@ -81,7 +81,7 @@
 </div>
 <div class="pricing__bonus">
     <div class="pricing__bonus__column">
-        <p class="pricing__option__name">One-off Bulk CSV processing</p>
+        <p class="pricing__option__name">One-off Bulk data processing</p>
         <h2 class="pricing__option__cost">£20</h2>
     </div>
     <div class="pricing__bonus__column">
