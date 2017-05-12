@@ -81,3 +81,12 @@ class BulkLookupViewTest(TestCase):
             'wizard_view-current_step': 'csv',
             'csv-original_file': csv_file,
         })
+
+    def test_cp1252_file(self):
+        csv_file = StringIO('ID,Postcode\nKing\x92s Lynn,SW1A1AA\nCambridge,EH11BB\0')
+        csv_file.content_type = 'text/csv'
+        response = self.client.post(reverse('home'), {
+            'wizard_view-current_step': 'csv',
+            'csv-original_file': csv_file,
+        })
+        self.assertContains(response, u'King\u2019s Lynn')

@@ -7,9 +7,10 @@ import defusedxml
 defusedxml.defuse_stdlib()
 
 
-class file_without_nulls(object):
+class file_without_nulls_or_cp1252(object):
     """An object that behaves like a provided file object,
-    but strips any NULL bytes when read() is called."""
+    but strips any NULL bytes when read() is called, and
+    spots Windows-1252 lines."""
     def __init__(self, f):
         object.__setattr__(self, '_file', f)
 
@@ -21,7 +22,15 @@ class file_without_nulls(object):
 
     def read(self, *args):
         # Remove null bytes from any underlying data
-        return self._file.read(*args).replace('\0', '')
+        data = self._file.read(*args)
+        data = data.replace('\0', '')
+        try:
+            # If it's not UTF-8...
+            data.decode('utf-8')
+        except UnicodeDecodeError:
+            # ...Assume Windows 1252
+            data = data.decode('cp1252').encode('utf-8')
+        return data
 
 
 class PyExcelReader(object):
@@ -36,7 +45,7 @@ class PyExcelReader(object):
         if ext in ('xls', 'xlsx'):
             kwargs['file_content'] = mmap.mmap(file_field.fileno(), 0, access=mmap.ACCESS_READ)
         elif ext == 'csv':
-            kwargs['file_stream'] = file_without_nulls(file_field)
+            kwargs['file_stream'] = file_without_nulls_or_cp1252(file_field)
         else:  # ODS
             kwargs['file_stream'] = file_field
         self.reader = self.iget_records(**kwargs)
