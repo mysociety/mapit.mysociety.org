@@ -31,8 +31,10 @@ sub recognize_apiname_apikey_token {
     # Save the key if there is one in the api_key querystring parameter or the
     # X-Api-Key header.
     # Note that we prefer the query string to the HTTP header if there's both.
+    # Strip the key if in the URL, so we only have to cache one backend resource.
     if (regsub(req.url, ".*[\?&]api_key=([^&;]*).*", "\1") != req.url) {
       set req.http.apikey = regsub(req.url, ".*[\?&]api_key=([^&;]*).*", "\1");
+      set req.url = regsuball(req.url, "[\?&]api_key=[^&;]*", "");
     } else if(req.http.X-Api-Key) {
       set req.http.apikey = req.http.X-Api-Key;
     }
