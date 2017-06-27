@@ -12,7 +12,7 @@ from .models import OutputOption
 
 
 def clean_postcode(pc):
-    return re.sub('[^A-Z0-9]', '', pc.upper())
+    return re.sub('[^A-Z0-9]', '', unicode(pc).upper())
 
 
 class CSVForm(forms.Form):
