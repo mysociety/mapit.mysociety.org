@@ -20,9 +20,22 @@ class file_without_nulls_or_cp1252(object):
     def __setattr__(self, name, value):
         return setattr(self._file, name, value)
 
+    def whole_character(self, data):
+        if '\xc2' <= data[-1] <= '\xdf' or (len(data) > 1 and '\xe0' <= data[-2] <= '\xef'):
+            return self._file.read(1)
+        if '\xe0' <= data[-1] <= '\xef' or (len(data) > 1 and '\xf0' <= data[-2] <= '\xf4'):
+            return self._file.read(2)
+        if '\xf0' <= data[-1] <= '\xf4':
+            return self._file.read(3)
+        if len(data) > 2 and '\xf0' <= data[-3] <= '\xf4':
+            return self._file.read(1)
+        return ''
+
     def read(self, *args):
         # Remove null bytes from any underlying data
         data = self._file.read(*args)
+        if data:
+            data += self.whole_character(data)
         data = data.replace('\0', '')
         try:
             # If it's not UTF-8...

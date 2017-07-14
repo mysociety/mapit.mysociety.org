@@ -90,3 +90,13 @@ class BulkLookupViewTest(TestCase):
             'csv-original_file': csv_file,
         })
         self.assertContains(response, u'King\u2019s Lynn')
+
+    def test_unicode_file_split(self):
+        # codecs reads in 72 bytes at a time...
+        csv_file = StringIO(u'ID,Postcode\nKings Lynn,SW1A1AA\nCambridge,EH11BB\nPenzance,SW1A0AA\nAn caf\u018d\n')
+        csv_file.content_type = 'text/csv'
+        response = self.client.post(reverse('home'), {
+            'wizard_view-current_step': 'csv',
+            'csv-original_file': csv_file,
+        })
+        self.assertContains(response, u'Penzance')
