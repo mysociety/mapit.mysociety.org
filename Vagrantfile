@@ -79,6 +79,13 @@ Vagrant.configure(2) do |config|
     # Install our own varnish config file
     sudo cp /vagrant/mapit.mysociety.org/conf/varnish.vcl-example /etc/varnish/default.vcl
     sudo service varnish restart
+
+    # Nicer running of runserver
+    su vagrant -c '.venv/bin/pip install pyinotify'
+
+    # Auto-activate virtualenv on login
+    echo >> /home/vagrant/.bashrc "source /vagrant/mapit.mysociety.org/.venv/bin/activate"
+
   SHELL
 
   # Start mailcatcher every time we start the VM
