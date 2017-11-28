@@ -211,30 +211,33 @@ class SubscriptionCancelView(StripeObjectMixin, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
+def stripe_mapit_sub(invoice):
+    stripe_sub = stripe.Subscription.retrieve(invoice.subscription)
+    return stripe_sub.plan.id.startswith('mapit')
+
+
 @require_POST
 @csrf_exempt
 def stripe_hook(request):
     event_json = json.loads(request.body)
     event = stripe.Event.retrieve(event_json["id"])
+    obj = event.data.object
     if event.type == 'customer.subscription.deleted':
-        subscription = event.data.object
         try:
-            sub = Subscription.objects.get(stripe_id=subscription.id)
+            sub = Subscription.objects.get(stripe_id=obj.id)
             sub.delete()
         except Subscription.DoesNotExist:  # pragma: no cover
             pass
     elif event.type == 'customer.subscription.updated':
-        subscription = event.data.object
         try:
-            sub = Subscription.objects.get(stripe_id=subscription.id)
-            sub.redis_update_max(subscription.plan.id)
+            sub = Subscription.objects.get(stripe_id=obj.id)
+            sub.redis_update_max(obj.plan.id)
         except Subscription.DoesNotExist:  # pragma: no cover
             pass
-    elif event.type == 'invoice.payment_failed':
-        invoice = event.data.object
-        customer = stripe.Customer.retrieve(invoice.customer)
+    elif event.type == 'invoice.payment_failed' and stripe_mapit_sub(obj):
+        customer = stripe.Customer.retrieve(obj.customer)
         email = customer.email
-        if invoice.next_payment_attempt:
+        if obj.next_payment_attempt:
             subject = 'Your payment to MapIt has failed'
             message = render_to_string("subscriptions/email_payment_failed.txt", {})
             mail.EmailMessage(subject, message, to=[email]).send()
@@ -242,13 +245,12 @@ def stripe_hook(request):
             subject = 'Your subscription to MapIt has been cancelled'
             message = render_to_string("subscriptions/email_cancelled.txt", {})
             mail.EmailMessage(subject, message, to=[email], bcc=[settings.CONTACT_EMAIL]).send()
-    elif event.type == 'invoice.payment_succeeded':  # pragma: no branch
-        invoice = event.data.object
+    elif event.type == 'invoice.payment_succeeded' and stripe_mapit_sub(obj):  # pragma: no branch
         try:
-            sub = Subscription.objects.get(stripe_id=invoice.subscription)
+            sub = Subscription.objects.get(stripe_id=obj.subscription)
             sub.redis_reset_quota()
         except Subscription.DoesNotExist:
             subject = "Someone's subscription was not renewed properly"
-            message = "MapIt tried to reset the quota for subscription %s but couldn't find it" % invoice.subscription
+            message = "MapIt tried to reset the quota for subscription %s but couldn't find it" % obj.subscription
             mail.EmailMessage(subject, message, to=[settings.CONTACT_EMAIL]).send()
     return HttpResponse(status=200)
