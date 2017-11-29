@@ -16,9 +16,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         plans = stripe.Plan.list()
-        plan_ids = [plan['id'] for plan in plans.data]
+        plan_ids = [plan['id'] for plan in plans.data if plan['id'].startswith('mapit')]
         coupons = stripe.Coupon.list()
-        self.coupon_ids = [coupon['id'] for coupon in coupons]
+        self.coupon_ids = [coupon['id'] for coupon in coupons if coupon['id'].startswith('charitable')]
         parser.add_argument('--email', required=True)
         parser.add_argument('--plan', choices=plan_ids, required=True)
         parser.add_argument('--coupon', help='Existing coupons: ' + ', '.join(self.coupon_ids))
