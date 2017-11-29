@@ -247,6 +247,13 @@ def stripe_hook(request):
             mail.EmailMessage(subject, message, to=[email], bcc=[settings.CONTACT_EMAIL]).send()
     elif event.type == 'invoice.payment_succeeded' and stripe_mapit_sub(obj):  # pragma: no branch
         try:
+            # Update the invoice's charge to say it came from MapIt (for CSV export)
+            charge = stripe.Charge.retrieve(obj.charge)
+            charge.description = 'MapIt'
+            charge.save()
+        except stripe.error.StripeError:  # pragma: no cover
+            pass
+        try:
             sub = Subscription.objects.get(stripe_id=obj.subscription)
             sub.redis_reset_quota()
         except Subscription.DoesNotExist:

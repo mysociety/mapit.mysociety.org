@@ -71,6 +71,9 @@ class PatchedStripeMixin(object):
         self.MockStripe.Subscription.create.return_value = convert_to_stripe_object({
             'id': 'SUBSCRIPTION-ID-CREATE'
         }, None, None)
+        self.MockStripe.Charge.retrieve.return_value = convert_to_stripe_object({
+            'id': 'CHARGE'
+        }, None, None)
         self.addCleanup(patcher.stop)
 
 
@@ -373,10 +376,12 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.assertEqual(mail.outbox[0].subject, 'Your subscription to MapIt has been cancelled')
 
     def test_invoice_succeeded_no_sub_here(self):
+        charge = self.MockStripe.Charge.retrieve.return_value
+        charge.save = Mock()
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
             'id': 'EVENT-ID-SUCCEEDED',
             'type': 'invoice.payment_succeeded',
-            'data': {'object': {'id': 'INVOICE-ID', 'subscription': 'SUBSCRIPTION-ID'}}
+            'data': {'object': {'id': 'INVOICE-ID', 'subscription': 'SUBSCRIPTION-ID', 'charge': 'CHARGE'}}
         }, None, None)
         self.post_to_hook('EVENT-ID-SUCCEEDED')
         self.assertEqual(len(mail.outbox), 1)
@@ -384,16 +389,20 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
 
     @override_settings(REDIS_API_NAME='test_api')
     def test_invoice_succeeded_sub_present(self):
+        charge = self.MockStripe.Charge.retrieve.return_value
+        charge.save = Mock()
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
             'id': 'EVENT-ID-SUCCEEDED',
             'type': 'invoice.payment_succeeded',
-            'data': {'object': {'id': 'INVOICE-ID', 'subscription': 'ID'}}
+            'data': {'object': {'id': 'INVOICE-ID', 'subscription': 'ID', 'charge': 'CHARGE'}}
         }, None, None)
         r = redis_connection()
         r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)
         self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 0, 'blocked': 0})
         self.post_to_hook('EVENT-ID-SUCCEEDED')
         self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': ['1234'], 'quota': 0, 'blocked': 0})
+        self.assertEqual(charge.description, 'MapIt')
+        charge.save.assert_called_once_with()
 
 
 @override_settings(REDIS_API_NAME='test_api')
