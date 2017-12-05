@@ -17,7 +17,8 @@ def clean_postcode(pc):
 
 class CSVForm(forms.Form):
     original_file = forms.FileField(
-        label='Step 1: Upload a CSV, Excel or OpenDocument file which includes a column of the postcodes you wish to match')
+        label='Step 1: Upload a CSV, Excel or OpenDocument file '
+              'which includes a column of the postcodes you wish to match')
 
     def clean_original_file(self):
         original_file = self.cleaned_data['original_file']
@@ -36,7 +37,7 @@ class PostcodeFieldForm(forms.Form):
         widget=forms.HiddenInput(),
         required=False,
         label="Yes, skip those bad rows"
-        )
+    )
     postcode_field = forms.ChoiceField(
         label='Please confirm the column which contains the postcodes you’d like to match',
         required=True)
@@ -48,6 +49,9 @@ class PostcodeFieldForm(forms.Form):
         postcode_fields = self.bulk_lookup.postcode_field_choices()
         super(PostcodeFieldForm, self).__init__(*args, **kwargs)
         self.fields['postcode_field'].choices = postcode_fields
+        if self.data:
+            # Make mutable so bad/num row items can be 'set' in process
+            self.data = self.data.copy()
 
     def clean(self):
         cleaned_data = super(PostcodeFieldForm, self).clean()
@@ -81,12 +85,12 @@ class PostcodeFieldForm(forms.Form):
             elif bad_rows == 1:
                 msg = 'Row: '
                 msg += ', '.join(bad_row_numbers)
-                msg += ' doesn\'t seem to be a valid postcode.'
+                msg += u' doesn’t seem to be a valid postcode.'
                 msg += ' Do you want us to skip it?'
             else:
                 msg = 'Rows: '
                 msg += ', '.join(bad_row_numbers)
-                msg += ' don\'t seem to be valid postcodes.'
+                msg += u' don’t seem to be valid postcodes.'
                 msg += ' Do you want us to skip them?'
             raise forms.ValidationError(msg)
 
@@ -142,7 +146,7 @@ class PersonalDetailsForm(forms.Form):
                 description=self.cleaned_data['description'])
             self.cleaned_data['charge_id'] = charge.id
             del self.cleaned_data['stripeToken']
-        except stripe.CardError, e:
+        except stripe.CardError:
             # The card has been declined
             raise forms.ValidationError(
                 """

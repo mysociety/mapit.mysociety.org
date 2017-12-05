@@ -47,7 +47,7 @@ class SubscriptionMixin(forms.Form):
         typ = cleaned_data.get('charitable')
 
         if not self.has_payment_data and not cleaned_data.get('stripeToken') and not (
-          cleaned_data.get('plan') == settings.PRICING[0]['plan'] and typ in ('c', 'i')):
+                cleaned_data.get('plan') == settings.PRICING[0]['plan'] and typ in ('c', 'i')):
             self.add_error('plan', 'You need to submit payment')
 
         if not self.stripe and not cleaned_data.get('tandcs_tick'):

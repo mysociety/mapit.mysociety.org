@@ -1,8 +1,9 @@
 import os
+import sys
 
 # Import MapIt's settings (first time to quiet flake8)
 from mapit_settings import (
-    config, INSTALLED_APPS, TEMPLATES, MIDDLEWARE_CLASSES, STATICFILES_DIRS, BASE_DIR, MAPIT_RATE_LIMIT)
+    config, INSTALLED_APPS, TEMPLATES, MIDDLEWARE_CLASSES, STATICFILES_DIRS, BASE_DIR, MAPIT_RATE_LIMIT, PARENT_DIR)
 from mapit_settings import *  # noqa
 
 # Update a couple of things to suit our changes
@@ -37,7 +38,10 @@ MEDIA_URL = '/uploads/'
 
 # New mapit.mysociety.org settings
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+if 'test' in sys.argv:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
