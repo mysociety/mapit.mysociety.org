@@ -357,7 +357,12 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         event = {
             'id': 'EVENT-ID-FAILED',
             'type': 'invoice.payment_failed',
-            'data': {'object': {'id': 'INVOICE-ID', 'customer': 'CUSTOMER-ID', 'next_payment_attempt': 1234567890, 'subscription': 'SUBSCRIPTION-ID'}}
+            'data': {'object': {
+                'id': 'INVOICE-ID',
+                'customer': 'CUSTOMER-ID',
+                'next_payment_attempt': 1234567890,
+                'subscription': 'SUBSCRIPTION-ID'
+            }}
         }
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object(event, None, None)
         self.post_to_hook('EVENT-ID-FAILED')
@@ -368,7 +373,12 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         event = {
             'id': 'EVENT-ID-FAILED',
             'type': 'invoice.payment_failed',
-            'data': {'object': {'id': 'INVOICE-ID', 'customer': 'CUSTOMER-ID', 'next_payment_attempt': None, 'subscription': 'SUBSCRIPTION-ID'}}
+            'data': {'object': {
+                'id': 'INVOICE-ID',
+                'customer': 'CUSTOMER-ID',
+                'next_payment_attempt': None,
+                'subscription': 'SUBSCRIPTION-ID'
+            }}
         }
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object(event, None, None)
         self.post_to_hook('EVENT-ID-FAILED')
