@@ -38,7 +38,7 @@ MAPIT_COUNTRY = config.get('COUNTRY', '')
 
 # A list of IP addresses or User Agents that should be excluded from rate
 # limiting. Optional.
-MAPIT_RATE_LIMIT = config.get('RATE_LIMIT', [])
+MAPIT_RATE_LIMIT = config.get('RATE_LIMIT', {})
 
 # A GA code for analytics
 GOOGLE_ANALYTICS = config.get('GOOGLE_ANALYTICS', '')

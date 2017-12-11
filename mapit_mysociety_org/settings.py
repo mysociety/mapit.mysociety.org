@@ -106,7 +106,7 @@ API_QUOTA_DEFAULT_LIMIT = config.get('API_QUOTA_DEFAULT_LIMIT')
 
 # A list of api keys or IP addresses to exclude from rate limiting
 # Take this from Mapit's existing setting for now
-API_THROTTLE_UNLIMITED = MAPIT_RATE_LIMIT
+API_THROTTLE_UNLIMITED = MAPIT_RATE_LIMIT.get('ips', []) + MAPIT_RATE_LIMIT.get('user_agents', [])
 
 STRIPE_SECRET_KEY = config.get('STRIPE_SECRET_KEY')
 STRIPE_PUBLIC_KEY = config.get('STRIPE_PUBLIC_KEY')

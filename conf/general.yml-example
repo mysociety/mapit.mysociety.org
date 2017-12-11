@@ -37,9 +37,10 @@ DEBUG: True
 # A GA code
 GOOGLE_ANALYTICS: ""
 
-# A list of IP addresses or User Agents that should be excluded from rate limiting. Optional.
+# A dictionary of IP addresses or User Agents that should be excluded from rate limiting. Optional.
 RATE_LIMIT:
-  - '127.0.0.1'
+  ips:
+    - '127.0.0.1'
 
 # Email address that errors should be sent to. Optional.
 BUGS_EMAIL: 'example@example.org'
