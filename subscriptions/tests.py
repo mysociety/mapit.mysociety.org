@@ -385,6 +385,35 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Your subscription to MapIt has been cancelled')
 
+    @override_settings(REDIS_API_NAME='test_api')
+    def test_invoice_updated_not_forgiven(self):
+        r = redis_connection()
+        self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
+            'id': 'EVENT-ID-FORGIVEN',
+            'type': 'invoice.updated',
+            'data': {'object': {'id': 'INVOICE-ID', 'subscription': 'ID', 'forgiven': False}}
+        }, None, None)
+        r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)
+        self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 0, 'blocked': 0})
+        self.post_to_hook('EVENT-ID-FORGIVEN')
+        self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 0, 'blocked': 0})
+
+    @override_settings(REDIS_API_NAME='test_api')
+    def test_invoice_updated_forgiven(self):
+        r = redis_connection()
+        self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
+            'id': 'EVENT-ID-FORGIVEN',
+            'type': 'invoice.updated',
+            'data': {
+                'object': {'id': 'INVOICE-ID', 'subscription': 'ID', 'forgiven': True},
+                'previous_attributes': {'forgiven': False}
+            }
+        }, None, None)
+        r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)
+        self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 0, 'blocked': 0})
+        self.post_to_hook('EVENT-ID-FORGIVEN')
+        self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': ['1234'], 'quota': 0, 'blocked': 0})
+
     def test_invoice_succeeded_no_sub_here(self):
         charge = self.MockStripe.Charge.retrieve.return_value
         charge.save = Mock()

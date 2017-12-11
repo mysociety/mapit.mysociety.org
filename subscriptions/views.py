@@ -216,6 +216,16 @@ def stripe_mapit_sub(invoice):
     return stripe_sub.plan.id.startswith('mapit')
 
 
+def stripe_reset_quota(subscription):
+    try:
+        sub = Subscription.objects.get(stripe_id=subscription)
+        sub.redis_reset_quota()
+    except Subscription.DoesNotExist:
+        subject = "Someone's subscription was not renewed properly"
+        message = "MapIt tried to reset the quota for subscription %s but couldn't find it" % subscription
+        mail.EmailMessage(subject, message, to=[settings.CONTACT_EMAIL]).send()
+
+
 @require_POST
 @csrf_exempt
 def stripe_hook(request):
@@ -245,7 +255,8 @@ def stripe_hook(request):
             subject = 'Your subscription to MapIt has been cancelled'
             message = render_to_string("subscriptions/email_cancelled.txt", {})
             mail.EmailMessage(subject, message, to=[email], bcc=[settings.CONTACT_EMAIL]).send()
-    elif event.type == 'invoice.payment_succeeded' and stripe_mapit_sub(obj):  # pragma: no branch
+    elif event.type == 'invoice.payment_succeeded' and stripe_mapit_sub(obj):
+        stripe_reset_quota(obj.subscription)
         try:
             # Update the invoice's charge to say it came from MapIt (for CSV export)
             charge = stripe.Charge.retrieve(obj.charge)
@@ -253,11 +264,8 @@ def stripe_hook(request):
             charge.save()
         except stripe.error.StripeError:  # pragma: no cover
             pass
-        try:
-            sub = Subscription.objects.get(stripe_id=obj.subscription)
-            sub.redis_reset_quota()
-        except Subscription.DoesNotExist:
-            subject = "Someone's subscription was not renewed properly"
-            message = "MapIt tried to reset the quota for subscription %s but couldn't find it" % obj.subscription
-            mail.EmailMessage(subject, message, to=[settings.CONTACT_EMAIL]).send()
+    elif event.type == 'invoice.updated' and stripe_mapit_sub(obj):  # pragma: no branch
+        previous = getattr(event.data, 'previous_attributes', None)
+        if obj.forgiven and previous and 'forgiven' in previous and not previous['forgiven']:
+            stripe_reset_quota(obj.subscription)
     return HttpResponse(status=200)
