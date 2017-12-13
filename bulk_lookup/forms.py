@@ -143,7 +143,7 @@ class PersonalDetailsForm(forms.Form):
                 currency="gbp",
                 receipt_email=self.cleaned_data['email'],
                 source=self.cleaned_data['stripeToken'],
-                description=self.cleaned_data['description'])
+                description=u'[MapIt] %s' % self.cleaned_data['description'])
             self.cleaned_data['charge_id'] = charge.id
             del self.cleaned_data['stripeToken']
         except stripe.CardError:
