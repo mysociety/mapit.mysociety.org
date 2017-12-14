@@ -38,8 +38,8 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
 
     def post(self, *args, **kwargs):
         # Make sure charge_id can't come in from outside
+        self.request.POST = self.request.POST.copy()
         if 'charge_id' in self.request.POST:
-            self.request.POST = self.request.POST.copy()
             del self.request.POST['charge_id']
         # If a CSV file has been submitted, reset the postcode field form
         # to prevent potential field errors.
