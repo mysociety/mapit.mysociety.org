@@ -38,6 +38,7 @@ class SignupView(SubscriptionUpdateMixin, account.views.SignupView):
     """ Override account.views.SignupView to use our email-only SignupForm """
 
     form_class = forms.SignupForm
+    identifier_field = 'email'
 
     def __init__(self, *args, **kwargs):
         self.messages.pop('email_confirmation_sent', None)

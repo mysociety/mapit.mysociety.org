@@ -3,7 +3,7 @@ import sys
 
 # Import MapIt's settings (first time to quiet flake8)
 from mapit_settings import (
-    config, INSTALLED_APPS, TEMPLATES, MIDDLEWARE_CLASSES, STATICFILES_DIRS, BASE_DIR, MAPIT_RATE_LIMIT, PARENT_DIR)
+    config, INSTALLED_APPS, TEMPLATES, MIDDLEWARE, STATICFILES_DIRS, BASE_DIR, MAPIT_RATE_LIMIT, PARENT_DIR)
 from mapit_settings import *  # noqa
 
 # Update a couple of things to suit our changes
@@ -22,7 +22,7 @@ TEMPLATES[0]['OPTIONS']['context_processors'] = old_context_processors + (
     'mapit_mysociety_org.context_processors.add_settings',
 )
 
-MIDDLEWARE_CLASSES.extend([
+MIDDLEWARE.extend([
     'django.middleware.csrf.CsrfViewMiddleware',
     "account.middleware.LocaleMiddleware",
     "account.middleware.TimezoneMiddleware",
