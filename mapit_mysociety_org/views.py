@@ -29,7 +29,7 @@ class LogoutView(TemplateView):
     template_name = "account/logout.html"
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             logout(self.request)
         return super(LogoutView, self).get(*args, **kwargs)
 

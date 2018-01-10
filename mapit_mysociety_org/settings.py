@@ -28,6 +28,8 @@ MIDDLEWARE.extend([
     "account.middleware.TimezoneMiddleware",
 ])
 
+APPEND_SLASH = False
+
 old_staticfiles_dirs = STATICFILES_DIRS
 STATICFILES_DIRS = old_staticfiles_dirs + (
     os.path.join(BASE_DIR, 'static'),

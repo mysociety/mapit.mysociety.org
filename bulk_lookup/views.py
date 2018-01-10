@@ -68,7 +68,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         elif step == 'personal_details':
             kwargs['amount'] = self.amount
             kwargs['free'] = False
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 if not self.object:
                     self.object = self.get_object()
                 if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
@@ -84,7 +84,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
                     initial['postcode_field'] = choice
                     break
         elif step == 'personal_details':
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 initial['email'] = self.request.user.email
         return initial
 
