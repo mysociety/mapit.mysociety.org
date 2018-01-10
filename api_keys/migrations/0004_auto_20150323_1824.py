@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='apikey',
             name='user',
-            field=models.OneToOneField(related_name='api_key', to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(related_name='api_key', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

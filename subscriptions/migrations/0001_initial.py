@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('charity_number', models.TextField(blank=True)),
                 ('description', models.TextField(blank=True)),
                 ('stripe_id', models.CharField(max_length=100)),
-                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
     ]
