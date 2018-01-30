@@ -212,6 +212,9 @@ class SubscriptionCancelView(StripeObjectMixin, DeleteView):
 
 
 def stripe_mapit_sub(invoice):
+    # If the invoice doesn't have a subscription, ignore it
+    if not invoice.subscription:
+        return False
     stripe_sub = stripe.Subscription.retrieve(invoice.subscription)
     return stripe_sub.plan.id.startswith('mapit')
 

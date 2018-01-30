@@ -353,6 +353,22 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.post_to_hook('EVENT-ID-UPDATED')
         self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': [], 'quota': 10000, 'blocked': 0})
 
+    def test_invoice_failed_without_subscription(self):
+        self.MockStripe.Subscription.retrieve.side_effect = stripe.error.InvalidRequestError(
+            "Could not determine...", 'id')
+        event = {
+            'id': 'EVENT-INVOICE',
+            'type': 'invoice.payment_failed',
+            'data': {'object': {
+                'id': 'INVOICE-ID',
+                'customer': 'CUSTOMER-ID',
+                'next_payment_attempt': 1234567890,
+                'subscription': None
+            }}
+        }
+        self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object(event, None, None)
+        self.post_to_hook('EVENT-INVOICE')
+
     def test_invoice_failed_first_time(self):
         event = {
             'id': 'EVENT-ID-FAILED',
