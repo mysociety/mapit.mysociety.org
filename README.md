@@ -18,6 +18,22 @@ Local Development
 There's a Vagrantfile which will install a fully working dev environment for
 you.
 
+    vagrant up
+
+Then, SSH into the VM, and start the Django server:
+
+    vagrant ssh
+    cd /vagrant/mapit.mysociety.org
+    ./manage.py runserver 0.0.0.0:8000
+
+The site will be accessible at <http://localhost:8000> and, if you have Varnish
+set up (see below), there’ll be a cached version at <http://localhost:6081>.
+
+If you make changes to the Sass styles, you’ll need to recompile the CSS:
+
+    cd /vagrant/mapit.mysociety.org
+    bin/mapit_make_css
+
 Local API Key Testing
 ---------------------
 The Vagrantfile installs Redis, Vagrant, libvmod-redis, our varnish-apikey
