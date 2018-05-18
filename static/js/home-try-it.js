@@ -9,6 +9,8 @@ var renderTemplate = function renderTemplate(templateName, data) {
 }
 
 $(function() {
+    L.Icon.Default.prototype.options.imagePath = '/static/mapit/leaflet/images/';
+
     $('.homepage-try').on('submit', function(e) {
         e.preventDefault();
 
