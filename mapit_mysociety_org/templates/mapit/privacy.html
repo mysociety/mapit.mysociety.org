@@ -1,0 +1,152 @@
+{% extends "mapit/base.html" %}
+
+{% block article-class %}content--with-sidebar{% endblock %}
+
+{% block title %}Privacy{% endblock title %}
+
+{% block content %}
+
+<h1>Privacy</h1>
+<hr>
+
+<header>
+    <nav class="toc">
+        <ol>
+            <li><a href="#collection">What personal data we collect</a></li>
+            <li><a href="#usage">How we use your data</a></li>
+            <li><a href="#retention">Retention period</a></li>
+            <li><a href="#law">Lawful basis for processing</a></li>
+            <li><a href="#access">Your right to access</a></li>
+            <li><a href="#erasure">Your right to erasure</a></li>
+            <li><a href="#complaints">Your right to complain</a></li>
+            <li><a href="#cookies">Cookies</a></li>
+            <li><a href="#us">About us</a></li>
+        </ol>
+    </nav>
+</header>
+
+<section id="collection">
+<h2>What personal data we collect</h2>
+
+<p><strong>When you register with this website</strong>, we collect and store
+your name and email address.</p>
+
+<p><strong>If you make a purchase</strong>, your name, contact details, payment
+and security details are held by the payment processor Stripe, whose usage terms
+and privacy policy can be seen here:
+<a href="https://stripe.com/gb/privacy">stripe.com/gb/privacy</a>.</p>
+
+<p>Your name, email address, the billing address of your card and the last few
+digits of your card or bank account number are made available to us along with
+your purchase history.</p>
+</section>
+
+<section id="usage">
+<h2>How we use your data</h2>
+
+<p>We use this information only for the processing of your purchase, and company
+accounting — which may involve sharing it with our accountant or HMRC.</p>
+
+<p>We may, from time to time, send you important information about the service
+where changes or updates may be relevant to your use of the service.</p>
+
+<p>We do our utmost to store your data securely. At any time you can request
+a copy of the data records we store about you.</p>
+</section>
+
+<section id="retention">
+<h2>Retention period</h2>
+
+<p>We comply with GDPR requirements regarding the use and storage of your
+personal data. We are obliged to keep records relating to financial transactions
+for at least six years following the end of the accounting period in which the
+transaction took place. We destroy our records after this point.</p>
+
+<p>If you require further information on Stripe’s retention policies, please
+<a href="https://stripe.com/gb/privacy#contact-us">contact them directly</a>.</p>
+</section>
+
+<section id="law">
+<h2>Lawful basis for processing</h2>
+
+<p>In making a purchase you consent to the processing of your data on the legal
+basis of GDPR 6(1)(b) – Processing is necessary for the performance of a
+contract with the data subject or to take steps to enter into a contract.</p>
+</section>
+
+<section id="access">
+<h2>Your right to access</h2>
+
+<p>You may contact us at any time to ask to see what personal data we hold about
+you.</p>
+</section>
+
+<section id="erasure">
+<h2>Your right to erasure</h2>
+
+<p>You may request that we destroy your data, provided that there is no
+legitimate reason for us continuing to hold it, that is to say if it does not
+relate to financial transactions or is unlikely to be of any legal or practical
+purpose in the future. Please <a href="{% url 'mapit_contact' %}">contact us</a>
+to request this.</p>
+</section>
+
+<section id="complaints">
+<h2>Your right to complain</h2>
+
+<p>If you believe that we have mishandled your data, you have the right to
+lodge a complaint with the Information Commissioner’s Office.
+<a href="https://ico.org.uk/concerns/handling/">You can report a concern
+here</a> (but do contact us first, so that we can try and help).</p>
+</section>
+
+<section id="cookies">
+<h2>Cookies</h2>
+
+<p>This service uses a session cookie in order to know whether users are logged
+in and for the short term storage of information necessary to provide the
+service such as the volume of maps requested by the user. It also uses a CSRF
+(Cross Site Request Forgery) protection cookie, to prevent cross site request
+forgeries which should not store any personal information about the user.</p>
+
+<h3>Measuring website usage (Google Analytics)</h3>
+
+<p>We use Google Analytics software to collect information about how you use
+this site. We do this to help make sure the site is meeting the needs of its
+users and to help us make improvements.</p>
+
+<p>Google Analytics stores information such as what
+pages you visit, how long you are on the site, how you got here, what you click
+on, and information about your web browser. IP addresses are masked (only a
+portion is stored) and personal information is only reported in aggregate. We
+do not allow Google to use or share our analytics data for any purpose besides
+providing us with analytics information, and we recommend that any user of
+Google Analytics does the same.</p>
+
+<h3>Opting out of Google Analytics</h3>
+
+<p>You can <a href="https://tools.google.com/dlpage/gaoptout">opt out of Google
+Analytics cookies</a>.</p>
+
+<p>If you want to disable advertising-based tracking, you can
+<a href="https://www.google.com/settings/ads">adjust your Google Ads
+Settings</a>, or opt out of advertising-based tracking across a
+number of providers in one go using the
+<a href="http://www.networkadvertising.org/choices/">Network
+Advertising Initiative’s opt-out form</a>.</p>
+
+<p>Rest assured, we only track usage data for one reason: to help us
+understand how we can make the site work better for you, our
+users.</p>
+</section>
+
+<section id="us">
+<h2>About us</h2>
+
+<p>mySociety Ltd is a private company limited by shares, registered in England
+and Wales under company number 05798215, whose registered office is at 483
+Green Lanes, London, N13 4BS. You can also contact us on
+<a href="mailto:hello@mysociety.org">hello@mysociety.org</a>.</p>
+</section>
+
+{% endblock %}
