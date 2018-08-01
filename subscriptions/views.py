@@ -70,8 +70,24 @@ class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(SubscriptionView, self).get_context_data(**kwargs)
         context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
-        if self.object:
-            context['quota_status'] = self.subscription.redis_status()
+        if not self.object:
+            return context
+
+        customer = self.object.customer
+        try:
+            upcoming = stripe.Invoice.upcoming(customer=customer.id)
+            upcoming['amount_due'] = upcoming['amount_due'] / 100
+        except stripe.error.InvalidRequestError:
+            upcoming = None
+
+        balance = customer.account_balance
+        if upcoming and upcoming.total < 0:
+            # Going to be credited
+            balance += upcoming.total
+
+        context['account_balance'] = -balance / 100
+        context['upcoming'] = upcoming
+        context['quota_status'] = self.subscription.redis_status()
         return context
 
 

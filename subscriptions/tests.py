@@ -54,7 +54,12 @@ class PatchedStripeMixin(object):
                 'charitable': 'c',
                 'charity_number': 123,
             },
-            'customer': Mock(spec_set=['default_source', 'source', 'save']),
+            'customer': {
+                'id': 'CUSTOMER-ID',
+                'account_balance': -400,
+                'default_source': {'brand': 'Visa', 'last4': '1234'},
+                'save': Mock(),
+            },
             'plan': {
                 'id': 'mapit-0k-v',
                 'name': 'MapIt, unlimited calls',
@@ -73,6 +78,11 @@ class PatchedStripeMixin(object):
         }, None, None)
         self.MockStripe.Charge.retrieve.return_value = convert_to_stripe_object({
             'id': 'CHARGE'
+        }, None, None)
+        self.MockStripe.Invoice.upcoming.return_value = convert_to_stripe_object({
+            'id': 'INVOICE',
+            'amount_due': 15000,
+            'total': 15000,
         }, None, None)
         self.addCleanup(patcher.stop)
 
@@ -171,6 +181,8 @@ class SubscriptionViewTest(PatchedStripeMixin, UserTestCase):
         self.assertContains(response, 'Your current plan is <strong>MapIt, unlimited calls</strong>')
         self.assertContains(
             response, u'<p>It costs you £150/mth. (£300/mth with 50% discount applied.)</p>', html=True)
+        self.assertRegex(response.content.decode('utf-8'), u'your next payment\s+of £150\s+will be taken on')
+        self.assertContains(response, u'Your account has a balance of £4.')
 
 
 class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):

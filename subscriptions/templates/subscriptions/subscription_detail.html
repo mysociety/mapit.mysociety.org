@@ -44,9 +44,15 @@
             {% if stripe.cancel_at_period_end %}
                 <strong>it expires on {{ stripe.current_period_end|date }}.</strong>
             {% elif actual_paid > 0 %}
-                your next payment will be taken on {{ stripe.current_period_end|date }}.
+                your next payment
+                {% if upcoming %} of £{{ upcoming.amount_due|floatformat:-2 }} {% endif %}
+                will be taken on {{ stripe.current_period_end|date }}.
             {% else %}
                 your next invoice date is {{ stripe.current_period_end|date }}.
+            {% endif %}
+
+            {% if account_balance %}
+                <br>Your account has a balance of £{{ account_balance|floatformat:-2 }}.
             {% endif %}
             </p>
 
