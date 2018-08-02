@@ -26,6 +26,7 @@
 
             <p>{% trans "Lookups" %}</p>
             <ol>
+                <li><a href="#api-quota">{% trans "Quota" %}</a></li>
                 <li><a href="#api-by_postcode">{% trans "Postcode" %}</a></li>
                 <li><a href="#api-by_partial_postcode">{% trans "Partial postcode" %}</a></li>
                 <li><a href="#api-by_point">{% trans "Point" %}</a></li>
@@ -57,10 +58,15 @@
             <dd>
             <p>All calls return JSON, and you can generally get an HTML
             representation by adding .html on the end.</p>
+
             <p>To use your API key, include it in each API call as either an
             <code>api_key</code> URL query parameter, e.g.
             <small>https://mapit.mysociety.org/area/2244?api_key=KEY</small>, or an
-            <code>X-Api-Key</code> HTTP request header.
+            <code>X-Api-Key</code> HTTP request header. All API responses
+            include your current usage and limit in the
+            <code>X-Quota-Current</code> and <code>X-Quota-Limit</code>
+            response headers.
+
             <p>Whenever an area is returned from MapIt, it is as a
             dictionary with the following keys: id, name, country, type,
             parent_area, generation_low, generation_high, codes.</p>
@@ -78,6 +84,20 @@
             </dd>
         </dl>
     </section>
+
+<section id="api-quota">
+    <h3><em>lookup</em> quota</h3>
+    <dl>
+        <dt>URL:</dt>
+        <dd>/quota</dd>
+
+        <dt>{% trans "Returns" %}:</dt>
+        <dd>
+            <p>Your current quota usage and limit. Note: Accessing this
+            endpoint does not count against your limit.</p>
+        </dd>
+    </dl>
+</section>
 
     {% include "mapit/api/postcode.html" %}
     {% include "mapit/api/point.html" %}
