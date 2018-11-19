@@ -42,7 +42,7 @@ class Subscription(models.Model):
         return "{0}:history".format(self.redis_key)
 
     def redis_update_max(self, plan):
-        m = re.match('mapit-(\d+)k', plan)
+        m = re.match(r'mapit-(\d+)k', plan)
         max = int(m.group(1)) * 1000
         r = redis_connection()
         r.set(self.redis_key_max, max)

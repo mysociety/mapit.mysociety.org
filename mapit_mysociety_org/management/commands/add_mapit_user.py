@@ -31,7 +31,7 @@ class Command(BaseCommand):
 
         if coupon not in self.coupon_ids:
             # coupon ID of the form charitableN(-Nmonths)
-            m = re.match('charitable(\d+)(?:-(\d+)month)?', coupon)
+            m = re.match(r'charitable(\d+)(?:-(\d+)month)?', coupon)
             if not m:
                 raise CommandError("Coupon not in correct format")
             percent_off, months = m.groups()
