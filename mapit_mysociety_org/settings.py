@@ -3,10 +3,52 @@ import sys
 
 # Import MapIt's settings (first time to quiet flake8)
 from mapit_settings import (
-    config, INSTALLED_APPS, TEMPLATES, MIDDLEWARE, STATICFILES_DIRS, BASE_DIR, MAPIT_RATE_LIMIT, PARENT_DIR)
+    config, INSTALLED_APPS, TEMPLATES, MIDDLEWARE, STATICFILES_DIRS, BASE_DIR, MAPIT_RATE_LIMIT, PARENT_DIR, DATABASES)
 from mapit_settings import *  # noqa
 
 # Update a couple of things to suit our changes
+
+if config.get('MAPIT_DB_RO_HOST', '') and 'test' not in sys.argv:
+    DATABASES['replica'] = {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': config.get('MAPIT_DB_NAME', 'mapit'),
+        'USER': config.get('MAPIT_DB_USER', 'mapit'),
+        'PASSWORD': config.get('MAPIT_DB_PASS', ''),
+        'HOST': config['MAPIT_DB_RO_HOST'],
+        'PORT': config['MAPIT_DB_RO_PORT'],
+        # Should work, but does not appear to (hence sys.argv test above); see
+        # https://stackoverflow.com/questions/33941139/test-mirror-default-database-but-no-data
+        # 'TEST': {
+        #     'MIRROR': 'default',
+        # },
+    }
+
+    import random
+    from .multidb import use_primary
+
+    class PrimaryReplicaRouter(object):
+        """A basic primary/replica database router."""
+        def db_for_read(self, model, **hints):
+            """Randomly pick between default and replica databases, unless the
+            request (via middleware) demands we use the primary."""
+            if use_primary():
+                return 'default'
+            return random.choice(['default', 'replica'])
+
+        def db_for_write(self, model, **hints):
+            """Always write to the primary database."""
+            return 'default'
+
+        def allow_relation(self, obj1, obj2, **hints):
+            """Any relation between objects is allowed, as same data."""
+            return True
+
+        def allow_migrate(self, db, app_label, model_name=None, **hints):
+            """migrate is only ever called on the default database."""
+            return True
+
+    DATABASE_ROUTERS = ['mapit_mysociety_org.settings.PrimaryReplicaRouter']
+    MIDDLEWARE.insert(0, 'mapit_mysociety_org.middleware.force_primary_middleware')
 
 INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'mailer', 'api_keys', 'subscriptions', 'bulk_lookup'])
 
