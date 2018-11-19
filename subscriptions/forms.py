@@ -33,7 +33,7 @@ class SubscriptionMixin(forms.Form):
         label='If an individual, please provide details of your project',
         max_length=500, required=False)
     tandcs_tick = forms.BooleanField(
-        label=mark_safe('I agree to the <a href="/legal" target="_blank">terms and conditions</a>'),
+        label=mark_safe('I agree to the <a href="/legal/" target="_blank">terms and conditions</a>'),
         required=False)
     stripeToken = forms.CharField(required=False, widget=forms.HiddenInput)
 
