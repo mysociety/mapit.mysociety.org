@@ -65,6 +65,7 @@ TEMPLATES[0]['OPTIONS']['context_processors'] = old_context_processors + (
 )
 
 MIDDLEWARE.extend([
+    'mapit_mysociety_org.middleware.add_api_key',
     'django.middleware.csrf.CsrfViewMiddleware',
     "account.middleware.LocaleMiddleware",
     "account.middleware.TimezoneMiddleware",
