@@ -35,6 +35,15 @@ class Command(BaseCommand):
     def process_job(self, bulk_lookup):
         try:
             with transaction.atomic():
+                # Get a row level lock before processing
+                try:
+                    lock = BulkLookup.objects.select_for_update(skip_locked=True).get(pk=bulk_lookup.pk)
+                    # Just check it hasn't been dealt with in the time since the list was fetched
+                    if lock.started:
+                        return
+                except BulkLookup.DoesNotExist:
+                    return
+
                 bulk_lookup.started = timezone.now()
                 bulk_lookup.save()
                 self.do_lookup(bulk_lookup)
