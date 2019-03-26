@@ -127,13 +127,17 @@ $(function() {
         }
 
         var addArea = function addArea(map, layers, area_id){
+            var data = {
+                simplify_tolerance: '0.0001'
+            };
+            var api_key = $(map.getContainer()).data('key');
+            if (api_key) {
+                data.api_key = api_key;
+            }
             $.ajax({
                 dataType: 'json',
                 url: '/area/' + area_id + '.geojson',
-                data: {
-                    simplify_tolerance: '0.0001'
-                }
-
+                data: data
             }).done(function(geojson){
                 layers[area_id] = new L.GeoJSON(geojson, {
                     style: {

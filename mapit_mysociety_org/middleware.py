@@ -31,9 +31,10 @@ def add_api_key(get_response):
     client-side JSON calls (e.g. to plot area on map)."""
 
     def alter_content(api_key, content):
-        return content.replace(
-            'simplify_tolerance=0.0001',
-            'simplify_tolerance=0.0001&api_key=' + force_bytes(api_key))
+        key = force_bytes(api_key)
+        content = content.replace('simplify_tolerance=0.0001', 'simplify_tolerance=0.0001&api_key=' + key)
+        content = content.replace('data-key=""', 'data-key="' + key + '"')
+        return content
 
     def middleware(request):
         api_key = None
