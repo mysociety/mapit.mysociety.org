@@ -24,7 +24,7 @@ PARENT_DIR = os.path.dirname(BASE_DIR)
 # Django settings.py file.
 try:
     with open(os.path.join(BASE_DIR, 'conf', 'general.yml'), 'r') as fp:
-        config = yaml.load(fp)
+        config = yaml.safe_load(fp)
 except:
     config = {}
 
