@@ -181,7 +181,7 @@ class SubscriptionViewTest(PatchedStripeMixin, UserTestCase):
         self.assertContains(response, 'Your current plan is <strong>MapIt, unlimited calls</strong>')
         self.assertContains(
             response, u'<p>It costs you £150/mth. (£300/mth with 50% discount applied.)</p>', html=True)
-        self.assertRegex(response.content.decode('utf-8'), ur'your next payment\s+of £150\s+will be taken on')
+        self.assertRegex(response.content.decode('utf-8'), u'your next payment\\s+of £150\\s+will be taken on')
         self.assertContains(response, u'Your account has a balance of £4.')
 
 

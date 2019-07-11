@@ -4,6 +4,7 @@ import re
 from django import forms
 from django.conf import settings
 from django.utils.crypto import get_random_string
+from django.utils.encoding import smart_text
 
 import stripe
 from ukpostcodeutils.validation import is_valid_postcode
@@ -12,7 +13,7 @@ from .models import OutputOption
 
 
 def clean_postcode(pc):
-    return re.sub('[^A-Z0-9]', '', unicode(pc).upper())
+    return re.sub('[^A-Z0-9]', '', smart_text(pc).upper())
 
 
 class CSVForm(forms.Form):
