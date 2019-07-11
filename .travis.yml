@@ -17,6 +17,7 @@ env:
   matrix:
     - TOXENV=flake8
     - TOXENV=py27-1.11
+    - TOXENV=py36-1.11
 
 install:
   - pip install tox codecov

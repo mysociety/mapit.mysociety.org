@@ -61,7 +61,7 @@ class Command(BaseCommand):
     def do_lookup(self, bulk_lookup):
         self.column_names = bulk_lookup.output_field_names()
 
-        with tempfile.TemporaryFile() as f:
+        with tempfile.TemporaryFile(mode='w+') as f:
             postcode_field = bulk_lookup.postcode_field
             output_options = bulk_lookup.output_options.all()
             self.header_row_done = False
@@ -76,6 +76,7 @@ class Command(BaseCommand):
                 dest_file_stream=f, dest_file_type='csv', records=rows,
                 auto_detect_float=False, auto_detect_int=False)
             bulk_lookup.output_file.save(output_filename, File(f))
+            bulk_lookup.original_file.close()
 
     def lookup_row(self, row, postcode_field, output_options):
         postcode = clean_postcode(row[postcode_field])

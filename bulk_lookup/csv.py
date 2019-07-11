@@ -3,11 +3,12 @@ import mmap
 import pyexcel
 from pyexcel._compact import zip_longest
 import defusedxml
+from django.utils.six import Iterator
 
 defusedxml.defuse_stdlib()
 
 
-class file_without_nulls_or_cp1252(object):
+class file_without_nulls_or_cp1252(Iterator):
     """An object that behaves like a provided file object,
     but strips any NULL bytes when read() is called, and
     spots Windows-1252 lines."""
@@ -20,6 +21,27 @@ class file_without_nulls_or_cp1252(object):
     def __setattr__(self, name, value):
         return setattr(self._file, name, value)
 
+    def __iter__(self):
+        return self
+
+    # On python 3, this object is used directly, and so needs
+    # to be an iterator that returns strings.
+    def __next__(self):
+        line = self.readline()
+        if not line:
+            raise StopIteration
+
+        # Remove null bytes from any underlying data
+        line = line.replace(b'\0', b'')
+
+        try:
+            # If it's not UTF-8...
+            line = line.decode('utf-8')
+        except UnicodeDecodeError:
+            # ...Assume Windows 1252
+            line = line.decode('cp1252')
+        return line
+
     def whole_character(self, data):
         if '\xc2' <= data[-1] <= '\xdf' or (len(data) > 1 and '\xe0' <= data[-2] <= '\xef'):
             return self._file.read(1)
@@ -31,6 +53,8 @@ class file_without_nulls_or_cp1252(object):
             return self._file.read(1)
         return ''
 
+    # On python 2, this object is used via a codecs wrapper, and so
+    # needs to return a byte string via read()
     def read(self, *args):
         # Remove null bytes from any underlying data
         data = self._file.read(*args)
@@ -46,7 +70,7 @@ class file_without_nulls_or_cp1252(object):
         return data
 
 
-class PyExcelReader(object):
+class PyExcelReader(Iterator):
     # Set up an iterator for reading in a CSV/XLS/XLSX/ODS file
     def __init__(self, file_field):
         self._fieldnames = None
@@ -73,7 +97,7 @@ class PyExcelReader(object):
     def fieldnames(self):
         if self._fieldnames is None:
             try:
-                self._fieldnames = self.reader.next()
+                self._fieldnames = next(self.reader)
             except StopIteration:
                 pass
         return self._fieldnames
@@ -83,11 +107,11 @@ class PyExcelReader(object):
         self._fieldnames = value
 
     # Smaller version of csv DictReader's
-    def next(self):
+    def __next__(self):
         self.fieldnames  # for the side effect
-        row = self.reader.next()
+        row = next(self.reader)
         while row == []:
-            row = self.reader.next()
+            row = next(self.reader)
         return dict(zip_longest(self.fieldnames, row, fillvalue=''))
 
     def __iter__(self):

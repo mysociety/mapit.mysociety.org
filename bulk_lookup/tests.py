@@ -1,5 +1,5 @@
 import os
-from StringIO import StringIO
+from io import BytesIO
 
 from django.core.management import call_command
 from django.core.files.base import ContentFile, File
@@ -11,7 +11,7 @@ from bulk_lookup import csv, models
 
 class BulkLookupViewTest(TestCase):
     def test_resubmission(self):
-        csv_file = StringIO('ID,Postcode\n1,SW1A1AA\n2,EH11BB')
+        csv_file = BytesIO(b'ID,Postcode\n1,SW1A1AA\n2,EH11BB')
         csv_file.content_type = 'text/csv'
         response = self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',
@@ -29,7 +29,7 @@ class BulkLookupViewTest(TestCase):
             'postcode_field-postcode_field': 'Postcode',
         })
         self.assertEqual(len(response.context['form'].errors), 0)
-        csv_file = StringIO('ID,Different\n1,SW1A1AA\n2,EH11BB')
+        csv_file = BytesIO(b'ID,Different\n1,SW1A1AA\n2,EH11BB')
         csv_file.content_type = 'text/csv'
         response = self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',
@@ -47,7 +47,7 @@ class BulkLookupViewTest(TestCase):
 
         self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',
-            'csv-original_file': StringIO('ID,Postcode\n1,SW1A1AA\n2,EH11BB'),
+            'csv-original_file': BytesIO(b'ID,Postcode\n1,SW1A1AA\n2,EH11BB'),
         })
         self.client.post(reverse('home'), {
             'wizard_view-current_step': 'output_options',
@@ -69,13 +69,13 @@ class BulkLookupViewTest(TestCase):
             {'Postcode': 'EH1 1BB', 'ID': 3, 'Name': 'Annabel'},
         ]
         for typ in ('csv', 'xlsx', 'ods'):
-            with open(os.path.dirname(__file__) + '/fixtures/test.' + typ) as fp:
+            with open(os.path.dirname(__file__) + '/fixtures/test.' + typ, 'rb') as fp:
                 reader = csv.PyExcelReader(File(fp))
                 self.assertEqual(reader.fieldnames, ['ID', 'Name', 'Postcode'])
                 self.assertEqual(list(reader), data)
 
     def test_null_byte(self):
-        csv_file = StringIO('ID,Postcode\n1,SW1A1AA\n2,EH11BB\0')
+        csv_file = BytesIO(b'ID,Postcode\n1,SW1A1AA\n2,EH11BB\0')
         csv_file.content_type = 'text/csv'
         self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',
@@ -83,7 +83,7 @@ class BulkLookupViewTest(TestCase):
         })
 
     def test_cp1252_file(self):
-        csv_file = StringIO('ID,Postcode\nKing\x92s Lynn,SW1A1AA\nCambridge,EH11BB\0')
+        csv_file = BytesIO(b'ID,Postcode\nKing\x92s Lynn,SW1A1AA\nCambridge,EH11BB\0')
         csv_file.content_type = 'text/csv'
         response = self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',
@@ -93,7 +93,7 @@ class BulkLookupViewTest(TestCase):
 
     def test_unicode_file_split(self):
         # codecs reads in 72 bytes at a time...
-        csv_file = StringIO(u'ID,Postcode\nKings Lynn,SW1A1AA\nCambridge,EH11BB\nPenzance,SW1A0AA\nAn caf\u018d\n')
+        csv_file = BytesIO(b'ID,Postcode\nKings Lynn,SW1A1AA\nCambridge,EH11BB\nPenzance,SW1A0AA\nAn caf\xc6\x8d\n')
         csv_file.content_type = 'text/csv'
         response = self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',
