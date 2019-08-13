@@ -147,7 +147,7 @@ class PersonalDetailsForm(forms.Form):
                 description=u'[MapIt] %s' % self.cleaned_data['description'])
             self.cleaned_data['charge_id'] = charge.id
             del self.cleaned_data['stripeToken']
-        except stripe.CardError:
+        except stripe.error.CardError:
             # The card has been declined
             raise forms.ValidationError(
                 """

@@ -9,7 +9,7 @@ from django.core import mail
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
-from stripe.resource import convert_to_stripe_object
+from stripe.util import convert_to_stripe_object
 
 from subscriptions.models import Subscription
 from subscriptions.tests import PatchedStripeMixin
