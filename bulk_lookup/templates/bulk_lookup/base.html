@@ -11,7 +11,7 @@
         {% block content_pre_buttons %}{% endblock %}
         <input type="submit" id="btn-submit" class="btn btn--primary" value="Next &rarr;">
       {% if wizard.steps.step0 > 1 %}
-        <button class="btn btn--back" name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">&larr; Previous</button>
+        <button id="btn-back" class="btn btn--back" name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">&larr; Previous</button>
       {% endif %}
         {% block extra_form_end %}{% endblock %}
     </form>

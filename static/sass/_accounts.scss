@@ -81,6 +81,11 @@ input[type="file"] {
     }
 }
 
+/* Stripe card element slightly off-centre */
+.StripeElement { padding: 0.75em; }
+.StripeElement--invalid { border-color: #fa755a; }
+.StripeElement--webkit-autofill { background-color: #fefde5 !important; }
+
 .subscription-quota-meter {
     width: 10em;
     max-width: 100%;

@@ -7,10 +7,12 @@ from django.shortcuts import redirect
 from django.views.generic import DetailView
 from django.utils.encoding import force_text
 from formtools.wizard.views import SessionWizardView
+import stripe
 
 from .models import BulkLookup, cache
 from .forms import CSVForm, PostcodeFieldForm, OutputOptionsForm, PersonalDetailsForm
 
+from mapit.shortcuts import output_json
 from mapit_mysociety_org.mixins import NeverCacheMixin
 from subscriptions.views import StripeObjectMixin
 
@@ -38,10 +40,6 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
     file_storage = FileSystemStorage()
 
     def post(self, *args, **kwargs):
-        # Make sure charge_id can't come in from outside
-        self.request.POST = self.request.POST.copy()
-        if 'charge_id' in self.request.POST:
-            del self.request.POST['charge_id']
         # If a CSV file has been submitted, reset the postcode field form
         # to prevent potential field errors.
         if self.request.POST.get('wizard_view-current_step') == 'csv':
@@ -89,13 +87,6 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
                 initial['email'] = self.request.user.email
         return initial
 
-    def get_form_step_data(self, form):
-        # If Stripe charge was successful, make sure it's stored so it isn't
-        # tried again
-        if 'charge_id' in form.cleaned_data:
-            form.data['personal_details-charge_id'] = form.cleaned_data['charge_id']
-        return form.data
-
     def get_context_data(self, form, **kwargs):
         context = super(WizardView, self).get_context_data(form=form, **kwargs)
         if self.steps.current == 'csv':
@@ -132,6 +123,40 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         bulk_lookup = BulkLookup.objects.create(**data)
         bulk_lookup.output_options.add(*output_options)
         return redirect('finished', pk=bulk_lookup.id, token=bulk_lookup.charge_id)
+
+
+def AjaxConfirmView(request):
+    intent = None
+    try:
+        if 'payment_method_id' in request.POST:
+            intent = stripe.PaymentIntent.create(
+                payment_method=request.POST['payment_method_id'],
+                amount=20 * 100,
+                currency='gbp',
+                description='[MapIt] %s' % (request.POST['personal_details-description'] or 'Bulk lookup',),
+                receipt_email=request.POST['personal_details-email'],
+                confirmation_method='manual',
+                confirm=True,
+            )
+        elif 'payment_intent_id' in request.POST:
+            intent = stripe.PaymentIntent.confirm(request.POST['payment_intent_id'])
+    except stripe.error.CardError as e:
+        return output_json({'error': e.user_message}, 200)
+
+    data, code = generate_payment_response(intent)
+    return output_json(data, code)
+
+
+def generate_payment_response(intent):
+    if intent.status in ('requires_action', 'requires_source_action') and intent.next_action.type == 'use_stripe_sdk':
+        return {
+            'requires_action': True,
+            'payment_intent_client_secret': intent.client_secret,
+        }, 200
+    elif intent.status == 'succeeded':
+        return {'success': True, 'charge_id': intent.id}, 200
+    else:
+        return {'error': 'Invalid PaymentIntent status'}, 500
 
 
 class FinishedView(NeverCacheMixin, DetailView):

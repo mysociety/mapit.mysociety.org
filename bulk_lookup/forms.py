@@ -2,7 +2,6 @@
 
 import re
 from django import forms
-from django.conf import settings
 from django.utils.crypto import get_random_string
 from django.utils.encoding import smart_text
 
@@ -115,7 +114,6 @@ class PersonalDetailsForm(forms.Form):
     description = forms.CharField(
         required=False,
         help_text='You can add a note here if you need to keep track of multiple files.')
-    stripeToken = forms.CharField(widget=forms.HiddenInput, required=False)
     charge_id = forms.CharField(widget=forms.HiddenInput, required=False)
 
     def __init__(self, amount, free, *args, **kwargs):
@@ -125,33 +123,15 @@ class PersonalDetailsForm(forms.Form):
 
     def clean(self):
         """
-        Validate everything by trying to charge the card with Stripe
+        We get here if we're doing it for free, or if they have paid already
         """
         super(PersonalDetailsForm, self).clean()
         # If we're doing this for free
-        if self.free and not self.cleaned_data['charge_id']:
+        if self.free:
             self.cleaned_data['charge_id'] = 'r_%s' % get_random_string()
-        # If we've already successfully been here before
-        if self.cleaned_data['charge_id']:
-            del self.cleaned_data['stripeToken']
-            return
-        if not self.cleaned_data['stripeToken']:
+        elif not self.cleaned_data['charge_id']:
             raise forms.ValidationError("You need to pay for the lookup")
-        stripe.api_key = settings.STRIPE_SECRET_KEY
-        try:
-            charge = stripe.Charge.create(
-                amount=self.amount * 100,
-                currency="gbp",
-                receipt_email=self.cleaned_data['email'],
-                source=self.cleaned_data['stripeToken'],
-                description=u'[MapIt] %s' % self.cleaned_data['description'])
-            self.cleaned_data['charge_id'] = charge.id
-            del self.cleaned_data['stripeToken']
-        except stripe.error.CardError:
-            # The card has been declined
-            raise forms.ValidationError(
-                """
-                Sorry, your card has been declined.
-                Perhaps you can try another?
-                """
-            )
+        else:
+            intent = stripe.PaymentIntent.retrieve(self.cleaned_data['charge_id'])
+            if intent.status != 'succeeded':
+                raise forms.ValidationError("You need to pay for the lookup")
