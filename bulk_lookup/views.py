@@ -5,6 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import redirect
 from django.views.generic import DetailView
+from django.utils.encoding import force_text
 from formtools.wizard.views import SessionWizardView
 
 from .models import BulkLookup, cache
@@ -80,7 +81,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         if step == 'postcode_field':
             bulk_lookup = self.get_cleaned_csv_data
             for choice in bulk_lookup.field_names:
-                if re.match(r'post(\s)*code', choice, flags=re.IGNORECASE):
+                if re.match(r'post(\s)*code', force_text(choice), flags=re.IGNORECASE):
                     initial['postcode_field'] = choice
                     break
         elif step == 'personal_details':
