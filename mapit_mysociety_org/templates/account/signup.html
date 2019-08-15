@@ -14,12 +14,38 @@
         <form id="signup_form" method="post" action="{% url "account_signup" %}" autocapitalize="off" {% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
             {% csrf_token %}
             {% include 'account/_form_fields.html' %}
+
+            <noscript>
+                <p class="account-form__errors"> Unfortunately, our payment
+                processor requires JavaScript to take payment.<br>Please
+                <a href="/contact">contact us</a> about your requirements and
+                we’ll be happy to help.</p>
+            </noscript>
+
+        {% if not form.stripeToken.value %}
+          <div id="js-payment-needed">
+            <div class="account-form__field">
+                <div class="account-form__label"><label for="id_personal_details-name">Name on card:</label></div>
+                <div class="account-form__input"><input type="text" name="personal_details-name" id="id_personal_details-name"></div>
+            </div>
+
+            <div class="account-form__field">
+                <div class="account-form__label"><label for="card-element">Credit or debit card details:</label></div>
+                <div id="card-element" class="form-control"><!-- A Stripe Element will be inserted here. --></div>
+                <div id="card-errors" role="alert"></div>
+            </div>
+          </div>
+        {% endif %}
+
             <div class="account-form__field account-form__field--submit">
                 <button id="customButton" class="btn btn--primary">{% trans "Sign up" %}</button>
+                <div id="spinner" class="mysoc-spinner mysoc-spinner--small" role="status">
+                    <span class="sr-only">Processing…</span>
+                </div>
             </div>
         </form>
 
-    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script src="https://js.stripe.com/v3"></script>
     <script id="js-payment" data-key="{{ STRIPE_PUBLIC_KEY }}" src="{% static "js/payment.js" %}"></script>
 
     </section>

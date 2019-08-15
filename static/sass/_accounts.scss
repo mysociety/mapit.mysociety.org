@@ -20,6 +20,11 @@ input[type="file"] {
     }
 }
 
+.account-form__field--submit {
+    display: flex;
+    align-items: center;
+}
+
 .account-form__input {
     & > ul {
         @extend .unstyled-list;
@@ -89,4 +94,14 @@ input[type="file"] {
 .subscription-quota-meter {
     width: 10em;
     max-width: 100%;
+}
+
+.mysoc-spinner--small {
+    margin-left: 1em;
+    font-size: 0.5em;
+    display: none;
+}
+
+button[disabled], button[disabled]:hover, button[disabled]:focus {
+    background-color: #999;
 }
