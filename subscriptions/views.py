@@ -214,11 +214,15 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
 class SubscriptionCardUpdateView(StripeObjectMixin, View):
     success_url = reverse_lazy('subscription')
 
+    def get(self, request, *args, **kwargs):
+        intent = stripe.SetupIntent.create()
+        return HttpResponse(json.dumps({'secret': intent.client_secret}), content_type='application/json')
+
     def post(self, request, *args, **kwargs):
         sub = self.get_object()
-        token = request.POST['stripeToken']
-        sub.customer.source = token
-        sub.customer.save()
+        payment_method = request.POST['payment_method']
+        payment_method = stripe.PaymentMethod.attach(payment_method, customer=sub.customer.id)
+        stripe.Customer.modify(sub.customer.id, invoice_settings={'default_payment_method': payment_method})
         messages.add_message(self.request, messages.INFO, 'Your card details have been updated.')
         return HttpResponseRedirect(self.success_url)
 

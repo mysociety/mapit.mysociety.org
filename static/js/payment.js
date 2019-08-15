@@ -114,7 +114,8 @@ function err(field, extra) {
   return err_highlight(label, extra !== undefined ? extra && !f : !f);
 }
 
-document.getElementById('signup_form').addEventListener('submit', function(e) {
+var form = document.getElementById('signup_form');
+form && form.addEventListener('submit', function(e) {
   // Already got a token from Stripe (so password mismatch error or somesuch)
   if (this.stripeToken.value) {
       return;
@@ -163,6 +164,41 @@ document.getElementById('signup_form').addEventListener('submit', function(e) {
       form.submit();
     }
   });
+});
+
+var form = document.getElementById('update_card_form');
+form && form.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  if (err('id_personal_details-name')) {
+    return;
+  }
+
+  document.querySelector('button').disabled = true;
+  document.getElementById('spinner').style.display = 'inline-block';
+  var request = new XMLHttpRequest();
+  request.open("GET", '/account/subscription/update-card');
+  request.addEventListener("load", function() {
+    var json = JSON.parse(request.responseText);
+    var cardholderName = document.getElementById('id_personal_details-name');
+    stripe.handleCardSetup(
+      json.secret, card, {
+      payment_method_data: {
+        billing_details: {name: cardholderName.value}
+      }
+    }).then(function(result) {
+      if (result.error) {
+        document.querySelector('button').disabled = false;
+        document.getElementById('spinner').style.display = 'none';
+        showError(result.error.message);
+      } else {
+        var form = document.getElementById('update_card_form');
+        form.payment_method.value = result.setupIntent.payment_method;
+        form.submit();
+      }
+    });
+  });
+  request.send();
 });
 
 })();

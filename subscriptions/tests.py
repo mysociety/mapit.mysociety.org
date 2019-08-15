@@ -321,13 +321,17 @@ class SubscriptionOtherViewsTest(PatchedStripeMixin, UserTestCase):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         self.sub = self.MockStripe.Subscription.retrieve.return_value
+        self.MockStripe.PaymentMethod.attach.return_value = convert_to_stripe_object({
+            'id': 'PM',
+        }, None, None)
 
     def test_card_update(self):
-        resp = self.client.post(reverse('subscription_card_update'), data={'stripeToken': 'TOKEN'}, follow=True)
+        resp = self.client.post(reverse('subscription_card_update'), data={'payment_method': 'PM'}, follow=True)
         self.assertRedirects(resp, reverse('subscription'))
         self.assertContains(resp, 'Your card details have been updated.')
-        self.assertEqual(self.sub.customer.source, 'TOKEN')
-        self.sub.customer.save.assert_called_once_with()
+        self.MockStripe.PaymentMethod.attach.assert_called_once_with('PM', customer='CUSTOMER-ID')
+        self.MockStripe.Customer.modify.assert_called_once_with(
+            'CUSTOMER-ID', invoice_settings={'default_payment_method': {'id': 'PM'}})
 
     def test_cancellation(self):
         self.sub.delete = Mock()
