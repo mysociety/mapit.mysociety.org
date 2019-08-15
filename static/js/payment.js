@@ -114,6 +114,28 @@ function err(field, extra) {
   return err_highlight(label, extra !== undefined ? extra && !f : !f);
 }
 
+function handleToken(form_id) {
+  if (err('id_personal_details-name')) {
+    return;
+  }
+
+  document.querySelector('button').disabled = true;
+  document.getElementById('spinner').style.display = 'inline-block';
+  stripe.createToken(card, {
+    name: document.getElementById('id_personal_details-name').value || ''
+  }).then(function(result) {
+    if (result.error) {
+      document.querySelector('button').disabled = false;
+      document.getElementById('spinner').style.display = 'none';
+      showError(result.error.message);
+    } else {
+      var form = document.getElementById(form_id);
+      form.stripeToken.value = result.token.id;
+      form.submit();
+    }
+  });
+}
+
 var form = document.getElementById('signup_form');
 form && form.addEventListener('submit', function(e) {
   // Already got a token from Stripe (so password mismatch error or somesuch)
@@ -145,25 +167,7 @@ form && form.addEventListener('submit', function(e) {
     return;
   }
 
-  if (err('id_person_details-name')) {
-    return;
-  }
-
-  document.querySelector('button').disabled = true;
-  document.getElementById('spinner').style.display = 'inline-block';
-  stripe.createToken(card, {
-    name: document.getElementById('id_personal_details-name').value || ''
-  }).then(function(result) {
-    if (result.error) {
-      document.querySelector('button').disabled = false;
-      document.getElementById('spinner').style.display = 'none';
-      showError(result.error.message);
-    } else {
-      var form = document.getElementById('signup_form');
-      form.stripeToken.value = result.token.id;
-      form.submit();
-    }
-  });
+  handleToken('signup_form');
 });
 
 var form = document.getElementById('update_card_form');
@@ -199,6 +203,12 @@ form && form.addEventListener('submit', function(e) {
     });
   });
   request.send();
+});
+
+var form = document.getElementById('declined_form');
+form && form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  handleToken('declined_form');
 });
 
 })();

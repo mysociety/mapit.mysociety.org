@@ -50,6 +50,7 @@ class PatchedStripeMixin(object):
                 },
                 'end': time.time(),
             },
+            'latest_invoice': None,
             'metadata': {
                 'charitable': 'c',
                 'charity_number': 123,
@@ -76,9 +77,6 @@ class PatchedStripeMixin(object):
         }, None, None)
         self.MockStripe.Subscription.create.return_value = convert_to_stripe_object({
             'id': 'SUBSCRIPTION-ID-CREATE'
-        }, None, None)
-        self.MockStripe.Charge.retrieve.return_value = convert_to_stripe_object({
-            'id': 'CHARGE'
         }, None, None)
         self.MockStripe.Invoice.upcoming.return_value = convert_to_stripe_object({
             'id': 'INVOICE',
@@ -220,10 +218,12 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Customer.create.assert_called_once_with(email='test@example.com', source='TOKEN')
         self.MockStripe.Subscription.create.assert_called_once_with(
             customer='CUSTOMER-ID', plan='mapit-100k-v', coupon=None, tax_percent=20,
+            expand=['latest_invoice.payment_intent'], payment_behavior='allow_incomplete',
             metadata={'charitable': '', 'description': '', 'charity_number': ''})
         sub = Subscription.objects.get(user=self.user)
         self.assertEqual(sub.stripe_id, 'SUBSCRIPTION-ID-CREATE')
-        self.assertEqual(sub.redis_status(), {'count': 0, 'history': [], 'quota': 100000, 'blocked': 0})
+        # Quota does not update until hook comes in now
+        self.assertEqual(sub.redis_status(), {'count': 0, 'history': [], 'quota': 0, 'blocked': 0})
 
     def test_update_page_no_plan_charitable(self):
         self.client.login(username="Test user", password="password")
@@ -238,10 +238,12 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Customer.create.assert_called_once_with(email='test@example.com')
         self.MockStripe.Subscription.create.assert_called_once_with(
             customer='CUSTOMER-ID', plan='mapit-10k-v', coupon='charitable100', tax_percent=20,
+            expand=['latest_invoice.payment_intent'], payment_behavior='allow_incomplete',
             metadata={'charitable': 'c', 'description': '', 'charity_number': '123'})
         sub = Subscription.objects.get(user=self.user)
         self.assertEqual(sub.stripe_id, 'SUBSCRIPTION-ID-CREATE')
-        self.assertEqual(sub.redis_status(), {'count': 0, 'history': [], 'quota': 10000, 'blocked': 0})
+        # Quota does not update until hook comes in now
+        self.assertEqual(sub.redis_status(), {'count': 0, 'history': [], 'quota': 0, 'blocked': 0})
 
     def test_update_page_with_plan_add_payment(self):
         sub = self.MockStripe.Subscription.retrieve.return_value
@@ -259,13 +261,14 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.assertEqual(response.status_code, 302)
         # The real code refetches from stripe after the redirect
         # Our test, the plan is no longer a dict so we need to make it so
-        self.assertEqual(sub.plan, 'mapit-100k-v')
+        self.MockStripe.Subscription.modify.assert_called_once_with(
+            'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable50',
+            metadata={'charitable': 'c', 'description': '', 'charity_number': '123'}, plan='mapit-100k-v')
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 10000}
         self.client.get(response['Location'])
 
         self.assertEqual(sub.customer.source, 'TOKEN')
         sub.customer.save.assert_called_once_with()
-        sub.save.assert_called_once_with()
 
     def test_update_page_with_plan(self):
         sub = self.MockStripe.Subscription.retrieve.return_value
@@ -281,9 +284,9 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         })
         self.assertEqual(response.status_code, 302)
         sub.customer.save.assert_not_called()
-        sub.save.assert_called_once_with()
-        self.assertEqual(sub.plan, 'mapit-10k-v')
-        self.assertEqual(sub.coupon, 'charitable100')
+        self.MockStripe.Subscription.modify.assert_called_once_with(
+            'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable100',
+            metadata={'charitable': 'c', 'description': '', 'charity_number': '123'}, plan='mapit-10k-v')
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 1667}
@@ -294,8 +297,6 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
 
     def test_update_page_with_plan_remove_charitable(self):
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.save = Mock()
-        sub.delete_discount = Mock()
 
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
@@ -304,9 +305,9 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         })
         self.assertEqual(response.status_code, 302)
         sub.customer.save.assert_not_called()
-        sub.delete_discount.assert_called_once_with()
-        sub.save.assert_called_once_with()
-        self.assertEqual(sub.plan, 'mapit-100k-v')
+        self.MockStripe.Subscription.modify.assert_called_once_with(
+            'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='',
+            metadata={'charitable': '', 'description': '', 'charity_number': ''}, plan='mapit-100k-v')
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 8333}
@@ -380,11 +381,28 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
                 'id': 'INVOICE-ID',
                 'customer': 'CUSTOMER-ID',
                 'next_payment_attempt': 1234567890,
+                'billing_reason': 'manual',
                 'subscription': None
             }}
         }
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object(event, None, None)
         self.post_to_hook('EVENT-INVOICE')
+
+    def test_invoice_failed_not_cycle(self):
+        event = {
+            'id': 'EVENT-ID-FAILED',
+            'type': 'invoice.payment_failed',
+            'data': {'object': {
+                'id': 'INVOICE-ID',
+                'customer': 'CUSTOMER-ID',
+                'next_payment_attempt': 1234567890,
+                'billing_reason': 'subscription_update',
+                'subscription': 'SUBSCRIPTION-ID'
+            }}
+        }
+        self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object(event, None, None)
+        self.post_to_hook('EVENT-ID-FAILED')
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_invoice_failed_first_time(self):
         event = {
@@ -394,6 +412,7 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
                 'id': 'INVOICE-ID',
                 'customer': 'CUSTOMER-ID',
                 'next_payment_attempt': 1234567890,
+                'billing_reason': 'subscription_cycle',
                 'subscription': 'SUBSCRIPTION-ID'
             }}
         }
@@ -410,6 +429,7 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
                 'id': 'INVOICE-ID',
                 'customer': 'CUSTOMER-ID',
                 'next_payment_attempt': None,
+                'billing_reason': 'subscription_cycle',
                 'subscription': 'SUBSCRIPTION-ID'
             }}
         }
@@ -424,7 +444,9 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
             'id': 'EVENT-ID-FORGIVEN',
             'type': 'invoice.updated',
-            'data': {'object': {'id': 'INVOICE-ID', 'subscription': 'ID', 'forgiven': False}}
+            'data': {'object': {
+                'id': 'INVOICE-ID', 'subscription': 'ID', 'forgiven': False, 'billing_reason': 'manual'
+            }}
         }, None, None)
         r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)
         self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 0, 'blocked': 0})
@@ -438,7 +460,7 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
             'id': 'EVENT-ID-FORGIVEN',
             'type': 'invoice.updated',
             'data': {
-                'object': {'id': 'INVOICE-ID', 'subscription': 'ID', 'forgiven': True},
+                'object': {'id': 'INVOICE-ID', 'subscription': 'ID', 'forgiven': True, 'billing_reason': 'manual'},
                 'previous_attributes': {'forgiven': False}
             }
         }, None, None)
@@ -448,33 +470,56 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': ['1234'], 'quota': 0, 'blocked': 0})
 
     def test_invoice_succeeded_no_sub_here(self):
-        charge = self.MockStripe.Charge.retrieve.return_value
-        charge.save = Mock()
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
             'id': 'EVENT-ID-SUCCEEDED',
             'type': 'invoice.payment_succeeded',
-            'data': {'object': {'id': 'INVOICE-ID', 'subscription': 'SUBSCRIPTION-ID', 'charge': 'CHARGE'}}
+            'data': {'object': {
+                'id': 'INVOICE-ID', 'subscription': 'SUBSCRIPTION-ID', 'charge': 'CHARGE',
+                'billing_reason': 'subscription_cycle', 'payment_intent': 'PI',
+            }}
         }, None, None)
         self.post_to_hook('EVENT-ID-SUCCEEDED')
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, "Someone's subscription was not renewed properly")
 
     @override_settings(REDIS_API_NAME='test_api')
-    def test_invoice_succeeded_sub_present(self):
-        charge = self.MockStripe.Charge.retrieve.return_value
-        charge.save = Mock()
+    def test_manual_invoice_succeeded_sub_present(self):
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
             'id': 'EVENT-ID-SUCCEEDED',
             'type': 'invoice.payment_succeeded',
-            'data': {'object': {'id': 'INVOICE-ID', 'subscription': 'ID', 'charge': 'CHARGE'}}
+            'data': {'object': {
+                'id': 'INVOICE-ID', 'subscription': 'ID', 'charge': 'CHARGE',
+                'billing_reason': 'manual', 'payment_intent': 'PI',
+            }}
         }, None, None)
         r = redis_connection()
         r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)
+        r.set('user:%d:quota:%s:max' % (self.user.id, 'test_api'), 100000)
+        self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 100000, 'blocked': 0})
+        self.post_to_hook('EVENT-ID-SUCCEEDED')
+        # Quota does not reset for manual invoices
         self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 0, 'blocked': 0})
+        self.MockStripe.Charge.modify.assert_called_once_with('CHARGE', description='MapIt')
+        self.MockStripe.PaymentIntent.modify.assert_called_once_with('PI', description='MapIt')
+
+    @override_settings(REDIS_API_NAME='test_api')
+    def test_invoice_succeeded_sub_present(self):
+        self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
+            'id': 'EVENT-ID-SUCCEEDED',
+            'type': 'invoice.payment_succeeded',
+            'data': {'object': {
+                'id': 'INVOICE-ID', 'subscription': 'ID', 'charge': 'CHARGE',
+                'billing_reason': 'subscription_cycle', 'payment_intent': 'PI',
+            }}
+        }, None, None)
+        r = redis_connection()
+        r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)
+        r.set('user:%d:quota:%s:max' % (self.user.id, 'test_api'), 100000)
+        self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 100000, 'blocked': 0})
         self.post_to_hook('EVENT-ID-SUCCEEDED')
         self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': ['1234'], 'quota': 0, 'blocked': 0})
-        self.assertEqual(charge.description, 'MapIt')
-        charge.save.assert_called_once_with()
+        self.MockStripe.Charge.modify.assert_called_once_with('CHARGE', description='MapIt')
+        self.MockStripe.PaymentIntent.modify.assert_called_once_with('PI', description='MapIt')
 
 
 @override_settings(REDIS_API_NAME='test_api')

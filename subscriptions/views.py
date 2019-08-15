@@ -31,7 +31,8 @@ class StripeObjectMixin(object):
         try:
             sub = self.subscription = Subscription.objects.get(user=self.request.user)
             return stripe.Subscription.retrieve(sub.stripe_id, expand=[
-                'customer.default_source', 'customer.invoice_settings.default_payment_method'])
+                'customer.default_source', 'customer.invoice_settings.default_payment_method',
+                'latest_invoice.payment_intent'])
         except Subscription.DoesNotExist:
             # There will be existing accounts with no subscription object
             return None
@@ -72,13 +73,69 @@ class StripeObjectMixin(object):
 class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
     model = Subscription
     context_object_name = 'stripe'
+    needs_processing = None
+
+    def get_template_names(self):
+        if self.needs_processing:
+            return ['subscriptions/check.html']
+        else:
+            return super(SubscriptionView, self).get_template_names()
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        invoice = self.object and self.object.latest_invoice or None
+        return self.process(invoice)
+
+    def process(self, invoice):
+        if invoice:
+            self.check_payment_intent(invoice)
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        sub = self.object = self.get_object()
+        # Update source of customer
+        sub.customer.source = request.POST['stripeToken']
+        sub.customer.save()
+
+        # Now we want to retry payment of invoice, but if we do that and it
+        # needs 3DS then Stripe sends an email, which we don't need as we're
+        # on-session!
+        # try:
+        #     invoice = stripe.Invoice.pay(sub.latest_invoice.id, expand=['payment_intent'])
+        # except stripe.error.CardError:  # pragma: no cover
+        #     # If it fails, due to total failure or needing 3DS, that'll be covered
+        #     invoice = stripe.Invoice.retrieve(sub.latest_invoice.id, expand=['payment_intent'])
+
+        # So instead, set up a new subscription, same as the old one...
+        args = {
+            'payment_behavior': 'allow_incomplete',
+            'expand': ['latest_invoice.payment_intent'],
+            'tax_percent': 20,
+            'customer': sub.customer,
+            'plan': sub.plan.id,
+            'metadata': sub.metadata,
+        }
+        if sub.discount:
+            args['coupon'] = sub.discount.coupon.id
+        obj = stripe.Subscription.create(**args)
+
+        self.subscription.stripe_id = obj.id
+        self.subscription.save()
+        return self.process(obj.latest_invoice)
 
     def get_context_data(self, **kwargs):
         context = super(SubscriptionView, self).get_context_data(**kwargs)
         context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
         if not self.object:
             return context
+        if self.needs_processing is not None:
+            context.update(self.needs_processing)
+            return context
+        else:
+            return self.get_context_data_detail(**context)
 
+    def get_context_data_detail(self, **context):
         customer = self.object.customer
         try:
             upcoming = stripe.Invoice.upcoming(customer=customer.id)
@@ -96,6 +153,23 @@ class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
         context['quota_status'] = self.subscription.redis_status()
         return context
 
+    def check_payment_intent(self, invoice):
+        # The subscription has been created, but it is possible that the
+        # payment failed (card error), or we need to do 3DS or similar
+        pi = invoice.payment_intent
+        if not pi:  # Free plan
+            return
+
+        if pi.status in ('requires_payment_method', 'requires_source'):
+            self.needs_processing = {
+                'requires_payment_method': True,
+            }
+        elif pi.status in ('requires_action', 'requires_source_action'):
+            self.needs_processing = {
+                'requires_action': True,
+                'payment_intent_client_secret': pi.client_secret,
+            }
+
 
 class SubscriptionUpdateMixin(object):
     def _update_subscription(self, form_data):
@@ -104,13 +178,26 @@ class SubscriptionUpdateMixin(object):
             self.object.customer.save()
 
         # Update Stripe subscription
-        self.object.plan = form_data['plan']
+        args = {
+            'plan': form_data['plan'],
+            'metadata': form_data['metadata'],
+        }
         if form_data['coupon']:
-            self.object.coupon = form_data['coupon']
+            args['coupon'] = form_data['coupon']
         elif self.object.discount:
-            self.object.delete_discount()
-        self.object.metadata = form_data['metadata']
-        self.object.save()
+            args['coupon'] = ''
+        stripe.Subscription.modify(self.object.id, payment_behavior='allow_incomplete', **args)
+
+        # Attempt immediate payment on the upgrade
+        try:
+            invoice = stripe.Invoice.create(customer=self.object.customer, subscription=self.object, tax_percent=20)
+            stripe.Invoice.finalize_invoice(invoice.id)
+            stripe.Invoice.pay(invoice.id)
+        except stripe.error.InvalidRequestError:
+            pass  # No invoice created if nothing to pay
+        except stripe.error.CardError:
+            pass  # A source may still require 3DS... Stripe will have sent an email :-/
+
         return super(SubscriptionUpdateMixin, self).form_valid(form_data['form'])
 
     def _add_subscription(self, form_data):
@@ -129,6 +216,8 @@ class SubscriptionUpdateMixin(object):
         assert form_data['stripeToken'] or (
             form_data['plan'] == settings.PRICING[0]['plan'] and form_data['coupon'] == 'charitable100')
         obj = stripe.Subscription.create(
+            payment_behavior='allow_incomplete',
+            expand=['latest_invoice.payment_intent'],
             tax_percent=20,
             customer=customer, plan=form_data['plan'], coupon=form_data['coupon'], metadata=form_data['metadata'])
         stripe_id = obj.id
@@ -167,7 +256,6 @@ class SubscriptionUpdateMixin(object):
         else:
             resp = self._add_subscription(form_data)
 
-        self.subscription.redis_update_max(form_data['plan'])
         messages.add_message(self.request, messages.INFO, 'Thank you very much!')
         return resp
 
@@ -275,7 +363,8 @@ def stripe_hook(request):
             sub.redis_update_max(obj.plan.id)
         except Subscription.DoesNotExist:  # pragma: no cover
             pass
-    elif event.type == 'invoice.payment_failed' and stripe_mapit_sub(obj):
+    elif event.type == 'invoice.payment_failed' and obj.billing_reason == 'subscription_cycle' \
+            and stripe_mapit_sub(obj):
         customer = stripe.Customer.retrieve(obj.customer)
         email = customer.email
         if obj.next_payment_attempt:
@@ -287,12 +376,21 @@ def stripe_hook(request):
             message = render_to_string("subscriptions/email_cancelled.txt", {})
             mail.EmailMessage(subject, message, to=[email], bcc=[settings.CONTACT_EMAIL]).send()
     elif event.type == 'invoice.payment_succeeded' and stripe_mapit_sub(obj):
-        stripe_reset_quota(obj.subscription)
+        # If this isn't a manual invoice (so it's the monthly one), reset the quota
+        if obj.billing_reason != 'manual':
+            stripe_reset_quota(obj.subscription)
+        # The plan might have changed too, so update the maximum
         try:
-            # Update the invoice's charge to say it came from MapIt (for CSV export)
-            charge = stripe.Charge.retrieve(obj.charge)
-            charge.description = 'MapIt'
-            charge.save()
+            stripe_sub = stripe.Subscription.retrieve(obj.subscription)
+            mapit_sub = Subscription.objects.get(stripe_id=obj.subscription)
+            mapit_sub.redis_update_max(stripe_sub.plan.id)
+        except Subscription.DoesNotExist:
+            pass
+        try:
+            # Update the invoice's PaymentIntent and Charge to say it came from MapIt (for CSV export)
+            # Both are shown in the Stripe admin, annoyingly
+            stripe.PaymentIntent.modify(obj.payment_intent, description='MapIt')
+            stripe.Charge.modify(obj.charge, description='MapIt')
         except stripe.error.StripeError:  # pragma: no cover
             pass
     elif event.type == 'invoice.updated' and stripe_mapit_sub(obj):  # pragma: no branch

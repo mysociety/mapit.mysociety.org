@@ -2,8 +2,10 @@ Hi,
 
 I'm afraid that when we tried to take payment for your subscription to MapIt,
 it failed again. We've cancelled your subscription, so you are now back on the
-free tier. If you wish to resubscribe, please just log in to MapIt and pick a
-new plan.
+free tier. If you wish to resubscribe in future, please just log in to MapIt
+and pick a new plan.
+
+Thanks for using MapIt.
 
 Yours,
 mySociety
