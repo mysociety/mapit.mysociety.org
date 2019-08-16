@@ -30,7 +30,8 @@ class StripeObjectMixin(object):
     def get_object(self):
         try:
             sub = self.subscription = Subscription.objects.get(user=self.request.user)
-            return stripe.Subscription.retrieve(sub.stripe_id, expand=['customer.default_source'])
+            return stripe.Subscription.retrieve(sub.stripe_id, expand=[
+                'customer.default_source', 'customer.invoice_settings.default_payment_method'])
         except Subscription.DoesNotExist:
             # There will be existing accounts with no subscription object
             return None
@@ -59,6 +60,11 @@ class StripeObjectMixin(object):
         else:
             data['plan']['amount'] = add_vat(data['plan']['amount'])
             context['actual_paid'] = data['plan']['amount']
+
+        if data.customer.invoice_settings.default_payment_method:
+            context['card_info'] = data.customer.invoice_settings.default_payment_method.card
+        else:
+            context['card_info'] = data.customer.default_source
 
         return context
 
@@ -189,13 +195,15 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
 
     def get_form_kwargs(self):
         kwargs = super(SubscriptionUpdateView, self).get_form_kwargs()
-        kwargs['has_payment_data'] = self.object and self.object.customer.default_source
+        kwargs['has_payment_data'] = self.object and (
+            self.object.customer.default_source or self.object.customer.invoice_settings.default_payment_method)
         kwargs['stripe'] = self.object
         return kwargs
 
     def get_context_data(self, **kwargs):
         kwargs['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
-        kwargs['has_payment_data'] = self.object and self.object.customer.default_source
+        kwargs['has_payment_data'] = self.object and (
+            self.object.customer.default_source or self.object.customer.invoice_settings.default_payment_method)
         kwargs['stripe'] = self.object
         return super(SubscriptionUpdateView, self).get_context_data(**kwargs)
 

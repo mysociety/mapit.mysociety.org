@@ -94,9 +94,9 @@
 
             <h3>Your payment details</h3>
 
-            {% if stripe.customer.default_source %}
-                <p>Payment details we hold: {{ stripe.customer.default_source.brand }},
-                last four digits <code>{{ stripe.customer.default_source.last4 }}</code>.</p>
+            {% if card_info %}
+                <p>Payment details we hold: {{ card_info.brand }},
+                last four digits <code>{{ card_info.last4 }}</code>.</p>
             {% else %}
                 <p>We do not currently hold any payment details for you.</p>
             {% endif %}

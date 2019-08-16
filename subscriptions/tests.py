@@ -58,6 +58,7 @@ class PatchedStripeMixin(object):
                 'id': 'CUSTOMER-ID',
                 'account_balance': -400,
                 'default_source': {'brand': 'Visa', 'last4': '1234'},
+                'invoice_settings': {'default_payment_method': None},
                 'save': Mock(),
             },
             'plan': {
