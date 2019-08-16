@@ -246,14 +246,15 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.assertEqual(sub.redis_status(), {'count': 0, 'history': [], 'quota': 0, 'blocked': 0})
 
     def test_update_page_with_plan_add_payment(self):
-        sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.save = Mock()
+        self.MockStripe.PaymentMethod.attach.return_value = convert_to_stripe_object({
+            'id': 'PM',
+        }, None, None)
 
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
             'plan': 'mapit-100k-v',
-            'stripeToken': 'TOKEN',
+            'payment_method': 'PM',
             'charitable_tick': 1,
             'charitable': 'c',
             'charity_number': 123,
@@ -264,16 +265,16 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable50',
             metadata={'charitable': 'c', 'description': '', 'charity_number': '123'}, plan='mapit-100k-v')
+
+        sub = self.MockStripe.Subscription.retrieve.return_value
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 10000}
         self.client.get(response['Location'])
 
-        self.assertEqual(sub.customer.source, 'TOKEN')
-        sub.customer.save.assert_called_once_with()
+        self.MockStripe.PaymentMethod.attach.assert_called_once_with('PM', customer='CUSTOMER-ID')
+        self.MockStripe.Customer.modify.assert_called_once_with(
+            'CUSTOMER-ID', invoice_settings={'default_payment_method': {'id': 'PM'}})
 
     def test_update_page_with_plan(self):
-        sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.save = Mock()
-
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
@@ -283,12 +284,14 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             'charity_number': 123,
         })
         self.assertEqual(response.status_code, 302)
-        sub.customer.save.assert_not_called()
+        self.MockStripe.Customer.modify.assert_not_called()
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable100',
             metadata={'charitable': 'c', 'description': '', 'charity_number': '123'}, plan='mapit-10k-v')
+
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
+        sub = self.MockStripe.Subscription.retrieve.return_value
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 1667}
         sub.discount.coupon.percent_off = 100
         response = self.client.get(response['Location'])
@@ -296,20 +299,20 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             response, u'<p>It costs you £0/mth. (£20/mth with 100% discount applied.)</p>', html=True)
 
     def test_update_page_with_plan_remove_charitable(self):
-        sub = self.MockStripe.Subscription.retrieve.return_value
-
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
             'plan': 'mapit-100k-v',
         })
         self.assertEqual(response.status_code, 302)
-        sub.customer.save.assert_not_called()
+        self.MockStripe.Customer.modify.assert_not_called()
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='',
             metadata={'charitable': '', 'description': '', 'charity_number': ''}, plan='mapit-100k-v')
+
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
+        sub = self.MockStripe.Subscription.retrieve.return_value
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 8333}
         sub.discount = None
         response = self.client.get(response['Location'])

@@ -136,6 +136,41 @@ function handleToken(form_id) {
   });
 }
 
+function card_update(form_id) {
+  if (err('id_personal_details-name')) {
+    return;
+  }
+
+  document.querySelector('button').disabled = true;
+  document.getElementById('spinner').style.display = 'inline-block';
+
+  var request = new XMLHttpRequest();
+  request.open("GET", '/account/subscription/update-card');
+  request.addEventListener("load", function() {
+    var json = JSON.parse(request.responseText);
+    stripe.handleCardSetup(
+      json.secret, card, {
+        payment_method_data: {
+          billing_details: {
+            name: document.getElementById('id_personal_details-name').value || ''
+          }
+        }
+      }
+    ).then(function(result) {
+      if (result.error) {
+        document.querySelector('button').disabled = false;
+        document.getElementById('spinner').style.display = 'none';
+        showError(result.error.message);
+      } else {
+        var form = document.getElementById(form_id);
+        form.payment_method.value = result.setupIntent.payment_method;
+        form.submit();
+      }
+    });
+  });
+  request.send();
+}
+
 var form = document.getElementById('signup_form');
 form && form.addEventListener('submit', function(e) {
   // Already got a token from Stripe (so password mismatch error or somesuch)
@@ -167,48 +202,24 @@ form && form.addEventListener('submit', function(e) {
     return;
   }
 
-  handleToken('signup_form');
+  var form = document.getElementById('signup_form');
+  if (form.action.indexOf('/account/subscription/update') > -1) {
+    card_update('signup_form');
+  } else {
+    handleToken('signup_form');
+  }
 });
 
 var form = document.getElementById('update_card_form');
 form && form.addEventListener('submit', function(e) {
   e.preventDefault();
-
-  if (err('id_personal_details-name')) {
-    return;
-  }
-
-  document.querySelector('button').disabled = true;
-  document.getElementById('spinner').style.display = 'inline-block';
-  var request = new XMLHttpRequest();
-  request.open("GET", '/account/subscription/update-card');
-  request.addEventListener("load", function() {
-    var json = JSON.parse(request.responseText);
-    var cardholderName = document.getElementById('id_personal_details-name');
-    stripe.handleCardSetup(
-      json.secret, card, {
-      payment_method_data: {
-        billing_details: {name: cardholderName.value}
-      }
-    }).then(function(result) {
-      if (result.error) {
-        document.querySelector('button').disabled = false;
-        document.getElementById('spinner').style.display = 'none';
-        showError(result.error.message);
-      } else {
-        var form = document.getElementById('update_card_form');
-        form.payment_method.value = result.setupIntent.payment_method;
-        form.submit();
-      }
-    });
-  });
-  request.send();
+  card_update('update_card_form');
 });
 
 var form = document.getElementById('declined_form');
 form && form.addEventListener('submit', function(e) {
   e.preventDefault();
-  handleToken('declined_form');
+  card_update('declined_form');
 });
 
 })();

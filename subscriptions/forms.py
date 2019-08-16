@@ -36,6 +36,7 @@ class SubscriptionMixin(forms.Form):
         label=mark_safe('I agree to the <a href="/legal/" target="_blank">terms and conditions</a>'),
         required=False)
     stripeToken = forms.CharField(required=False, widget=forms.HiddenInput)
+    payment_method = forms.CharField(required=False, widget=forms.HiddenInput)
 
     def __init__(self, has_payment_data=False, stripe=False, *args, **kwargs):
         self.has_payment_data = has_payment_data
@@ -46,7 +47,8 @@ class SubscriptionMixin(forms.Form):
         cleaned_data = super(SubscriptionMixin, self).clean()
         typ = cleaned_data.get('charitable')
 
-        if not self.has_payment_data and not cleaned_data.get('stripeToken') and not (
+        payment_data = cleaned_data.get('stripeToken') or cleaned_data.get('payment_method')
+        if not self.has_payment_data and not payment_data and not (
                 cleaned_data.get('plan') == settings.PRICING[0]['plan'] and typ in ('c', 'i')):
             self.add_error('plan', 'You need to submit payment')
 

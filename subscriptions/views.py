@@ -94,35 +94,17 @@ class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
 
     def post(self, request, *args, **kwargs):
         sub = self.object = self.get_object()
+
         # Update source of customer
-        sub.customer.source = request.POST['stripeToken']
-        sub.customer.save()
+        payment_method = stripe.PaymentMethod.attach(request.POST['payment_method'], customer=sub.customer)
+        stripe.Customer.modify(self.object.customer.id, invoice_settings={'default_payment_method': payment_method})
 
-        # Now we want to retry payment of invoice, but if we do that and it
-        # needs 3DS then Stripe sends an email, which we don't need as we're
-        # on-session!
-        # try:
-        #     invoice = stripe.Invoice.pay(sub.latest_invoice.id, expand=['payment_intent'])
-        # except stripe.error.CardError:  # pragma: no cover
-        #     # If it fails, due to total failure or needing 3DS, that'll be covered
-        #     invoice = stripe.Invoice.retrieve(sub.latest_invoice.id, expand=['payment_intent'])
+        try:
+            invoice = stripe.Invoice.pay(sub.latest_invoice.id, expand=['payment_intent'])
+        except stripe.error.CardError:  # pragma: no cover
+            invoice = stripe.Invoice.retrieve(sub.latest_invoice.id, expand=['payment_intent'])
 
-        # So instead, set up a new subscription, same as the old one...
-        args = {
-            'payment_behavior': 'allow_incomplete',
-            'expand': ['latest_invoice.payment_intent'],
-            'tax_percent': 20,
-            'customer': sub.customer,
-            'plan': sub.plan.id,
-            'metadata': sub.metadata,
-        }
-        if sub.discount:
-            args['coupon'] = sub.discount.coupon.id
-        obj = stripe.Subscription.create(**args)
-
-        self.subscription.stripe_id = obj.id
-        self.subscription.save()
-        return self.process(obj.latest_invoice)
+        return self.process(invoice)
 
     def get_context_data(self, **kwargs):
         context = super(SubscriptionView, self).get_context_data(**kwargs)
@@ -173,9 +155,10 @@ class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
 
 class SubscriptionUpdateMixin(object):
     def _update_subscription(self, form_data):
-        if form_data['stripeToken']:
-            self.object.customer.source = form_data['stripeToken']
-            self.object.customer.save()
+        if form_data['payment_method']:
+            payment_method = stripe.PaymentMethod.attach(form_data['payment_method'], customer=self.object.customer.id)
+            stripe.Customer.modify(
+                self.object.customer.id, invoice_settings={'default_payment_method': payment_method})
 
         # Update Stripe subscription
         args = {
