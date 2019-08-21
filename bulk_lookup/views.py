@@ -17,6 +17,9 @@ from mapit_mysociety_org.mixins import NeverCacheMixin
 from subscriptions.views import StripeObjectMixin
 
 
+AMOUNT = 20
+
+
 class WizardError(Exception):
     """If something odd happens (e.g. missing data though we're part way
     through the process), raise this and the wizard will reset."""
@@ -24,7 +27,6 @@ class WizardError(Exception):
 
 class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
     object = None
-    amount = 20
 
     form_list = [
         ('csv', CSVForm),
@@ -65,7 +67,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         if step == 'postcode_field':
             kwargs['bulk_lookup'] = self.get_cleaned_csv_data
         elif step == 'personal_details':
-            kwargs['amount'] = self.amount
+            kwargs['amount'] = AMOUNT
             kwargs['free'] = False
             if self.request.user.is_authenticated:
                 if not self.object:
@@ -90,6 +92,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
     def get_context_data(self, form, **kwargs):
         context = super(WizardView, self).get_context_data(form=form, **kwargs)
         if self.steps.current == 'csv':
+            context['amount'] = AMOUNT
             return context
 
         bulk_lookup = self.get_cleaned_csv_data
@@ -107,7 +110,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
             raise WizardError
         context['num_good_rows'] = pc_data['num_rows'] - pc_data['bad_rows']
         if self.steps.current == 'personal_details':
-            context['price'] = self.amount
+            context['price'] = AMOUNT
             context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
             if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
                 context['price'] = 0
@@ -131,7 +134,7 @@ def AjaxConfirmView(request):
         if 'payment_method_id' in request.POST:
             intent = stripe.PaymentIntent.create(
                 payment_method=request.POST['payment_method_id'],
-                amount=20 * 100,
+                amount=AMOUNT * 100,
                 currency='gbp',
                 description='[MapIt] %s' % (request.POST['personal_details-description'] or 'Bulk lookup',),
                 receipt_email=request.POST['personal_details-email'],
