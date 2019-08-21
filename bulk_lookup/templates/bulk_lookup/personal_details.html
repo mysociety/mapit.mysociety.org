@@ -79,6 +79,8 @@ document.forms[0].addEventListener('submit', function(e) {
     return;
   }
 
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('spinner').style.display = 'inline-block';
   stripe.createPaymentMethod('card', card, {
     billing_details: {
       name: name.value
@@ -88,6 +90,8 @@ document.forms[0].addEventListener('submit', function(e) {
 
 function handleStripeResult(result) {
   if (result.error) {
+    document.getElementById('btn-submit').disabled = false;
+    document.getElementById('spinner').style.display = 'none';
     showError(result.error.message);
   } else {
     var data;
@@ -110,6 +114,8 @@ function handleStripeResult(result) {
 
 function handleServerResponse(response) {
   if (response.error) {
+    document.getElementById('btn-submit').disabled = false;
+    document.getElementById('spinner').style.display = 'none';
     showError(response.error);
   } else if (response.requires_action) {
     stripe.handleCardAction(response.payment_intent_client_secret).then(handleStripeResult);

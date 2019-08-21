@@ -9,10 +9,19 @@
         {{ wizard.management_form }}
         {% include "account/_form_fields.html" with form=wizard.form %}
         {% block content_pre_buttons %}{% endblock %}
+
+      <div class="account-form__field account-form__field--submit">
         <input type="submit" id="btn-submit" class="btn btn--primary" value="Next &rarr;">
+
+        <div id="spinner" class="mysoc-spinner mysoc-spinner--small" role="status">
+            <span class="sr-only">Processing…</span>
+        </div>
+
       {% if wizard.steps.step0 > 1 %}
         <button id="btn-back" class="btn btn--back" name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">&larr; Previous</button>
       {% endif %}
+      </div>
+
         {% block extra_form_end %}{% endblock %}
     </form>
     {% block extra_end %}{% endblock %}
