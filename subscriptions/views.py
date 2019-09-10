@@ -372,8 +372,10 @@ def stripe_hook(request):
         try:
             # Update the invoice's PaymentIntent and Charge to say it came from MapIt (for CSV export)
             # Both are shown in the Stripe admin, annoyingly
-            stripe.PaymentIntent.modify(obj.payment_intent, description='MapIt')
-            stripe.Charge.modify(obj.charge, description='MapIt')
+            if obj.payment_intent:
+                stripe.PaymentIntent.modify(obj.payment_intent, description='MapIt')
+            if obj.charge:
+                stripe.Charge.modify(obj.charge, description='MapIt')
         except stripe.error.StripeError:  # pragma: no cover
             pass
     elif event.type == 'invoice.updated' and stripe_mapit_sub(obj):  # pragma: no branch
