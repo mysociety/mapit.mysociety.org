@@ -193,10 +193,12 @@ class SubscriptionUpdateMixin(object):
         cust_params = {'email': email}
         if form_data['stripeToken']:
             cust_params['source'] = form_data['stripeToken']
+        if form_data['payment_method']:
+            cust_params['payment_method'] = form_data['payment_method']
         obj = stripe.Customer.create(**cust_params)
         customer = obj.id
 
-        assert form_data['stripeToken'] or (
+        assert form_data['stripeToken'] or form_data['payment_method'] or (
             form_data['plan'] == settings.PRICING[0]['plan'] and form_data['coupon'] == 'charitable100')
         obj = stripe.Subscription.create(
             payment_behavior='allow_incomplete',
