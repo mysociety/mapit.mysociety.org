@@ -195,7 +195,7 @@ class SubscriptionUpdateMixin(object):
             cust_params['source'] = form_data['stripeToken']
         if form_data['payment_method']:
             cust_params['payment_method'] = form_data['payment_method']
-            cust_params['invoice_settings'] = {'default_payment_method': payment_method}
+            cust_params['invoice_settings'] = {'default_payment_method': form_data['payment_method']}
         obj = stripe.Customer.create(**cust_params)
         customer = obj.id
 
