@@ -100,6 +100,17 @@ class ConfirmEmailView(account.views.ConfirmEmailView):
         self.object = confirmation = self.get_object()
         confirmation.confirm()
         self.after_confirmation(confirmation)
+
+        # Update any associated stripe email
+        user = confirmation.email_address.user
+        if user.subscription:
+            try:
+                obj = stripe.Subscription.retrieve(user.subscription.stripe_id)
+                if obj.customer.email != confirmation.email_address.email:
+                    stripe.Customer.modify(obj.customer.id, email=confirmation.email_address.email)
+            except stripe.error.InvalidRequestError:
+                pass
+
         self.login_user(user=confirmation.email_address.user)
         if self.messages.get("email_confirmed"):
             messages.add_message(

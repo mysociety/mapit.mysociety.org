@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+import re
 from StringIO import StringIO
 from mock import patch
 
@@ -35,6 +36,13 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
         self.assertContains(
             resp, u'<p>It costs you £150/mth. (£300/mth with 50% discount applied.)</p>', html=True)
         self.assertEqual(len(mail.outbox), 1)
+
+        m = re.search(r'https:[^\s]*', mail.outbox[0].body)
+        link = m.group()
+        self.client.get(link)
+        self.MockStripe.Customer.modify.assert_called_once_with(
+            'CUSTOMER-ID', email='testing@example.net')
+
         self.client.get(reverse('account_logout'))
 
 

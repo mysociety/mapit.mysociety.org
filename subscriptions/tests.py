@@ -57,6 +57,7 @@ class PatchedStripeMixin(object):
             },
             'customer': {
                 'id': 'CUSTOMER-ID',
+                'email': 'CUSTOMER-EMAIL',
                 'account_balance': -400,
                 'default_source': {'brand': 'Visa', 'last4': '1234'},
                 'invoice_settings': {'default_payment_method': None},
@@ -83,7 +84,10 @@ class PatchedStripeMixin(object):
             'amount_due': 15000,
             'total': 15000,
         }, None, None)
+        patcher2 = patch('mapit_mysociety_org.views.stripe', new=self.MockStripe)
+        patcher2.start()
         self.addCleanup(patcher.stop)
+        self.addCleanup(patcher2.stop)
 
 
 @override_settings(REDIS_API_NAME='test_api')
