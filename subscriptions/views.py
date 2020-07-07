@@ -153,6 +153,27 @@ class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
             }
 
 
+class InvoicesView(StripeObjectMixin, NeverCacheMixin, DetailView):
+    model = Subscription
+    context_object_name = 'stripe'
+    template_name = 'subscriptions/invoices.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(InvoicesView, self).get_context_data(**kwargs)
+        if not self.object:
+            return context
+
+        invoices = stripe.Invoice.list(subscription=self.object.id, limit=24)
+        invoices = invoices.get('data', [])
+        for invoice in invoices:
+            if invoice['status_transitions']['finalized_at']:
+                invoice['finalized_at'] = datetime.fromtimestamp(invoice['status_transitions']['finalized_at'])
+            invoice['amount_due'] = invoice['amount_due'] / 100
+        context['invoices'] = invoices
+
+        return context
+
+
 class SubscriptionUpdateMixin(object):
     def _update_subscription(self, form_data):
         if form_data['payment_method']:

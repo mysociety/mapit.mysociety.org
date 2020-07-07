@@ -2,13 +2,19 @@ from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
 from .views import (
-    stripe_hook, SubscriptionView, SubscriptionUpdateView, SubscriptionCardUpdateView, SubscriptionCancelView)
+    stripe_hook, InvoicesView, SubscriptionView, SubscriptionUpdateView,
+    SubscriptionCardUpdateView, SubscriptionCancelView)
 
 urlpatterns = [
     url(
         r'^$',
         login_required(SubscriptionView.as_view()),
         name="subscription"
+    ),
+    url(
+        r'^/invoices$',
+        login_required(InvoicesView.as_view()),
+        name="invoices"
     ),
     url(
         r'^/update$',

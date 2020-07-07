@@ -96,6 +96,16 @@ input[type="file"] {
     max-width: 100%;
 }
 
+table.striped {
+    th, td {
+        padding: 1em;
+        margin: 0;
+    }
+    tr:nth-child(2n) {
+        background-color: #eee;
+    }
+}
+
 .mysoc-spinner--small {
     margin-left: 1em;
     font-size: 0.5em;

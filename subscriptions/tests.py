@@ -84,6 +84,20 @@ class PatchedStripeMixin(object):
             'amount_due': 15000,
             'total': 15000,
         }, None, None)
+        self.MockStripe.Invoice.list.return_value = convert_to_stripe_object({
+            'data': [{
+                'number': 'INVOICE-002',
+                'amount_due': 2000,
+                'status_transitions': {'finalized_at': time.time()},
+                'status': 'open',
+            }, {
+                'number': 'INVOICE-001',
+                'amount_due': 2000,
+                'status_transitions': {'finalized_at': time.time()},
+                'status': 'paid',
+                'invoice_pdf': 'https://example.org/pdf-001',
+            }],
+        }, None, None)
         patcher2 = patch('mapit_mysociety_org.views.stripe', new=self.MockStripe)
         patcher2.start()
         self.addCleanup(patcher.stop)
@@ -332,6 +346,15 @@ class SubscriptionOtherViewsTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.PaymentMethod.attach.return_value = convert_to_stripe_object({
             'id': 'PM',
         }, None, None)
+
+    def test_invoices_page(self):
+        resp = self.client.get(reverse('invoices'))
+        date = '%d %s' % (int(time.strftime('%d')), time.strftime('%b %Y'))
+        self.assertContains(
+            resp, '<td>INVOICE-002</td><td>%s</td><td>£20</td><td>Open</td><td></td>' % date, html=True)
+        self.assertContains(
+            resp, '<td>INVOICE-001</td><td>%s</td><td>£20</td><td>Paid</td>'
+                  '<td><a href="https://example.org/pdf-001">Download PDF</a></td>' % date, html=True)
 
     def test_card_update(self):
         resp = self.client.post(reverse('subscription_card_update'), data={'payment_method': 'PM'}, follow=True)
