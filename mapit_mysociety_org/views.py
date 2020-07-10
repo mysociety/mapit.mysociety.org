@@ -105,7 +105,7 @@ class ConfirmEmailView(account.views.ConfirmEmailView):
         user = confirmation.email_address.user
         if user.subscription:
             try:
-                obj = stripe.Subscription.retrieve(user.subscription.stripe_id)
+                obj = stripe.Subscription.retrieve(user.subscription.stripe_id, expand=['customer'])
                 if obj.customer.email != confirmation.email_address.email:
                     stripe.Customer.modify(obj.customer.id, email=confirmation.email_address.email)
             except stripe.error.InvalidRequestError:
