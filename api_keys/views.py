@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DeleteView
 from django.views.generic.base import View
 from django.http import Http404, HttpResponseRedirect

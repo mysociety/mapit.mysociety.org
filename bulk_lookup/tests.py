@@ -3,7 +3,7 @@ from StringIO import StringIO
 
 from django.core.management import call_command
 from django.core.files.base import ContentFile, File
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 
 from bulk_lookup import csv, models

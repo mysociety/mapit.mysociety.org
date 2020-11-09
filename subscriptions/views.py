@@ -7,7 +7,7 @@ import smtplib
 from django.conf import settings
 from django.contrib import messages
 from django.core import mail
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.views.generic import DetailView, FormView, DeleteView, View
