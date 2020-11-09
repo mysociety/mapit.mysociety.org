@@ -1,0 +1,65 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test MapIt
+    runs-on: ubuntu-18.04
+
+    services:
+      postgres:
+        image: postgis/postgis:10-2.5
+        env:
+          POSTGRES_PASSWORD: mapit
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: mapit
+      CFLAGS: "-O0"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [2.7]
+        thing-to-test: [flake8, 1.11]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        set -xe
+        python -VV
+        python -m site
+        pip install tox tox-gh-actions codecov
+
+    - name: Install GDAL
+      run: sudo apt-get install gdal-bin
+
+    - name: Set up config
+      run: |
+        createdb mapit
+        psql -d mapit -c 'create extension postgis;'
+        sed -r -e "s,(MAPIT_DB_USER:) 'mapit',\\1 'postgres'," conf/general.yml-example > conf/general.yml
+
+    - name: Run tests
+      run: tox
+      env:
+        THING_TO_TEST: ${{ matrix.thing-to-test }}
+
+    - name: Upload code coverage
+      run: codecov
