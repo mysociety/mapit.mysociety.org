@@ -1,6 +1,6 @@
 from functools import partial
 from django.utils.encoding import force_bytes
-from django.utils.six.moves import map
+from six.moves import map
 from .multidb import use_primary
 from api_keys.models import APIKey
 
@@ -32,8 +32,8 @@ def add_api_key(get_response):
 
     def alter_content(api_key, content):
         key = force_bytes(api_key)
-        content = content.replace('simplify_tolerance=0.0001', 'simplify_tolerance=0.0001&api_key=' + key)
-        content = content.replace('data-key=""', 'data-key="' + key + '"')
+        content = content.replace(b'simplify_tolerance=0.0001', b'simplify_tolerance=0.0001&api_key=' + key)
+        content = content.replace(b'data-key=""', b'data-key="' + key + b'"')
         return content
 
     def middleware(request):

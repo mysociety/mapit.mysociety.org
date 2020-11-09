@@ -2,9 +2,9 @@ import os
 import sys
 
 # Import MapIt's settings (first time to quiet flake8)
-from mapit_settings import (
+from .mapit_settings import (
     config, INSTALLED_APPS, TEMPLATES, MIDDLEWARE, STATICFILES_DIRS, BASE_DIR, MAPIT_RATE_LIMIT, PARENT_DIR, DATABASES)
-from mapit_settings import *  # noqa
+from .mapit_settings import *  # noqa
 
 # Update a couple of things to suit our changes
 

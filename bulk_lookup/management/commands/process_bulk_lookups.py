@@ -61,7 +61,7 @@ class Command(BaseCommand):
     def do_lookup(self, bulk_lookup):
         self.column_names = bulk_lookup.output_field_names()
 
-        with tempfile.TemporaryFile() as f:
+        with tempfile.TemporaryFile(mode='w+') as f:
             postcode_field = bulk_lookup.postcode_field
             output_options = bulk_lookup.output_options.all()
             self.header_row_done = False

@@ -5,12 +5,14 @@ from django.db import models
 from django.dispatch import receiver
 from django.conf import settings
 
+from six import python_2_unicode_compatible
 from account.signals import user_signed_up
 
 from .utils import redis_connection
 
 
 # Inspired by https://github.com/CIGIHub/django-simple-api-key
+@python_2_unicode_compatible
 class APIKey(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -20,8 +22,8 @@ class APIKey(models.Model):
     key = models.CharField(max_length=40, blank=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
-        return "%s: %s" % (self.user, self.key)
+    def __str__(self):
+        return u"%s: %s" % (self.user, self.key)
 
     def save(self, *args, **kwargs):
         # Call the "real" save() method.

@@ -28,7 +28,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [2.7]
+        python-version: [2.7, 3.6]
         thing-to-test: [flake8, 1.11]
 
     steps:

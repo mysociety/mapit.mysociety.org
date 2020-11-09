@@ -3,11 +3,12 @@ import mmap
 import pyexcel
 from pyexcel._compact import zip_longest
 import defusedxml
+from six import Iterator, PY2
 
 defusedxml.defuse_stdlib()
 
 
-class file_without_nulls_or_cp1252(object):
+class file_without_nulls_or_cp1252(Iterator):
     """An object that behaves like a provided file object,
     but strips any NULL bytes when read() is called, and
     spots Windows-1252 lines."""
@@ -31,6 +32,23 @@ class file_without_nulls_or_cp1252(object):
             return self._file.read(1)
         return ''
 
+    def __iter__(self):
+        self._iterator = iter(self._file)
+        return self
+
+    def __next__(self):
+        data = next(self._iterator)
+        data = data.replace(b'\0', b'')
+        try:
+            # If it's not UTF-8...
+            data = data.decode('utf-8')
+        except UnicodeDecodeError:
+            # ...Assume Windows 1252
+            data = data.decode('cp1252')
+        if PY2:
+            data = data.encode('utf-8')
+        return data
+
     def read(self, *args):
         # Remove null bytes from any underlying data
         data = self._file.read(*args)
@@ -46,7 +64,7 @@ class file_without_nulls_or_cp1252(object):
         return data
 
 
-class PyExcelReader(object):
+class PyExcelReader(Iterator):
     # Set up an iterator for reading in a CSV/XLS/XLSX/ODS file
     def __init__(self, file_field):
         self._fieldnames = None
@@ -73,7 +91,7 @@ class PyExcelReader(object):
     def fieldnames(self):
         if self._fieldnames is None:
             try:
-                self._fieldnames = self.reader.next()
+                self._fieldnames = next(self.reader)
             except StopIteration:
                 pass
         return self._fieldnames
@@ -83,11 +101,11 @@ class PyExcelReader(object):
         self._fieldnames = value
 
     # Smaller version of csv DictReader's
-    def next(self):
+    def __next__(self):
         self.fieldnames  # for the side effect
-        row = self.reader.next()
+        row = next(self.reader)
         while row == []:
-            row = self.reader.next()
+            row = next(self.reader)
         return dict(zip_longest(self.fieldnames, row, fillvalue=''))
 
     def __iter__(self):

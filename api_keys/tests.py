@@ -1,4 +1,4 @@
-from StringIO import StringIO
+from six import StringIO
 
 from mock import patch
 from mockredis import mock_strict_redis_client
@@ -209,7 +209,7 @@ class APIKeyModelTest(PatchedRedisTestCase):
         r = redis_connection()
         self.assertIsNone(r.get(expected_key))
         key = APIKey.objects.create(user=self.user, key="test_key")
-        self.assertEqual(r.get(expected_key), str(self.user.id))
+        self.assertEqual(r.get(expected_key), b'%d' % self.user.id)
         key.delete()
 
     @override_settings(REDIS_API_NAME='test_api')
@@ -217,7 +217,7 @@ class APIKeyModelTest(PatchedRedisTestCase):
         expected_key = "key:test_key:api:test_api"
         r = redis_connection()
         key = APIKey.objects.create(user=self.user, key="test_key")
-        self.assertEqual(r.get(expected_key), str(self.user.id))
+        self.assertEqual(r.get(expected_key), b'%d' % self.user.id)
         key.delete()
         self.assertIsNone(r.get(expected_key))
 
@@ -226,7 +226,7 @@ class APIKeyModelTest(PatchedRedisTestCase):
         expected_key = "key:test_key:api:test_api"
         key = APIKey.objects.create(user=self.user, key="test_key")
         r = redis_connection()
-        self.assertEqual(r.get(expected_key), str(self.user.id))
+        self.assertEqual(r.get(expected_key), b'%d' % self.user.id)
         self.user.delete()
         with self.assertRaises(APIKey.DoesNotExist):
             APIKey.objects.get(pk=key.pk)
@@ -244,13 +244,13 @@ class RestrictAPICommandTest(PatchedRedisTestCase):
             stdout=StringIO(),
             stderr=StringIO()
         )
-        self.assertEqual(r.get(RedisStrings.API_RESTRICT), '1')
+        self.assertEqual(r.get(RedisStrings.API_RESTRICT), b'1')
 
     @override_settings(REDIS_API_NAME='test_api', API_RESTRICT=False)
     def test_unrestricts_api(self):
         r = redis_connection()
         r.set(RedisStrings.API_RESTRICT, '1')
-        self.assertEqual(r.get(RedisStrings.API_RESTRICT), '1')
+        self.assertEqual(r.get(RedisStrings.API_RESTRICT), b'1')
         call_command(
             'api_keys_restrict_api',
             stdout=StringIO(),
@@ -283,13 +283,13 @@ class ThrottleAPICommandTest(PatchedRedisTestCase):
             stderr=StringIO()
         )
 
-        self.assertEqual(r.get(RedisStrings.API_THROTTLE), '1')
-        self.assertEqual(r.get(RedisStrings.API_THROTTLE_COUNTER), '360')
-        self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), '360')
-        self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), '360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE), b'1')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_COUNTER), b'360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), b'360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), b'360')
         self.assertEqual(
             r.get(RedisStrings.rate_limit_string('127.0.0.1')),
-            '0'
+            b'0'
         )
 
     @override_settings(REDIS_API_NAME='test_api', API_THROTTLE=False)
@@ -300,10 +300,10 @@ class ThrottleAPICommandTest(PatchedRedisTestCase):
         r.set(RedisStrings.API_THROTTLE_BLOCKED, '360')
         r.set(RedisStrings.API_THROTTLE_DEFAULT_LIMIT, '360')
 
-        self.assertEqual(r.get(RedisStrings.API_THROTTLE), '1')
-        self.assertEqual(r.get(RedisStrings.API_THROTTLE_COUNTER), '360')
-        self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), '360')
-        self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), '360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE), b'1')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_COUNTER), b'360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_BLOCKED), b'360')
+        self.assertEqual(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT), b'360')
 
         call_command(
             'api_keys_throttle_api',
