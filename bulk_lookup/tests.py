@@ -1,5 +1,5 @@
 import os
-from StringIO import StringIO
+from six import StringIO, BytesIO
 
 from django.core.management import call_command
 from django.core.files.base import ContentFile, File
@@ -69,7 +69,7 @@ class BulkLookupViewTest(TestCase):
             {'Postcode': 'EH1 1BB', 'ID': 3, 'Name': 'Annabel'},
         ]
         for typ in ('csv', 'xlsx', 'ods'):
-            with open(os.path.dirname(__file__) + '/fixtures/test.' + typ) as fp:
+            with open(os.path.dirname(__file__) + '/fixtures/test.' + typ, 'rb') as fp:
                 reader = csv.PyExcelReader(File(fp))
                 self.assertEqual(reader.fieldnames, ['ID', 'Name', 'Postcode'])
                 self.assertEqual(list(reader), data)
@@ -83,7 +83,7 @@ class BulkLookupViewTest(TestCase):
         })
 
     def test_cp1252_file(self):
-        csv_file = StringIO('ID,Postcode\nKing\x92s Lynn,SW1A1AA\nCambridge,EH11BB\0')
+        csv_file = BytesIO(b'ID,Postcode\nKing\x92s Lynn,SW1A1AA\nCambridge,EH11BB\0')
         csv_file.content_type = 'text/csv'
         response = self.client.post(reverse('home'), {
             'wizard_view-current_step': 'csv',

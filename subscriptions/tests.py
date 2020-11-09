@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import json
-from StringIO import StringIO
+from six import StringIO
 import time
 from mock import patch, Mock
 
@@ -121,9 +121,9 @@ class SubscriptionTest(UserTestCase):
         r.set('user:%d:quota:%s:blocked' % (self.user.id, 'test_api'), 1)
         self.assertEqual(sub.redis_status(), {'count': 1234, 'history': [], 'quota': 1000, 'blocked': 1})
         sub.redis_reset_quota()
-        self.assertEqual(sub.redis_status(), {'count': 0, 'history': ['1234'], 'quota': 1000, 'blocked': 0})
+        self.assertEqual(sub.redis_status(), {'count': 0, 'history': [b'1234'], 'quota': 1000, 'blocked': 0})
         sub.delete()
-        self.assertEqual(sub.redis_status(), {'count': 0, 'history': ['1234'], 'quota': 0, 'blocked': 0})
+        self.assertEqual(sub.redis_status(), {'count': 0, 'history': [b'1234'], 'quota': 0, 'blocked': 0})
 
 
 class SubsFormTest(TestCase):
@@ -497,7 +497,7 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)
         self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 0, 'blocked': 0})
         self.post_to_hook('EVENT-ID-FORGIVEN')
-        self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': ['1234'], 'quota': 0, 'blocked': 0})
+        self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': [b'1234'], 'quota': 0, 'blocked': 0})
 
     def test_invoice_succeeded_no_sub_here(self):
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
@@ -547,7 +547,7 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         r.set('user:%d:quota:%s:max' % (self.user.id, 'test_api'), 100000)
         self.assertEqual(self.sub.redis_status(), {'count': 1234, 'history': [], 'quota': 100000, 'blocked': 0})
         self.post_to_hook('EVENT-ID-SUCCEEDED')
-        self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': ['1234'], 'quota': 0, 'blocked': 0})
+        self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': [b'1234'], 'quota': 0, 'blocked': 0})
         self.MockStripe.Charge.modify.assert_called_once_with('CHARGE', description='MapIt')
         self.MockStripe.PaymentIntent.modify.assert_called_once_with('PI', description='MapIt')
 
