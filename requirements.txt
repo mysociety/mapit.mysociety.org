@@ -1,2 +1,4 @@
-Django==1.11.8
+Django==1.11.29
+django-formtools==2.1
+django-user-accounts==2.0.3
 -r requirements-base.txt

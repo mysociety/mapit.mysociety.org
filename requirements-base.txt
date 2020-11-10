@@ -1,6 +1,5 @@
 psycopg2 >= 2.5.4
 -e git://github.com/mysociety/mapit.git@master#egg=django-mapit
-django-user-accounts==2.0.3
 django-appconf==1.0.3
 django-mailer==1.2.2
 mock==1.3.0
@@ -12,7 +11,6 @@ six
 
 # Bulk lookup
 xlrd<2
-django-formtools==2.0
 defusedxml==0.5.0
 pyexcel==0.4.5
 pyexcel-io==0.3.4.1
