@@ -22,7 +22,7 @@
                 we’ll be happy to help.</p>
             </noscript>
 
-        {% if not form.stripeToken.value %}
+        {% if not form.cleaned_data.stripeToken %}
           <div id="js-payment-needed">
             <div class="account-form__field">
                 <div class="account-form__label"><label for="id_personal_details-name">Name on card:</label></div>
