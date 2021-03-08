@@ -1,4 +1,4 @@
-{% if form.errors and form.stripeToken.data %}
+{% if form.errors and form.cleaned_data.stripeToken %}
   <div class="account-form__errors">
     We have safely stored your payment information, and you have not yet been charged.
     Please correct the issues below, you will not need to reenter your card details.

@@ -217,7 +217,19 @@ class SubscriptionUpdateMixin(object):
         if form_data['payment_method']:
             cust_params['payment_method'] = form_data['payment_method']
             cust_params['invoice_settings'] = {'default_payment_method': form_data['payment_method']}
-        obj = stripe.Customer.create(**cust_params)
+
+        # At the point the customer is created, details such as postcode and
+        # security code can be checked, and therefore fail
+        try:
+            obj = stripe.Customer.create(**cust_params)
+        except stripe.error.CardError as e:
+            message = ('Sorry, we could not process your payment, please try again. '
+                       'Our payment processor returned: %s' % e.user_message)
+            form = form_data['form']
+            form.add_error(None, message)
+            # So the token clears
+            form.add_error('stripeToken', message)
+            return super(SubscriptionUpdateMixin, self).form_invalid(form)
         customer = obj.id
 
         assert form_data['stripeToken'] or form_data['payment_method'] or (

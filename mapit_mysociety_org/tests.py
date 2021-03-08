@@ -11,6 +11,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from django.test.utils import override_settings
 from stripe.util import convert_to_stripe_object
+import stripe
 
 from subscriptions.models import Subscription
 from subscriptions.tests import PatchedStripeMixin
@@ -44,6 +45,23 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
             'CUSTOMER-ID', email='testing@example.net')
 
         self.client.get(reverse('account_logout'))
+
+    def test_signup_card_error(self):
+        self.MockStripe.error.CardError = stripe.error.CardError
+        self.MockStripe.Customer.create.side_effect = stripe.error.CardError(
+            'Your postcode did not match', 'PARAM', '400')
+        self.client.get(reverse('account_signup'))
+        resp = self.client.post(reverse('account_signup'), {
+            'email': 'testing@example.net',
+            'password': 'password',
+            'password_confirm': 'password',
+            'tandcs_tick': 1,
+            'plan': 'mapit-10k-v',
+            'charitable_tick': 1,
+            'charitable': 'c',
+            'charity_number': '123',
+        })
+        self.assertContains(resp, 'Your postcode did not match')
 
 
 @override_settings(REDIS_API_NAME='test_api')
