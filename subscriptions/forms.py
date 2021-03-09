@@ -30,8 +30,13 @@ class SubscriptionMixin(forms.Form):
         label='If charity, please provide your registered charity number',
         max_length=500, required=False)
     description = forms.CharField(
-        label='If an individual, please provide details of your project',
+        label='Please provide some details of your project',
+        help_text='(optional)',
         max_length=500, required=False)
+    interest_contact = forms.BooleanField(
+        label=mark_safe('We like to write about interesting uses of MapIt on the mySociety blog. '
+                        'Please tick here if you are happy for us to get in touch for this purpose.'),
+        required=False)
     tandcs_tick = forms.BooleanField(
         label=mark_safe('I agree to the <a href="/legal/" target="_blank">terms and conditions</a>'),
         required=False)

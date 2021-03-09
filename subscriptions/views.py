@@ -268,6 +268,7 @@ class SubscriptionUpdateMixin(object):
             'charitable': form_data['charitable'],
             'charity_number': form_data['charity_number'],
             'description': form_data['description'],
+            'interest_contact': form_data['interest_contact'] and 'Yes' or 'No',
         }
 
         if hasattr(self, 'object') and self.object:
@@ -291,11 +292,14 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
     def get_initial(self):
         initial = super(SubscriptionUpdateView, self).get_initial()
         if self.object:
+            interest_contact = self.object.metadata.get('interest_contact', 'No')
+            interest_contact = interest_contact == 'Yes' and True or False
             initial['plan'] = self.object.plan.id
             initial['charitable_tick'] = True if self.object.discount else False
             initial['charitable'] = self.object.metadata.get('charitable', '')
             initial['charity_number'] = self.object.metadata.get('charity_number', '')
             initial['description'] = self.object.metadata.get('description', '')
+            initial['interest_contact'] = interest_contact
         else:
             initial['plan'] = self.request.GET.get('plan')
         return initial

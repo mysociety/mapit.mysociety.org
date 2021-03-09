@@ -47,30 +47,32 @@ if (document.getElementById('id_plan_0')) {
   document.getElementById('id_plan_0').addEventListener('change', toggle_stripe);
   document.getElementById('id_plan_1').addEventListener('change', toggle_stripe);
   document.getElementById('id_plan_2').addEventListener('change', toggle_stripe);
+  var opt = document.getElementById('charitable-desc').querySelector('.account-form__help_text');
   document.getElementById('id_charitable_tick').addEventListener('click', function(e) {
     if (this.checked) {
         document.getElementById('charitable-qns').style.display = 'block';
     } else {
         document.getElementById('charitable-qns').style.display = 'none';
     }
+    opt.style.display = 'block';
     toggle_stripe();
   });
   document.getElementById('id_charitable_0').addEventListener('change', function(e) {
     document.getElementById('charitable-neither').style.display = 'none';
-    document.getElementById('charitable-desc').style.display = 'none';
+    opt.style.display = 'block';
     document.getElementById('charity-number').style.display = 'block';
     toggle_stripe();
   });
   document.getElementById('id_charitable_1').addEventListener('change', function(e) {
     document.getElementById('charity-number').style.display = 'none';
     document.getElementById('charitable-neither').style.display = 'none';
-    document.getElementById('charitable-desc').style.display = 'block';
+    opt.style.display = 'none';
     toggle_stripe();
   });
   document.getElementById('id_charitable_2').addEventListener('change', function(e) {
     document.getElementById('charitable-neither').style.display = 'block';
     document.getElementById('charity-number').style.display = 'none';
-    document.getElementById('charitable-desc').style.display = 'none';
+    opt.style.display = 'block';
     toggle_stripe();
   });
 }

@@ -237,7 +237,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Subscription.create.assert_called_once_with(
             customer='CUSTOMER-ID', plan='mapit-100k-v', coupon=None, tax_percent=20,
             expand=['latest_invoice.payment_intent'], payment_behavior='allow_incomplete',
-            metadata={'charitable': '', 'description': '', 'charity_number': ''})
+            metadata={'charitable': '', 'description': '', 'charity_number': '', 'interest_contact': 'No'})
         sub = Subscription.objects.get(user=self.user)
         self.assertEqual(sub.stripe_id, 'SUBSCRIPTION-ID-CREATE')
         # Quota does not update until hook comes in now
@@ -257,7 +257,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Subscription.create.assert_called_once_with(
             customer='CUSTOMER-ID', plan='mapit-10k-v', coupon='charitable100', tax_percent=20,
             expand=['latest_invoice.payment_intent'], payment_behavior='allow_incomplete',
-            metadata={'charitable': 'c', 'description': '', 'charity_number': '123'})
+            metadata={'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'})
         sub = Subscription.objects.get(user=self.user)
         self.assertEqual(sub.stripe_id, 'SUBSCRIPTION-ID-CREATE')
         # Quota does not update until hook comes in now
@@ -282,7 +282,9 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         # Our test, the plan is no longer a dict so we need to make it so
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable50',
-            metadata={'charitable': 'c', 'description': '', 'charity_number': '123'}, plan='mapit-100k-v')
+            metadata={
+                'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'
+            }, plan='mapit-100k-v')
 
         sub = self.MockStripe.Subscription.retrieve.return_value
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 10000}
@@ -305,7 +307,9 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Customer.modify.assert_not_called()
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable100',
-            metadata={'charitable': 'c', 'description': '', 'charity_number': '123'}, plan='mapit-10k-v')
+            metadata={
+                'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'
+            }, plan='mapit-10k-v')
 
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
@@ -326,7 +330,9 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Customer.modify.assert_not_called()
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='',
-            metadata={'charitable': '', 'description': '', 'charity_number': ''}, plan='mapit-100k-v')
+            metadata={
+                'charitable': '', 'description': '', 'charity_number': '', 'interest_contact': 'No'
+            }, plan='mapit-100k-v')
 
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
