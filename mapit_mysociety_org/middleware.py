@@ -34,6 +34,9 @@ def add_api_key(get_response):
         key = force_bytes(api_key)
         content = content.replace(b'simplify_tolerance=0.0001', b'simplify_tolerance=0.0001&api_key=' + key)
         content = content.replace(b'data-key=""', b'data-key="' + key + b'"')
+        content = content.replace(b'.geojson"', b'.geojson?api_key=' + key + b'"')
+        content = content.replace(b'.kml"', b'.kml?api_key=' + key + b'"')
+        content = content.replace(b'.wkt"', b'.wkt?api_key=' + key + b'"')
         return content
 
     def middleware(request):
