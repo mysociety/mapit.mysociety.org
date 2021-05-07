@@ -39,7 +39,7 @@ $(function() {
                 'WMP' // is always just "House of Commons"
             ];
 
-            _.each(areas, function(area) {
+            $.each(areas, function(i, area) {
                 if (areasToIgnore.indexOf(area.type) > -1) {
                     return true;
                 }
@@ -89,11 +89,13 @@ $(function() {
             map.addLayer(layers.osm);
 
             // Find a smallish area, and pre-select it.
-            var lsoa = _.findWhere(context.areas, {type: 'OLF'});
-            if (lsoa) {
-                addArea(map, layers, lsoa.id);
-                $('[data-areaid="' + lsoa.id + '"]').addClass('selected');
-            }
+            $.each(context.areas, function(i, area) {
+                if (area.type === 'OLF') {
+                    addArea(map, layers, area.id);
+                    $('[data-areaid="' + area.id + '"]').addClass('selected');
+                    return false;
+                }
+            });
 
             $('.homepage-try-result__area').on('click', function(e){
                 e.preventDefault();

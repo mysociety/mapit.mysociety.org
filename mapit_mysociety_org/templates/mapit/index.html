@@ -185,7 +185,7 @@
         <div class="container">
             <h2>Areas covering <a href="/postcode/<%= encodeURIComponent(postcode) %>.html"><%= postcode %></a></h2>
             <div class="homepage-try-result__areas">
-              <% _.each(areas, function(area) { %>
+              <% $.each(areas, function(i, area) { %>
                 <a class="homepage-try-result__area" href="/area/<%= area.id %>.html" data-areatype="<%= area.type %>" data-areaid="<%= area.id %>">
                     <span class="homepage-try-result__area__type"><%= area.type_name %></span>
                     <span class="homepage-try-result__area__name"><%= area.name %></span>
@@ -199,6 +199,6 @@
 </script>
 
 {{ block.super }}
-<script src="{% static "js/underscore-1.8.3.min.js" %}"></script>
+<script src="{% static "js/underscore-1.13.1.template.min.js" %}"></script>
 <script src="{% static "js/home-try-it.js" %}"></script>
 {% endblock %}
