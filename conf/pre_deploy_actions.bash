@@ -11,13 +11,12 @@ cd "$(dirname $BASH_SOURCE)"/..
 PYTHONDONTWRITEBYTECODE=""
 
 # create the virtual environment
-virtualenv_args=""
 virtualenv_dir='.venv'
 virtualenv_activate="$virtualenv_dir/bin/activate"
 
 if [ ! -f "$virtualenv_activate" ]
 then
-    virtualenv $virtualenv_args $virtualenv_dir
+    python3 -m venv $virtualenv_dir
 fi
 
 source $virtualenv_activate
