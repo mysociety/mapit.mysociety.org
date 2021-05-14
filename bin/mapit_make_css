@@ -19,7 +19,7 @@ subprocess.check_call([
     "mkdir", "-p", "%s/static/css" % parent_dir
 ])
 subprocess.check_call([
-    "sassc", "--sourcemap",
+    "pysassc", "--sourcemap",
     "--style", "compressed",
     "%s/static/sass/main.scss" % parent_dir,
     "%s/static/css/main.css" % parent_dir
