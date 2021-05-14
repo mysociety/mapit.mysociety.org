@@ -7,6 +7,10 @@ redis==2.10.5
 stripe==2.35.0
 six
 
+Shapely==1.7.1
+PyYAML==5.3.1
+python-memcached==1.59
+
 # Bulk lookup
 xlrd<2
 defusedxml==0.5.0

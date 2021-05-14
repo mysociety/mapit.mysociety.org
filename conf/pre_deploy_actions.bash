@@ -10,8 +10,8 @@ cd "$(dirname $BASH_SOURCE)"/..
 # them back to the defaults which is what they would have on the servers.
 PYTHONDONTWRITEBYTECODE=""
 
-# create the virtual environment; we always want system packages
-virtualenv_args="--system-site-packages"
+# create the virtual environment
+virtualenv_args=""
 virtualenv_dir='.venv'
 virtualenv_activate="$virtualenv_dir/bin/activate"
 
@@ -22,15 +22,13 @@ fi
 
 source $virtualenv_activate
 
-# Upgrade pip to a secure version
-# curl -L -s https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
-# Revert to the line above once we can get a newer setuptools from Debian, or
-# pip ceases to need such a recent one.
-curl -L -s https://raw.github.com/mysociety/commonlib/master/bin/get_pip.bash | bash
-# Improve SSL behaviour
-pip install 'pyOpenSSL>=0.14'
+# Install GDAL, correct version, right headers
+gdal_version=$(gdal-config --version)
+# stretch version of GDAL doesn't have matching pypi version
+if [ $gdal_version = "2.1.2" ]; then gdal_version="2.1.3"; fi
+C_INCLUDE_PATH=/usr/include/gdal CPLUS_INCLUDE_PATH=/usr/include/gdal pip install GDAL==$gdal_version
 
-# Install all the packages
+# Install all the (other) packages
 pip install -r requirements.txt
 
 # make sure that there is no old code (the .py files may have been git deleted)
