@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import re
-from six import StringIO
+from io import StringIO
 from mock import patch
 
 from django.contrib.auth.models import User

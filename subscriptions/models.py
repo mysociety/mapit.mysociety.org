@@ -4,7 +4,6 @@ from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
 
-from six import python_2_unicode_compatible
 from api_keys.utils import redis_connection
 
 
@@ -15,7 +14,6 @@ def ensure_int(s):
         return 0
 
 
-@python_2_unicode_compatible
 class Subscription(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     stripe_id = models.CharField(max_length=100)

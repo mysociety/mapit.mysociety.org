@@ -1,4 +1,4 @@
-from six import StringIO
+from io import StringIO
 
 from mock import patch
 from mockredis import mock_strict_redis_client

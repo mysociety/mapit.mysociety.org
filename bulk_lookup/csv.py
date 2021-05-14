@@ -3,12 +3,11 @@ import mmap
 import pyexcel
 from pyexcel._compact import zip_longest
 import defusedxml
-from six import Iterator, PY2
 
 defusedxml.defuse_stdlib()
 
 
-class file_without_nulls_or_cp1252(Iterator):
+class file_without_nulls_or_cp1252(object):
     """An object that behaves like a provided file object,
     but strips any NULL bytes when read() is called, and
     spots Windows-1252 lines."""
@@ -45,8 +44,6 @@ class file_without_nulls_or_cp1252(Iterator):
         except UnicodeDecodeError:
             # ...Assume Windows 1252
             data = data.decode('cp1252')
-        if PY2:
-            data = data.encode('utf-8')
         return data
 
     def read(self, *args):
@@ -64,7 +61,7 @@ class file_without_nulls_or_cp1252(Iterator):
         return data
 
 
-class PyExcelReader(Iterator):
+class PyExcelReader(object):
     # Set up an iterator for reading in a CSV/XLS/XLSX/ODS file
     def __init__(self, file_field):
         self._fieldnames = None

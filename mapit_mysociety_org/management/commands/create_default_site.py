@@ -1,4 +1,4 @@
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings

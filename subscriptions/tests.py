@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import json
-from six import StringIO
+from io import StringIO
 import time
 from mock import patch, Mock
 

@@ -5,14 +5,12 @@ from django.db import models
 from django.dispatch import receiver
 from django.conf import settings
 
-from six import python_2_unicode_compatible
 from account.signals import user_signed_up
 
 from .utils import redis_connection
 
 
 # Inspired by https://github.com/CIGIHub/django-simple-api-key
-@python_2_unicode_compatible
 class APIKey(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

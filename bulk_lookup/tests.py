@@ -1,5 +1,5 @@
 import os
-from six import StringIO, BytesIO
+from io import StringIO, BytesIO
 
 from django.core.management import call_command
 from django.core.files.base import ContentFile, File

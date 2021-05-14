@@ -1,6 +1,5 @@
 from functools import partial
 from django.utils.encoding import force_bytes
-from six.moves import map
 from .multidb import use_primary
 from api_keys.models import APIKey
 
