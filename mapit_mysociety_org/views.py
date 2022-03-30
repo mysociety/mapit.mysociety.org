@@ -103,7 +103,7 @@ class ConfirmEmailView(account.views.ConfirmEmailView):
 
         # Update any associated stripe email
         user = confirmation.email_address.user
-        if user.subscription:
+        if hasattr(user, 'subscription'):
             try:
                 obj = stripe.Subscription.retrieve(user.subscription.stripe_id, expand=['customer'])
                 if obj.customer.email != confirmation.email_address.email:
