@@ -26,9 +26,15 @@ class PatchedRedisTestCase(TestCase):
             mock_strict_redis_client
         )
         self.redis_patcher.start()
+        self.sentinel_patcher = patch(
+            'api_keys.utils.Sentinel',
+            **{'return_value.master_for.return_value': mock_strict_redis_client()}
+        )
+        self.sentinel_patcher.start()
 
     def tearDown(self):
         self.redis_patcher.stop()
+        self.sentinel_patcher.stop()
 
 
 class SignalsTest(PatchedRedisTestCase):

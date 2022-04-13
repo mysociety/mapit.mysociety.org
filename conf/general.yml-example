@@ -14,10 +14,24 @@ MAPIT_DB_PORT: '5432'
 MAPIT_DB_RO_HOST: 'replica'
 MAPIT_DB_RO_PORT: '5433'
 
+# Connection details for Redis.
+# Note that REDIS_DB_HOST and REDIS_DB_PORT will be ignored
+# if REDIS_SENTINEL_HOSTS is set as the connection to the
+# Redis primary will be mediated by Sentinel.
+# REDIS_DB_NUMBER and REDIS_DB_PASSWORD will be used in either
+# case when making the connection to the primary.
 REDIS_DB_HOST: 'localhost'
 REDIS_DB_PORT: 6379
 REDIS_DB_NUMBER: 0
 REDIS_DB_PASSWORD: null
+# REDIS_SENTINEL_HOSTS should be a dict of "'host': port" pairs.
+# If you don't want to use Sentinel, set it to null.
+REDIS_SENTINEL_HOSTS:
+  'localhost': 26379
+# Note that this will not be used unless REDIS_SENTINEL_HOSTS is set.
+# It refers to the set of Redis hosts Sentinel should return connection
+# details for.
+REDIS_SENTINEL_SET: data
 
 # Country is currently one of GB, NO, or KE. Optional; country specific things won't happen if not set.
 COUNTRY: 'GB'

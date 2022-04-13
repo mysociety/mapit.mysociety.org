@@ -1,4 +1,5 @@
 import redis
+from redis.sentinel import Sentinel
 
 from django.conf import settings
 
@@ -9,12 +10,27 @@ _connection = None
 def redis_connection():
     global _connection
     if _connection is None:
-        _connection = redis.StrictRedis(
-            host=settings.REDIS_DB_HOST,
-            port=settings.REDIS_DB_PORT,
-            db=settings.REDIS_DB_NUMBER,
-            password=settings.REDIS_DB_PASSWORD
-        )
+        if settings.REDIS_SENTINEL_HOSTS is not None:
+            # If we have listed any sentinels, use those to manage the connection.
+            # REDIS_SENTINEL_HOSTS will be a dict, but this needs an array of tuples [('host', port)]
+            sentinel = Sentinel(
+                [(host, port) for host, port in settings.REDIS_SENTINEL_HOSTS.items()],
+                socket_timeout=0.1
+            )
+            _connection = sentinel.master_for(
+                settings.REDIS_SENTINEL_SET,
+                socket_timeout=0.1,
+                db=settings.REDIS_DB_NUMBER,
+                password=settings.REDIS_DB_PASSWORD
+            )
+        else:
+            # Otherwise fall back to a regular connection
+            _connection = redis.StrictRedis(
+                host=settings.REDIS_DB_HOST,
+                port=settings.REDIS_DB_PORT,
+                db=settings.REDIS_DB_NUMBER,
+                password=settings.REDIS_DB_PASSWORD
+            )
     return _connection
 
 
