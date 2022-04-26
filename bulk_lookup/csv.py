@@ -72,6 +72,8 @@ class PyExcelReader(object):
         # The XLS reader doesn't accept a stream, but does accept an mmap file...
         if ext in ('xls', 'xlsx'):
             kwargs['file_content'] = mmap.mmap(file_field.fileno(), 0, access=mmap.ACCESS_READ)
+            if ext == 'xlsx':
+                kwargs['library'] = 'pyexcel-xlsx'
         elif ext == 'csv':
             kwargs['file_stream'] = file_without_nulls_or_cp1252(file_field)
         else:  # ODS

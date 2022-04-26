@@ -14,9 +14,10 @@ PyYAML==5.3.1
 python-memcached==1.59
 
 # Bulk lookup
-xlrd<2
+xlrd==2.0.1
 defusedxml==0.7.1
 pyexcel==0.4.5
 pyexcel-io==0.3.4.1
 pyexcel-odsr==0.3.2
 pyexcel-xls==0.3.3
+pyexcel-xlsx==0.3.0
