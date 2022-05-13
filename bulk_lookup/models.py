@@ -47,7 +47,7 @@ def output_file_upload_to(instance, filename):
 
 
 def random_folder_path(base_folder, filename):
-    random_folder = get_random_string()
+    random_folder = get_random_string(12)
     return os.path.join(base_folder, random_folder, filename)
 
 

@@ -3,7 +3,7 @@
 import re
 from django import forms
 from django.utils.crypto import get_random_string
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 import stripe
 from ukpostcodeutils.validation import is_valid_postcode
@@ -12,7 +12,7 @@ from .models import OutputOption
 
 
 def clean_postcode(pc):
-    return re.sub('[^A-Z0-9]', '', smart_text(pc).upper())
+    return re.sub('[^A-Z0-9]', '', smart_str(pc).upper())
 
 
 class CSVForm(forms.Form):
@@ -128,7 +128,7 @@ class PersonalDetailsForm(forms.Form):
         super(PersonalDetailsForm, self).clean()
         # If we're doing this for free
         if self.free:
-            self.cleaned_data['charge_id'] = 'r_%s' % get_random_string()
+            self.cleaned_data['charge_id'] = 'r_%s' % get_random_string(12)
         elif not self.cleaned_data['charge_id']:
             raise forms.ValidationError("You need to pay for the lookup")
         else:

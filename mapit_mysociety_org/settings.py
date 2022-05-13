@@ -50,6 +50,8 @@ if config.get('MAPIT_DB_RO_HOST', '') and 'test' not in sys.argv:
     DATABASE_ROUTERS = ['mapit_mysociety_org.settings.PrimaryReplicaRouter']
     MIDDLEWARE.insert(0, 'mapit_mysociety_org.middleware.force_primary_middleware')
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'mailer', 'api_keys', 'subscriptions', 'bulk_lookup'])
 
 # Insert our project app before mapit and mapit_gb so that the templates
