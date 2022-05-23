@@ -569,7 +569,14 @@ class ManagementTest(PatchedRedisTestCase):
         r = redis_connection()
         r.set('user:127.0.0.2:quota:test_api:count', 42)
         r.set('user:127.0.0.3:quota:test_api:blocked', 1)
+
+        self.assertEqual(r.get('user:127.0.0.2:quota:test_api:count'), b'42')
+        self.assertEqual(r.get('user:127.0.0.3:quota:test_api:blocked'), b'1')
+
         call_command('reset_ip_quotas', stdout=StringIO(), stderr=StringIO(), **kwargs)
+
+        self.assertIsNone(r.get('user:127.0.0.2:quota:test_api:count'))
+        self.assertIsNone(r.get('user:127.0.0.3:quota:test_api:blocked'))
 
     def test_reset_ip_quotas(self):
         self._test_reset_ip_quotas()
