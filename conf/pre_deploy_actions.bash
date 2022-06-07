@@ -21,11 +21,12 @@ fi
 
 source $virtualenv_activate
 
+# Install Wheel
+pip install wheel
+
 # Install GDAL, correct version, right headers
 gdal_version=$(gdal-config --version)
-# stretch version of GDAL doesn't have matching pypi version
-if [ $gdal_version = "2.1.2" ]; then gdal_version="2.1.3"; fi
-C_INCLUDE_PATH=/usr/include/gdal CPLUS_INCLUDE_PATH=/usr/include/gdal pip install GDAL==$gdal_version
+pip install GDAL==$gdal_version
 
 # Install all the (other) packages
 pip install -r requirements.txt
