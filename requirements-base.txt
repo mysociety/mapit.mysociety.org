@@ -11,7 +11,7 @@ stripe==2.35.0
 
 Shapely==1.7.1
 PyYAML==5.4.1
-python-memcached==1.59
+pylibmc==1.6.3
 
 # Bulk lookup
 xlrd==2.0.1
