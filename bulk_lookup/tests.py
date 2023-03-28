@@ -22,8 +22,9 @@ class BulkLookupViewTest(TestCase):
             'wizard_view-current_step': 'postcode_field',
             'postcode_field-postcode_field': 'Bad',
         })
-        self.assertFormError(
-            response, 'form', 'postcode_field', 'Select a valid choice. Bad is not one of the available choices.')
+        self.assertEqual(
+            response.context['form'].errors['postcode_field'][0],
+            'Select a valid choice. Bad is not one of the available choices.')
         response = self.client.post(reverse('home'), {
             'wizard_view-current_step': 'postcode_field',
             'postcode_field-postcode_field': 'Postcode',
