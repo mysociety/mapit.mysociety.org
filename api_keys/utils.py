@@ -25,7 +25,7 @@ def redis_connection():
             )
         else:
             # Otherwise fall back to a regular connection
-            _connection = redis.StrictRedis(
+            _connection = redis.Redis(
                 host=settings.REDIS_DB_HOST,
                 port=settings.REDIS_DB_PORT,
                 db=settings.REDIS_DB_NUMBER,
