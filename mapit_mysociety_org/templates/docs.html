@@ -68,8 +68,19 @@
             response headers.
 
             <p>Whenever an area is returned from MapIt, it is as a
-            dictionary with the following keys: id, name, country, type,
-            parent_area, generation_low, generation_high, codes.</p>
+            dictionary with the following keys: <code>id</code>, <code>name</code>,
+            <code>country</code>, <code>type</code>, <code>parent_area</code>,
+            <code>generation_low</code>, <code>generation_high</code>,
+            and <code>codes</code>.</p>
+            </dd>
+
+            <dt>Errors</dt>
+            <dd>
+            Whenever an error is returned from MapIt, it is as a dictionary
+            with an <code>error</code> key (which contains a textual description
+            such as “Postcode […] is not valid.” or “Usage limit reached.”) and
+            an optional <code>code</code> key (which, if present, will be a copy
+            of the HTTP status code).
             </dd>
 
             <dt>Historical areas</dt>
