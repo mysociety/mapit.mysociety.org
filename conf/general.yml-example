@@ -59,6 +59,7 @@ DEBUG: True
 GOOGLE_ANALYTICS: ""
 
 # A dictionary of IP addresses or User Agents that should be excluded from rate limiting. Optional.
+RATE_LIMIT_FILE: ""
 RATE_LIMIT:
   ips:
     - '127.0.0.1'
