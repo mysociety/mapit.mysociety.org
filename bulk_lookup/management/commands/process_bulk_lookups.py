@@ -8,6 +8,7 @@ import defusedxml
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.core.files import File
 from django.core.mail import send_mail
@@ -28,7 +29,10 @@ class Command(BaseCommand):
     help = "Processes all the bulk lookup jobs that need processing"
 
     def handle(self, *args, **options):
-        self.generation = Generation.objects.current()
+        generation = Generation.objects.current()
+        generation = generation.id if generation else generation
+        self.generation_query = Q(generation_low__lte=generation, generation_high__gte=generation)
+
         for bulk_lookup in BulkLookup.objects.needs_processing():
             self.process_job(bulk_lookup)
 
@@ -82,7 +86,7 @@ class Command(BaseCommand):
         if is_valid_postcode(postcode):
             try:
                 pc = Postcode.objects.get(postcode=postcode)
-                areas = list(add_codes(Area.objects.by_postcode(pc, self.generation)))
+                areas = list(add_codes(Area.objects.by_postcode(pc, self.generation_query)))
                 self.process_mapit_response(areas, row, output_options)
             except Postcode.DoesNotExist:
                 pass
