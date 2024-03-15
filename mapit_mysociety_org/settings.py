@@ -1,5 +1,6 @@
 import os
 import sys
+import yaml
 
 # Import MapIt's settings (first time to quiet flake8)
 from .mapit_settings import (
@@ -152,6 +153,18 @@ API_THROTTLE_BLOCK_TIME = config.get('API_THROTTLE_BLOCK_TIME')
 # What is the default quota limit? As above with rate limiting, this can be
 # varied per key or IP address.
 API_QUOTA_DEFAULT_LIMIT = config.get('API_QUOTA_DEFAULT_LIMIT')
+
+# Potentially load in extra file of IP addresses
+MAPIT_RATE_LIMIT_FILE = config.get('RATE_LIMIT_FILE')
+if MAPIT_RATE_LIMIT_FILE:
+    try:
+        with open(MAPIT_RATE_LIMIT_FILE, 'r') as fp:
+            MAPIT_RATE_LIMIT_FILE = yaml.load(fp, Loader=yaml.SafeLoader)
+            if isinstance(MAPIT_RATE_LIMIT_FILE, dict) and MAPIT_RATE_LIMIT_FILE.get('internal_ips'):
+                MAPIT_RATE_LIMIT['ips'] += MAPIT_RATE_LIMIT_FILE['internal_ips']['ipv4']
+                MAPIT_RATE_LIMIT['ips'] += MAPIT_RATE_LIMIT_FILE['internal_ips']['ipv6']
+    except:
+        MAPIT_RATE_LIMIT_FILE = None
 
 # A list of api keys or IP addresses to exclude from rate limiting
 # Take this from Mapit's existing setting for now
