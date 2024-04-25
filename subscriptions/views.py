@@ -342,20 +342,11 @@ class SubscriptionCancelView(StripeObjectMixin, DeleteView):
     template_name = 'subscriptions/cancel.html'
     success_url = reverse_lazy('subscription')
 
-    def _delete(self):
-        """Django 3 calls delete(), 4 calls form_valid() - call this from both.
-        Could then rewrite to use a form subclass for the confirmation step."""
-        stripe_sub = self.get_object()
-        if stripe_sub:
-            stripe_sub.delete(at_period_end=True)
+    def form_valid(self, form):
+        if self.object:
+            self.object.delete(at_period_end=True)
         messages.add_message(self.request, messages.INFO, 'Your subscription has been cancelled.')
         return HttpResponseRedirect(self.success_url)
-
-    def delete(self, request, *args, **kwargs):
-        return self._delete()
-
-    def form_valid(self, form):
-        return self._delete()
 
 
 def stripe_mapit_sub(invoice):
