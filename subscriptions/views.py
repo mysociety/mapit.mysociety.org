@@ -222,9 +222,10 @@ class SubscriptionUpdateMixin(object):
         # security code can be checked, and therefore fail
         try:
             obj = stripe.Customer.create(**cust_params)
-        except stripe.error.CardError as e:
-            message = ('Sorry, we could not process your payment, please try again. '
-                       'Our payment processor returned: %s' % e.user_message)
+        except (stripe.error.CardError, stripe.error.InvalidRequestError) as e:
+            message = 'Sorry, we could not process your payment, please try again.'
+            if hasattr(e, 'user_message'):
+                message += f' Our payment processor returned: {e.user_message}'
             form = form_data['form']
             form.add_error(None, message)
             # So the token clears

@@ -2,6 +2,7 @@
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 
 
@@ -47,6 +48,12 @@ class SubscriptionMixin(forms.Form):
         self.has_payment_data = has_payment_data
         self.stripe = stripe
         return super(SubscriptionMixin, self).__init__(*args, **kwargs)
+
+    def clean_payment_method(self):
+        pm = self.cleaned_data['payment_method']
+        if pm and len(pm) < 4:
+            raise ValidationError('Invalid value')
+        return pm
 
     def clean(self):
         cleaned_data = super(SubscriptionMixin, self).clean()

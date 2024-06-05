@@ -48,6 +48,7 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
 
     def test_signup_card_error(self):
         self.MockStripe.error.CardError = stripe.error.CardError
+        self.MockStripe.error.InvalidRequestError = stripe.error.InvalidRequestError
         self.MockStripe.Customer.create.side_effect = stripe.error.CardError(
             'Your postcode did not match', 'PARAM', '400')
         self.client.get(reverse('account_signup'))

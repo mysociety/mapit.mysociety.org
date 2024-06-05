@@ -265,14 +265,14 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
 
     def test_update_page_with_plan_add_payment(self):
         self.MockStripe.PaymentMethod.attach.return_value = convert_to_stripe_object({
-            'id': 'PM',
+            'id': 'PMPM',
         }, None, None)
 
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
             'plan': 'mapit-100k-v',
-            'payment_method': 'PM',
+            'payment_method': 'PMPM',
             'charitable_tick': 1,
             'charitable': 'c',
             'charity_number': 123,
@@ -290,9 +290,9 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 10000}
         self.client.get(response['Location'])
 
-        self.MockStripe.PaymentMethod.attach.assert_called_once_with('PM', customer='CUSTOMER-ID')
+        self.MockStripe.PaymentMethod.attach.assert_called_once_with('PMPM', customer='CUSTOMER-ID')
         self.MockStripe.Customer.modify.assert_called_once_with(
-            'CUSTOMER-ID', invoice_settings={'default_payment_method': {'id': 'PM'}})
+            'CUSTOMER-ID', invoice_settings={'default_payment_method': {'id': 'PMPM'}})
 
     def test_update_page_with_plan(self):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
