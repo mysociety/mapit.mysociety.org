@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 import stripe
-from stripe.util import convert_to_stripe_object
+from stripe import convert_to_stripe_object
 
 from api_keys.tests import PatchedRedisTestCase
 from api_keys.utils import redis_connection
