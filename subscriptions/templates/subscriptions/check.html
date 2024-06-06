@@ -50,7 +50,7 @@
         </form>
 
         <script src="https://js.stripe.com/v3"></script>
-        <script id="js-payment" data-key="{{ STRIPE_PUBLIC_KEY }}" src="{% static "js/payment.js" %}"></script>
+        <script id="js-payment" data-key="{{ STRIPE_PUBLIC_KEY }}" data-api-version="{{ STRIPE_API_VERSION }}" src="{% static "js/payment.js" %}"></script>
 
       {% elif requires_action %}
 
@@ -63,7 +63,7 @@
 
         <script src="https://js.stripe.com/v3"></script>
         <script>
-            var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+            var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}', { apiVersion: '{{ STRIPE_API_VERSION }}' });
             stripe.handleCardPayment('{{ payment_intent_client_secret }}').then(function(result) {
                 location.href = location.href;
             });

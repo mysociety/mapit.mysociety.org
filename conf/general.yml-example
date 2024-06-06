@@ -51,6 +51,7 @@ DJANGO_SECRET_KEY: 'gu^&xc)hoibh3x&s+9009jbn4d$!nq0lz+syx-^x8%z24!kfs4'
 # Keys for accepting money via Stripe
 STRIPE_SECRET_KEY: ''
 STRIPE_PUBLIC_KEY: ''
+STRIPE_API_VERSION: ''
 
 # Mapped to Django's DEBUG and TEMPLATE_DEBUG settings. Optional, defaults to True.
 DEBUG: True

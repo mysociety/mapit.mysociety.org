@@ -17,6 +17,7 @@ from . import forms
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_version = settings.STRIPE_API_VERSION
 
 
 class LoginView(account.views.LoginView):
@@ -52,10 +53,6 @@ class SignupView(SubscriptionUpdateMixin, account.views.SignupView):
         initial = super(SignupView, self).get_initial()
         initial['plan'] = self.request.GET.get('plan')
         return initial
-
-    def get_context_data(self, **kwargs):
-        kwargs['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
-        return super(SignupView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
         return self.update_subscription(form)

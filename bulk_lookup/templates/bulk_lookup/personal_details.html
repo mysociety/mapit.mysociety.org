@@ -36,7 +36,7 @@
 
 <script src="https://js.stripe.com/v3"></script>
 <script>
-var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}', { apiVersion: '{{ STRIPE_API_VERSION }}' });
 var elements = stripe.elements();
 var card = elements.create('card');
 card.mount('#card-element');

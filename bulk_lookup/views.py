@@ -111,7 +111,6 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         context['num_good_rows'] = pc_data['num_rows'] - pc_data['bad_rows']
         if self.steps.current == 'personal_details':
             context['price'] = AMOUNT
-            context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
             if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
                 context['price'] = 0
         return context

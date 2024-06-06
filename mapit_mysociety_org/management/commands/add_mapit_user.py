@@ -9,6 +9,7 @@ from api_keys.models import APIKey
 from subscriptions.models import Subscription
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_version = settings.STRIPE_API_VERSION
 
 
 class Command(BaseCommand):
