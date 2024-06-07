@@ -37,6 +37,10 @@
             {% endif %}
             </p>
 
+         {% if stripe.schedule.phases.1 and stripe.schedule.phases.1.items.0.plan.nickname != stripe.plan.nickname %}
+             <p>You are switching to <strong>{{ stripe.schedule.phases.1.items.0.plan.nickname }}</strong> at the end of your current period.</p>
+        {% endif %}
+
             {% if stripe.discount.end %}
                 <p>Your discount will expire on {{ stripe.discount.end|date }}.</p>
             {% endif %}

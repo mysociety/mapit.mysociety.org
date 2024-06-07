@@ -32,7 +32,7 @@ class StripeObjectMixin(object):
             sub = self.subscription = Subscription.objects.get(user=self.request.user)
             return stripe.Subscription.retrieve(sub.stripe_id, expand=[
                 'customer.default_source', 'customer.invoice_settings.default_payment_method',
-                'latest_invoice.payment_intent'])
+                'latest_invoice.payment_intent', 'schedule.phases.items.plan'])
         except Subscription.DoesNotExist:
             # There will be existing accounts with no subscription object
             return None
@@ -181,27 +181,68 @@ class SubscriptionUpdateMixin(object):
                 self.object.customer.id, invoice_settings={'default_payment_method': payment_method})
 
         # Update Stripe subscription
-        args = {
-            'plan': form_data['plan'],
-            'metadata': form_data['metadata'],
-            'cancel_at_period_end': False,  # just in case it had been cancelled
-        }
-        if form_data['coupon']:
-            args['coupon'] = form_data['coupon']
-        elif self.object.discount:
-            args['coupon'] = ''
-        stripe.Subscription.modify(self.object.id, payment_behavior='allow_incomplete', **args)
 
-        # Attempt immediate payment on the upgrade
-        try:
-            invoice = stripe.Invoice.create(
-                customer=self.object.customer, subscription=self.object, tax_rates=[settings.STRIPE_TAX_RATE])
-            stripe.Invoice.finalize_invoice(invoice.id)
-            stripe.Invoice.pay(invoice.id)
-        except stripe.error.InvalidRequestError:
-            pass  # No invoice created if nothing to pay
-        except stripe.error.CardError:
-            pass  # A source may still require 3DS... Stripe will have sent an email :-/
+        for p in settings.PRICING:
+            if p['plan'] == form_data['plan']:
+                new_price = p['price'] * 100
+                if form_data['coupon'] == 'charitable100':
+                    new_price = 0
+                elif form_data['coupon'] == 'charitable50':
+                    new_price /= 2
+            if p['plan'] == self.object.plan.id:
+                old_price = p['price'] * 100
+                if self.object.discount and (coupon := self.object.discount.coupon):
+                    if coupon.percent_off == 100:
+                        old_price = 0
+                    elif coupon.percent_off == 50:
+                        old_price /= 2
+
+        if old_price >= new_price:
+            if self.object.schedule:
+                stripe.SubscriptionSchedule.release(self.object.schedule)
+            schedule = stripe.SubscriptionSchedule.create(from_subscription=self.object.id)
+            phases = [
+                {
+                    'items': [{'price': schedule.phases[0]['items'][0].price}],
+                    'start_date': schedule.phases[0].start_date,
+                    'end_date': schedule.phases[0].end_date,
+                    'proration_behavior': 'none',
+                    'default_tax_rates': [settings.STRIPE_TAX_RATE],
+                },
+                {
+                    'items': [{'price': form_data['plan']}],
+                    'iterations': 1,
+                    'metadata': form_data['metadata'],
+                    'proration_behavior': 'none',
+                    'default_tax_rates': [settings.STRIPE_TAX_RATE],
+                },
+            ]
+            if schedule.phases[0].discounts and schedule.phases[0].discounts[0].coupon:
+                phases[0]['discounts'] = [{'coupon': schedule.phases[0].discounts[0].coupon}]
+            if form_data['coupon']:
+                phases[1]['coupon'] = form_data['coupon']
+            stripe.SubscriptionSchedule.modify(schedule.id, phases=phases)
+            messages.add_message(
+                self.request, messages.INFO, 'Your subscription will downgrade '
+                'at the end of your current billing period.')
+
+        if old_price < new_price:
+            args = {
+                'plan': form_data['plan'],
+                'metadata': form_data['metadata'],
+                'cancel_at_period_end': False,  # just in case it had been cancelled
+                'payment_behavior': 'allow_incomplete',
+                'proration_behavior': 'always_invoice',
+            }
+            if form_data['coupon']:
+                args['coupon'] = form_data['coupon']
+            elif self.object.discount:
+                args['coupon'] = ''
+            if self.object.schedule:
+                stripe.SubscriptionSchedule.release(self.object.schedule)
+            stripe.Subscription.modify(self.object.id, **args)
+
+            messages.add_message(self.request, messages.INFO, 'Thank you very much!')
 
         return super(SubscriptionUpdateMixin, self).form_valid(form_data['form'])
 
@@ -277,8 +318,8 @@ class SubscriptionUpdateMixin(object):
             resp = self._update_subscription(form_data)
         else:
             resp = self._add_subscription(form_data)
+            messages.add_message(self.request, messages.INFO, 'Thank you very much!')
 
-        messages.add_message(self.request, messages.INFO, 'Thank you very much!')
         return resp
 
 
