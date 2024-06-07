@@ -28,12 +28,12 @@
 
         {% if stripe.plan %}
 
-            <p>Your current plan is <strong>{{ stripe.plan.name }}</strong>.</p>
+            <p>Your current plan is <strong>{{ stripe.plan.nickname }}</strong>.</p>
 
             <p>It costs you £{{ actual_paid|floatformat:-2 }}/mth.
             {% if stripe.discount %}
                 (£{{ stripe.plan.amount|floatformat:-2 }}/mth with
-                {{ stripe.discount.coupon.percent_off }}% discount applied.)
+                {{ stripe.discount.coupon.percent_off|floatformat }}% discount applied.)
             {% endif %}
             </p>
 
@@ -52,8 +52,8 @@
                 your next invoice date is {{ stripe.current_period_end|date }}.
             {% endif %}
 
-            {% if account_balance %}
-                <br>Your account has a balance of £{{ account_balance|floatformat:-2 }}.
+            {% if balance %}
+                <br>Your account has a balance of £{{ balance|floatformat:-2 }}.
             {% endif %}
             </p>
 

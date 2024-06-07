@@ -139,6 +139,7 @@ def AjaxConfirmView(request):
                 receipt_email=request.POST['personal_details-email'],
                 confirmation_method='manual',
                 confirm=True,
+                automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
             )
         elif 'payment_intent_id' in request.POST:
             intent = stripe.PaymentIntent.confirm(request.POST['payment_intent_id'])

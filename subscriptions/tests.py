@@ -3,7 +3,7 @@
 import json
 from io import StringIO
 import time
-from mock import patch, Mock
+from mock import patch, Mock, ANY
 
 from django.contrib.auth.models import User
 from django.core import mail
@@ -40,13 +40,13 @@ class PatchedStripeMixin(object):
         self.MockStripe.Subscription.retrieve.return_value = convert_to_stripe_object({
             'id': 'SUBSCRIPTION-ID',
             'created': time.time(),
-            'start': time.time(),
+            'start_date': time.time(),
             'current_period_start': time.time(),
             'current_period_end': time.time(),
             'cancel_at_period_end': False,
             'discount': {
                 'coupon': {
-                    'percent_off': 50,
+                    'percent_off': 50.0,
                 },
                 'end': time.time(),
             },
@@ -58,14 +58,14 @@ class PatchedStripeMixin(object):
             'customer': {
                 'id': 'CUSTOMER-ID',
                 'email': 'CUSTOMER-EMAIL',
-                'account_balance': -400,
+                'balance': -400,
                 'default_source': {'brand': 'Visa', 'last4': '1234'},
                 'invoice_settings': {'default_payment_method': None},
                 'save': Mock(),
             },
             'plan': {
                 'id': 'mapit-0k-v',
-                'name': 'MapIt, unlimited calls',
+                'nickname': 'MapIt, unlimited calls',
                 'amount': 25000,
             },
         }, None, None)
@@ -235,7 +235,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.assertRedirects(response, reverse('subscription'))
         self.MockStripe.Customer.create.assert_called_once_with(email='test@example.com', source='TOKEN')
         self.MockStripe.Subscription.create.assert_called_once_with(
-            customer='CUSTOMER-ID', plan='mapit-100k-v', coupon=None, tax_percent=20,
+            customer='CUSTOMER-ID', plan='mapit-100k-v', coupon=None, default_tax_rates=[ANY],
             expand=['latest_invoice.payment_intent'], payment_behavior='allow_incomplete',
             metadata={'charitable': '', 'description': '', 'charity_number': '', 'interest_contact': 'No'})
         sub = Subscription.objects.get(user=self.user)
@@ -255,7 +255,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.assertRedirects(response, reverse('subscription'))
         self.MockStripe.Customer.create.assert_called_once_with(email='test@example.com')
         self.MockStripe.Subscription.create.assert_called_once_with(
-            customer='CUSTOMER-ID', plan='mapit-10k-v', coupon='charitable100', tax_percent=20,
+            customer='CUSTOMER-ID', plan='mapit-10k-v', coupon='charitable100', default_tax_rates=[ANY],
             expand=['latest_invoice.payment_intent'], payment_behavior='allow_incomplete',
             metadata={'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'})
         sub = Subscription.objects.get(user=self.user)
@@ -282,12 +282,13 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         # Our test, the plan is no longer a dict so we need to make it so
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable50',
+            cancel_at_period_end=False,
             metadata={
                 'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'
             }, plan='mapit-100k-v')
 
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 10000}
+        sub.plan = {'id': sub.plan, 'nickname': 'MapIt', 'amount': 10000}
         self.client.get(response['Location'])
 
         self.MockStripe.PaymentMethod.attach.assert_called_once_with('PMPM', customer='CUSTOMER-ID')
@@ -307,6 +308,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Customer.modify.assert_not_called()
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable100',
+            cancel_at_period_end=False,
             metadata={
                 'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'
             }, plan='mapit-10k-v')
@@ -314,8 +316,8 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 1667}
-        sub.discount.coupon.percent_off = 100
+        sub.plan = {'id': sub.plan, 'nickname': 'MapIt', 'amount': 1667}
+        sub.discount.coupon.percent_off = 100.0
         response = self.client.get(response['Location'])
         self.assertContains(
             response, u'<p>It costs you £0/mth. (£20/mth with 100% discount applied.)</p>', html=True)
@@ -330,6 +332,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Customer.modify.assert_not_called()
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='',
+            cancel_at_period_end=False,
             metadata={
                 'charitable': '', 'description': '', 'charity_number': '', 'interest_contact': 'No'
             }, plan='mapit-100k-v')
@@ -337,7 +340,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = {'id': sub.plan, 'name': 'MapIt', 'amount': 8333}
+        sub.plan = {'id': sub.plan, 'nickname': 'MapIt', 'amount': 8333}
         sub.discount = None
         response = self.client.get(response['Location'])
         self.assertContains(response, u'<p>It costs you £100/mth.</p>', html=True)
@@ -371,11 +374,10 @@ class SubscriptionOtherViewsTest(PatchedStripeMixin, UserTestCase):
             'CUSTOMER-ID', invoice_settings={'default_payment_method': {'id': 'PM'}})
 
     def test_cancellation(self):
-        self.sub.delete = Mock()
         resp = self.client.post(reverse('subscription_cancel'), follow=True)
         self.assertRedirects(resp, reverse('subscription'))
         self.assertContains(resp, 'Your subscription has been cancelled.')
-        self.sub.delete.assert_called_once_with(at_period_end=True)
+        self.MockStripe.Subscription.modify.assert_called_once_with('SUBSCRIPTION-ID', cancel_at_period_end=True)
 
 
 class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
@@ -481,7 +483,7 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
             'id': 'EVENT-ID-FORGIVEN',
             'type': 'invoice.updated',
             'data': {'object': {
-                'id': 'INVOICE-ID', 'subscription': 'ID', 'forgiven': False, 'billing_reason': 'manual'
+                'id': 'INVOICE-ID', 'subscription': 'ID', 'status': 'open', 'billing_reason': 'manual'
             }}
         }, None, None)
         r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)
@@ -496,8 +498,9 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
             'id': 'EVENT-ID-FORGIVEN',
             'type': 'invoice.updated',
             'data': {
-                'object': {'id': 'INVOICE-ID', 'subscription': 'ID', 'forgiven': True, 'billing_reason': 'manual'},
-                'previous_attributes': {'forgiven': False}
+                'object': {'id': 'INVOICE-ID', 'subscription': 'ID',
+                           'status': 'uncollectible', 'billing_reason': 'manual'},
+                'previous_attributes': {'status': 'open'}
             }
         }, None, None)
         r.set('user:%d:quota:%s:count' % (self.user.id, 'test_api'), 1234)

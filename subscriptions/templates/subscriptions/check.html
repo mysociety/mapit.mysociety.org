@@ -19,11 +19,11 @@
             </div>
 
         {% if stripe.plan %}
-            <p>You are subscribing to <strong>{{ stripe.plan.name }}</strong>,
+            <p>You are subscribing to <strong>{{ stripe.plan.nickname }}</strong>,
             costing £{{ actual_paid|floatformat:-2 }}/mth.
             {% if stripe.discount %}
                 (£{{ stripe.plan.amount|floatformat:-2 }}/mth with
-                {{ stripe.discount.coupon.percent_off }}% discount applied.)
+                {{ stripe.discount.coupon.percent_off|floatformat }}% discount applied.)
             {% endif %}
             </p>
         {% endif %}

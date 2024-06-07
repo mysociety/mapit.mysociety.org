@@ -48,7 +48,7 @@ class StripeObjectMixin(object):
             return context
 
         data = self.object
-        for fld in ['current_period_start', 'current_period_end', 'created', 'start']:
+        for fld in ['current_period_start', 'current_period_end', 'created', 'start_date']:
             data[fld] = datetime.fromtimestamp(data[fld])
         if data['discount'] and data['discount']['end']:
             data['discount']['end'] = datetime.fromtimestamp(data['discount']['end'])
@@ -124,12 +124,12 @@ class SubscriptionView(StripeObjectMixin, NeverCacheMixin, DetailView):
         except stripe.error.InvalidRequestError:
             upcoming = None
 
-        balance = customer.account_balance
+        balance = customer.balance
         if upcoming and upcoming.total < 0:
             # Going to be credited
             balance += upcoming.total
 
-        context['account_balance'] = -balance / 100
+        context['balance'] = -balance / 100
         context['upcoming'] = upcoming
         context['quota_status'] = self.subscription.redis_status()
         return context
@@ -184,6 +184,7 @@ class SubscriptionUpdateMixin(object):
         args = {
             'plan': form_data['plan'],
             'metadata': form_data['metadata'],
+            'cancel_at_period_end': False,  # just in case it had been cancelled
         }
         if form_data['coupon']:
             args['coupon'] = form_data['coupon']
@@ -193,7 +194,8 @@ class SubscriptionUpdateMixin(object):
 
         # Attempt immediate payment on the upgrade
         try:
-            invoice = stripe.Invoice.create(customer=self.object.customer, subscription=self.object, tax_percent=20)
+            invoice = stripe.Invoice.create(
+                customer=self.object.customer, subscription=self.object, tax_rates=[settings.STRIPE_TAX_RATE])
             stripe.Invoice.finalize_invoice(invoice.id)
             stripe.Invoice.pay(invoice.id)
         except stripe.error.InvalidRequestError:
@@ -237,7 +239,7 @@ class SubscriptionUpdateMixin(object):
         obj = stripe.Subscription.create(
             payment_behavior='allow_incomplete',
             expand=['latest_invoice.payment_intent'],
-            tax_percent=20,
+            default_tax_rates=[settings.STRIPE_TAX_RATE],
             customer=customer, plan=form_data['plan'], coupon=form_data['coupon'], metadata=form_data['metadata'])
         stripe_id = obj.id
 
@@ -326,7 +328,9 @@ class SubscriptionCardUpdateView(StripeObjectMixin, View):
     success_url = reverse_lazy('subscription')
 
     def get(self, request, *args, **kwargs):
-        intent = stripe.SetupIntent.create()
+        intent = stripe.SetupIntent.create(
+            automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
+        )
         return HttpResponse(json.dumps({'secret': intent.client_secret}), content_type='application/json')
 
     def post(self, request, *args, **kwargs):
@@ -344,7 +348,7 @@ class SubscriptionCancelView(StripeObjectMixin, DeleteView):
 
     def form_valid(self, form):
         if self.object:
-            self.object.delete(at_period_end=True)
+            stripe.Subscription.modify(self.object.id, cancel_at_period_end=True)
         messages.add_message(self.request, messages.INFO, 'Your subscription has been cancelled.')
         return HttpResponseRedirect(self.success_url)
 
@@ -419,6 +423,7 @@ def stripe_hook(request):
             pass
     elif event.type == 'invoice.updated' and stripe_mapit_sub(obj):  # pragma: no branch
         previous = getattr(event.data, 'previous_attributes', None)
-        if obj.forgiven and previous and 'forgiven' in previous and not previous['forgiven']:
+        if obj.status == 'uncollectible' and previous and 'status' in previous \
+                and previous['status'] != 'uncollectible':
             stripe_reset_quota(obj.subscription)
     return HttpResponse(status=200)
