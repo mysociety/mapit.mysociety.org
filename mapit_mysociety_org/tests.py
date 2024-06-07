@@ -19,7 +19,9 @@ from api_keys.tests import PatchedRedisTestCase
 
 
 class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
-    def test_signup(self):
+    @patch('socket.getfqdn')
+    def test_signup(self, socket):
+        socket.return_value = 'example.net'
         self.client.get(reverse('account_signup'))
         resp = self.client.post(reverse('account_signup'), {
             'email': 'testing@example.net',
