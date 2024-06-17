@@ -92,7 +92,11 @@
             {% endif %}
 
             {% if quota_status.history %}
-                <p>Previous months: {{ quota_status.history }}</p>
+                <p>Previous months:
+                {% for month in quota_status.history %}
+                    {{ month|floatformat }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                </p>
             {% endif %}
 
             <hr>
