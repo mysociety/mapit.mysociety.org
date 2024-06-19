@@ -127,6 +127,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         return redirect('finished', pk=bulk_lookup.id, token=bulk_lookup.charge_id)
 
 
+# The flow is from https://docs.stripe.com/payments/accept-a-payment-synchronously
 def AjaxConfirmView(request):
     intent = None
     try:
@@ -139,7 +140,7 @@ def AjaxConfirmView(request):
                 receipt_email=request.POST['personal_details-email'],
                 confirmation_method='manual',
                 confirm=True,
-                automatic_payment_methods={"enabled": True, "allow_redirects": "never"},
+                payment_method_types=['card'],
             )
         elif 'payment_intent_id' in request.POST:
             intent = stripe.PaymentIntent.confirm(request.POST['payment_intent_id'])
