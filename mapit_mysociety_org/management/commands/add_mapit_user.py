@@ -3,6 +3,7 @@ import re
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
+from django.utils.crypto import get_random_string
 import stripe
 
 from api_keys.models import APIKey
@@ -46,7 +47,7 @@ class Command(BaseCommand):
             )
 
         username = email[:25]
-        password = User.objects.make_random_password(length=20)
+        password = get_random_string(20)
         user = User.objects.create_user(username, email, password=password)
         api_key = APIKey.objects.create(user=user, key=APIKey.generate_key())
 
