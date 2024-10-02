@@ -182,8 +182,15 @@ BULK_LOOKUP_AMOUNT = config.get('BULK_LOOKUP_AMOUNT')
 BULK_LOOKUP_PRICE_ID = config.get('BULK_LOOKUP_PRICE_ID')
 
 # API subscriptions
-PRICING = [
-    {'id': 'mapit-10k-v', 'price': 20, 'calls': '10,000'},
-    {'id': 'mapit-100k-v', 'price': 100, 'calls': '100,000'},
-    {'id': 'mapit-0k-v', 'price': 300, 'calls': '0'},
-]
+if 'test' in sys.argv:
+    PRICING = [
+        {'id': 'price_123', 'price': 20, 'calls': '10,000'},
+        {'id': 'price_456', 'price': 100, 'calls': '100,000'},
+        {'id': 'price_789', 'price': 300, 'calls': '0'},
+    ]
+else:
+    PRICING = [
+        {'id': config.get('PRICING_TIER_1_ID'), 'price': config.get('PRICING_TIER_1_AMOUNT'), 'calls': '10,000'},
+        {'id': config.get('PRICING_TIER_2_ID'), 'price': config.get('PRICING_TIER_2_AMOUNT'), 'calls': '100,000'},
+        {'id': config.get('PRICING_TIER_3_ID'), 'price': config.get('PRICING_TIER_3_AMOUNT'), 'calls': '0'},
+    ]

@@ -407,8 +407,8 @@ def stripe_mapit_sub(invoice):
     # If the invoice doesn't have a subscription, ignore it
     if not invoice.subscription:
         return False
-    stripe_sub = stripe.Subscription.retrieve(invoice.subscription)
-    return stripe_sub['items'].data[0].price.id.startswith('mapit')
+    stripe_sub = stripe.Subscription.retrieve(invoice.subscription, expand=['items.data.price.product'])
+    return stripe_sub['items'].data[0].price.product.name.startswith('MapIt')
 
 
 def stripe_reset_quota(subscription):
@@ -436,7 +436,7 @@ def stripe_hook(request):
     elif event.type == 'customer.subscription.updated':
         try:
             sub = Subscription.objects.get(stripe_id=obj.id)
-            sub.redis_update_max(obj['items'].data[0].price.id)
+            sub.redis_update_max(obj['items'].data[0].price)
         except Subscription.DoesNotExist:  # pragma: no cover
             pass
     elif event.type == 'invoice.payment_failed' and obj.billing_reason == 'subscription_cycle' \
@@ -459,7 +459,7 @@ def stripe_hook(request):
         try:
             stripe_sub = stripe.Subscription.retrieve(obj.subscription)
             mapit_sub = Subscription.objects.get(stripe_id=obj.subscription)
-            mapit_sub.redis_update_max(stripe_sub['items'].data[0].price.id)
+            mapit_sub.redis_update_max(stripe_sub['items'].data[0].price)
         except Subscription.DoesNotExist:
             pass
         try:
