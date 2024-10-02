@@ -1,5 +1,3 @@
-import re
-
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
@@ -42,8 +40,7 @@ class Subscription(models.Model):
         return "{0}:history".format(self.redis_key)
 
     def redis_update_max(self, price):
-        m = re.match(r'mapit-(\d+)k', price)
-        max = int(m.group(1)) * 1000
+        max = int(price.metadata['calls'])
         r = redis_connection()
         r.set(self.redis_key_max, max)
         r.delete(self.redis_key_blocked)

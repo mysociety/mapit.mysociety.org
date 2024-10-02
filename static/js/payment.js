@@ -2,20 +2,17 @@
 
 function price_cost() {
   var price = document.querySelector('input[name=price]:checked'),
+    pricing = document.getElementById('js-price-information'),
+    min_price = pricing.dataset.minimumPrice,
     ctick = document.getElementById('id_charitable_tick'),
     c = document.querySelector('input[name=charitable]:checked');
-  price = price ? price.value : '';
+  price = price ? price.value.toLowerCase() : '';
   ctick = ctick ? ctick.checked : '';
   c = c ? c.value : '';
-  var num = 20;
-  if (plan === 'mapit-100k-v') {
-    num = 100;
-  } else if (plan === 'mapit-0k-v') {
-    num = 300;
-  }
+  var num = pricing.dataset[price] || min_price;
   if (ctick) {
     if (c === 'c' || c === 'i') {
-      if (num === 20) {
+      if (num == min_price) {
         num = 0;
       } else {
         num = num / 2;
