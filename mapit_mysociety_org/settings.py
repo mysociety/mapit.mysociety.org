@@ -178,6 +178,7 @@ STRIPE_TAX_RATE = config.get('STRIPE_TAX_RATE')
 # Bulk lookup
 MAX_RETRIES = 3
 RETRY_INTERVAL = 0
+BULK_LOOKUP_PRICE = 50
 
 # API subscriptions
 PRICING = [

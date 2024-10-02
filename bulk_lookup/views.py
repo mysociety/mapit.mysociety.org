@@ -17,9 +17,6 @@ from mapit_mysociety_org.mixins import NeverCacheMixin
 from subscriptions.views import StripeObjectMixin
 
 
-AMOUNT = 20
-
-
 class WizardError(Exception):
     """If something odd happens (e.g. missing data though we're part way
     through the process), raise this and the wizard will reset."""
@@ -67,7 +64,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         if step == 'postcode_field':
             kwargs['bulk_lookup'] = self.get_cleaned_csv_data
         elif step == 'personal_details':
-            kwargs['amount'] = AMOUNT
+            kwargs['amount'] = settings.BULK_LOOKUP_PRICE
             kwargs['free'] = False
             if self.request.user.is_authenticated:
                 if not self.object:
@@ -92,7 +89,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
     def get_context_data(self, form, **kwargs):
         context = super(WizardView, self).get_context_data(form=form, **kwargs)
         if self.steps.current == 'csv':
-            context['amount'] = AMOUNT
+            context['amount'] = settings.BULK_LOOKUP_PRICE
             return context
 
         bulk_lookup = self.get_cleaned_csv_data
@@ -110,7 +107,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
             raise WizardError
         context['num_good_rows'] = pc_data['num_rows'] - pc_data['bad_rows']
         if self.steps.current == 'personal_details':
-            context['price'] = AMOUNT
+            context['price'] = settings.BULK_LOOKUP_PRICE
             if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
                 context['price'] = 0
         return context
@@ -134,7 +131,7 @@ def AjaxConfirmView(request):
         if 'payment_method_id' in request.POST:
             intent = stripe.PaymentIntent.create(
                 payment_method=request.POST['payment_method_id'],
-                amount=AMOUNT * 100,
+                amount=settings.BULK_LOOKUP_PRICE * 100,
                 currency='gbp',
                 description='[MapIt] %s' % (request.POST['personal_details-description'] or 'Bulk lookup',),
                 receipt_email=request.POST['personal_details-email'],
