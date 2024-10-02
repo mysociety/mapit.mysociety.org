@@ -1,10 +1,10 @@
 (function() {
 
-function plan_cost() {
-  var plan = document.querySelector('input[name=plan]:checked'),
+function price_cost() {
+  var price = document.querySelector('input[name=price]:checked'),
     ctick = document.getElementById('id_charitable_tick'),
     c = document.querySelector('input[name=charitable]:checked');
-  plan = plan ? plan.value : '';
+  price = price ? price.value : '';
   ctick = ctick ? ctick.checked : '';
   c = c ? c.value : '';
   var num = 20;
@@ -26,7 +26,7 @@ function plan_cost() {
 }
 
 function need_stripe() {
-  var num = plan_cost();
+  var num = price_cost();
   if (num === 0 || document.getElementById('js-payment').getAttribute('data-has-payment-data')) {
     return false;
   }
@@ -43,10 +43,10 @@ function toggle_stripe() {
   }
 }
 
-if (document.getElementById('id_plan_0')) {
-  document.getElementById('id_plan_0').addEventListener('change', toggle_stripe);
-  document.getElementById('id_plan_1').addEventListener('change', toggle_stripe);
-  document.getElementById('id_plan_2').addEventListener('change', toggle_stripe);
+if (document.getElementById('id_price_0')) {
+  document.getElementById('id_price_0').addEventListener('change', toggle_stripe);
+  document.getElementById('id_price_1').addEventListener('change', toggle_stripe);
+  document.getElementById('id_price_2').addEventListener('change', toggle_stripe);
   var opt = document.getElementById('charitable-desc').querySelector('.account-form__help_text');
   document.getElementById('id_charitable_tick').addEventListener('click', function(e) {
     if (this.checked) {
@@ -187,8 +187,8 @@ form && form.addEventListener('submit', function(e) {
   errors += err('id_email');
   errors += err('id_password');
   errors += err('id_password_confirm');
-  var plan = document.querySelector('input[name=plan]:checked');
-  errors += err_highlight(document.querySelector('label[for=id_plan_0]'), !plan);
+  var price = document.querySelector('input[name=price]:checked');
+  errors += err_highlight(document.querySelector('label[for=id_price_0]'), !price);
   var ctick = document.getElementById('id_charitable_tick').checked;
   var c = document.querySelector('input[name=charitable]:checked');
   errors += err_highlight(document.querySelector('label[for=id_charitable_0]'), ctick && !c);

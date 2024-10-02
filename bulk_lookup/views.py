@@ -102,7 +102,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
             context['price'] = settings.BULK_LOOKUP_AMOUNT
             if not self.object:
                 self.object = self.get_object()
-            if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
+            if self.object and self.object.price.id == settings.PRICING[-1]['id']:
                 context['price'] = 0
         return context
 
