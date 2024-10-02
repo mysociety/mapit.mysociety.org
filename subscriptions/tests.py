@@ -683,6 +683,163 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.PaymentIntent.modify.assert_called_once_with('PI', description='MapIt')
 
 
+class PriceChangeTest(PatchedStripeMixin, UserTestCase):
+    def setUp(self):
+        super().setUp()
+        Subscription.objects.create(user=self.user, stripe_id='ID')
+        self.MockStripe.Price.list.return_value = convert_to_stripe_object({
+            'data': [
+                {'id': 'price_789',
+                 'metadata': {'calls': '0'},
+                 'product': {'id': 'prod_GHI', 'name': 'MapIt, unlimited calls'}},
+                {'id': 'price_789b',
+                 'metadata': {'calls': '0'},
+                 'product': {'id': 'prod_GHI', 'name': 'MapIt, unlimited calls'}},
+                {'id': 'price_123',
+                 'metadata': {'calls': '10000'},
+                 'product': {'id': 'prod_ABC', 'name': 'MapIt, 10,000 calls'}},
+                {'id': 'price_123b',
+                 'metadata': {'calls': '10000'},
+                 'product': {'id': 'prod_ABC', 'name': 'MapIt, 10,000 calls'}},
+                {'id': 'price_456',
+                 'metadata': {'calls': '100000'},
+                 'product': {'id': 'prod_DEF', 'name': 'MapIt, 100,000 calls'}},
+                {'id': 'price_456b',
+                 'metadata': {'calls': '100000'},
+                 'product': {'id': 'prod_DEF', 'name': 'MapIt, 100,000 calls'}},
+            ]
+        }, None, None)
+
+    def test_change_price_charitable_sub(self):
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_789', '--new', 'price_789b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(
+            from_subscription='SUBSCRIPTION-ID')
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_789'}],
+                'start_date': ANY,
+                'iterations': 2,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+                'discounts': [{'coupon': 'charitable50'}]
+            }, {
+                'items': [{'price': 'price_789b'}],
+                'iterations': 1,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+                'discounts': [{'coupon': 'charitable50'}]
+            }])
+
+    def test_change_price_non_charitable_sub(self):
+        sub = self.MockStripe.SubscriptionSchedule.create.return_value
+        sub.phases[0].discounts = None
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_789', '--new', 'price_789b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(
+            from_subscription='SUBSCRIPTION-ID')
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_789'}],
+                'start_date': ANY,
+                'iterations': 2,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+            }, {
+                'items': [{'price': 'price_789b'}],
+                'iterations': 1,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+            }])
+
+    def test_change_price_just_downgraded(self):
+        sub = self.MockStripe.Subscription.retrieve.return_value
+        sub.schedule = convert_to_stripe_object({
+            'id': 'SCHEDULE-ID',
+            'phases': [{
+                'start_date': time.time(),
+                'end_date': time.time(),
+                'discounts': [{'coupon': 'charitable50'}],
+                'items': [{
+                    'price': 'price_789',
+                }]
+            }, {
+                'start_date': time.time(),
+                'end_date': time.time(),
+                'discounts': [{'coupon': 'charitable50'}],
+                'items': [{
+                    'price': 'price_456',
+                }]
+            }],
+        }, None, None)
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_456', '--new', 'price_456b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_789'}],
+                'start_date': ANY,
+                'end_date': ANY,
+                'discounts': [{'coupon': 'charitable50'}]
+            }, {
+                'items': [{'price': 'price_456'}],
+                'start_date': ANY,
+                'end_date': ANY,
+                'discounts': [{'coupon': 'charitable50'}]
+            }, {
+                'items': [{'price': 'price_456b'}],
+                'iterations': 1,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+                'discounts': [{'coupon': 'charitable50'}]
+            }])
+
+    def test_change_price_downgraded_last_month(self):
+        sub = self.MockStripe.Subscription.retrieve.return_value
+        sub.schedule = convert_to_stripe_object({
+            'id': 'SCHEDULE-ID',
+            'phases': [{
+                'start_date': time.time(),
+                'end_date': time.time(),
+                'discounts': [{'coupon': 'charitable50'}],
+                'items': [{
+                    'price': 'price_456',
+                }]
+            }],
+        }, None, None)
+        sub = self.MockStripe.SubscriptionSchedule.create.return_value
+        sub.phases[0].discounts = None
+        sub.phases[0]['items'][0].price = 'price_456'
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_456', '--new', 'price_456b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(
+            from_subscription='SUBSCRIPTION-ID')
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_456'}],
+                'iterations': 2,
+                'start_date': ANY,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+            }, {
+                'items': [{'price': 'price_456b'}],
+                'iterations': 1,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+            }])
+
+
 @override_settings(REDIS_API_NAME='test_api')
 class ManagementTest(PatchedRedisTestCase):
     @override_settings(API_THROTTLE_UNLIMITED=['127.0.0.4'])
