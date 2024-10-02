@@ -51,7 +51,7 @@ class SignupView(SubscriptionUpdateMixin, account.views.SignupView):
 
     def get_initial(self):
         initial = super(SignupView, self).get_initial()
-        initial['plan'] = self.request.GET.get('plan')
+        initial['price'] = self.request.GET.get('price')
         return initial
 
     def form_valid(self, form):

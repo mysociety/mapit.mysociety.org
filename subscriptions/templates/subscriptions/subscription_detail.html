@@ -26,19 +26,19 @@
           {% endif %}
         {% endif %}
 
-        {% if stripe.plan %}
+        {% if stripe.price %}
 
-            <p>Your current plan is <strong>{{ stripe.plan.nickname }}</strong>.</p>
+            <p>Your current plan is <strong>{{ stripe.price.nickname }}</strong>.</p>
 
             <p>It costs you £{{ actual_paid|floatformat:-2 }}/mth.
             {% if stripe.discount %}
-                (£{{ stripe.plan.amount|floatformat:-2 }}/mth with
+                (£{{ stripe.price.unit_amount|floatformat:-2 }}/mth with
                 {{ stripe.discount.coupon.percent_off|floatformat }}% discount applied.)
             {% endif %}
             </p>
 
-         {% if stripe.schedule.phases.1 and stripe.schedule.phases.1.items.0.plan.nickname != stripe.plan.nickname %}
-             <p>You are switching to <strong>{{ stripe.schedule.phases.1.items.0.plan.nickname }}</strong> at the end of your current period.</p>
+         {% if stripe.schedule.phases.1 and stripe.schedule.phases.1.items.0.price.nickname != stripe.price.nickname %}
+             <p>You are switching to <strong>{{ stripe.schedule.phases.1.items.0.price.nickname }}</strong> at the end of your current period.</p>
         {% endif %}
 
             {% if stripe.discount.end %}

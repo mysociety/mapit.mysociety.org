@@ -41,8 +41,8 @@ class Subscription(models.Model):
     def redis_key_history(self):
         return "{0}:history".format(self.redis_key)
 
-    def redis_update_max(self, plan):
-        m = re.match(r'mapit-(\d+)k', plan)
+    def redis_update_max(self, price):
+        m = re.match(r'mapit-(\d+)k', price)
         max = int(m.group(1)) * 1000
         r = redis_connection()
         r.set(self.redis_key_max, max)

@@ -183,7 +183,7 @@ BULK_LOOKUP_PRICE_ID = config.get('BULK_LOOKUP_PRICE_ID')
 
 # API subscriptions
 PRICING = [
-    {'plan': 'mapit-10k-v', 'price': 20, 'calls': '10,000'},
-    {'plan': 'mapit-100k-v', 'price': 100, 'calls': '100,000'},
-    {'plan': 'mapit-0k-v', 'price': 300, 'calls': '0'},
+    {'id': 'mapit-10k-v', 'price': 20, 'calls': '10,000'},
+    {'id': 'mapit-100k-v', 'price': 100, 'calls': '100,000'},
+    {'id': 'mapit-0k-v', 'price': 300, 'calls': '0'},
 ]
