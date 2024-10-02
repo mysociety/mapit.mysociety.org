@@ -389,6 +389,8 @@ class SubscriptionCancelView(StripeObjectMixin, DeleteView):
 
     def form_valid(self, form):
         if self.object:
+            if self.object.schedule:
+                stripe.SubscriptionSchedule.release(self.object.schedule)
             stripe.Subscription.modify(self.object.id, cancel_at_period_end=True)
         messages.add_message(self.request, messages.INFO, 'Your subscription has been cancelled.')
         return HttpResponseRedirect(self.success_url)
