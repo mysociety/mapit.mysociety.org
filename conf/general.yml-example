@@ -54,6 +54,9 @@ STRIPE_PUBLIC_KEY: ''
 STRIPE_API_VERSION: ''
 STRIPE_TAX_RATE: ''
 
+BULK_LOOKUP_AMOUNT: 50
+BULK_LOOKUK_PRICE_ID: 'price_123'
+
 # Mapped to Django's DEBUG and TEMPLATE_DEBUG settings. Optional, defaults to True.
 DEBUG: True
 

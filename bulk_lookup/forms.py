@@ -2,10 +2,8 @@
 
 import re
 from django import forms
-from django.utils.crypto import get_random_string
 from django.utils.encoding import smart_str
 
-import stripe
 from ukpostcodeutils.validation import is_valid_postcode
 
 from .models import OutputOption
@@ -114,24 +112,3 @@ class PersonalDetailsForm(forms.Form):
     description = forms.CharField(
         required=False,
         help_text='You can add a note here if you need to keep track of multiple files.')
-    charge_id = forms.CharField(widget=forms.HiddenInput, required=False)
-
-    def __init__(self, amount, free, *args, **kwargs):
-        self.amount = amount
-        self.free = free
-        super(PersonalDetailsForm, self).__init__(*args, **kwargs)
-
-    def clean(self):
-        """
-        We get here if we're doing it for free, or if they have paid already
-        """
-        super(PersonalDetailsForm, self).clean()
-        # If we're doing this for free
-        if self.free:
-            self.cleaned_data['charge_id'] = 'r_%s' % get_random_string(12)
-        elif not self.cleaned_data['charge_id']:
-            raise forms.ValidationError("You need to pay for the lookup")
-        else:
-            intent = stripe.PaymentIntent.retrieve(self.cleaned_data['charge_id'])
-            if intent.status != 'succeeded':
-                raise forms.ValidationError("You need to pay for the lookup")

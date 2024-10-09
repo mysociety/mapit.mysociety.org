@@ -1,10 +1,12 @@
 import re
 
 from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import FileSystemStorage
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.generic import DetailView
+from django.utils.crypto import get_random_string
 from django.utils.encoding import force_str
 from formtools.wizard.views import SessionWizardView
 import stripe
@@ -12,7 +14,6 @@ import stripe
 from .models import BulkLookup, cache
 from .forms import CSVForm, PostcodeFieldForm, OutputOptionsForm, PersonalDetailsForm
 
-from mapit.shortcuts import output_json
 from mapit_mysociety_org.mixins import NeverCacheMixin
 from subscriptions.views import StripeObjectMixin
 
@@ -63,14 +64,6 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         kwargs = super(WizardView, self).get_form_kwargs(step)
         if step == 'postcode_field':
             kwargs['bulk_lookup'] = self.get_cleaned_csv_data
-        elif step == 'personal_details':
-            kwargs['amount'] = settings.BULK_LOOKUP_PRICE
-            kwargs['free'] = False
-            if self.request.user.is_authenticated:
-                if not self.object:
-                    self.object = self.get_object()
-                if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
-                    kwargs['free'] = True
         return kwargs
 
     def get_form_initial(self, step):
@@ -89,7 +82,6 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
     def get_context_data(self, form, **kwargs):
         context = super(WizardView, self).get_context_data(form=form, **kwargs)
         if self.steps.current == 'csv':
-            context['amount'] = settings.BULK_LOOKUP_PRICE
             return context
 
         bulk_lookup = self.get_cleaned_csv_data
@@ -107,45 +99,60 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
             raise WizardError
         context['num_good_rows'] = pc_data['num_rows'] - pc_data['bad_rows']
         if self.steps.current == 'personal_details':
-            context['price'] = settings.BULK_LOOKUP_PRICE
+            context['price'] = settings.BULK_LOOKUP_AMOUNT
             if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
                 context['price'] = 0
         return context
 
     def done(self, form_list, form_dict, **kwargs):
         data = {}
+
         for form_obj in form_list:
             data.update(form_obj.cleaned_data)
+
+        free = False
+        if self.request.user.is_authenticated:
+            if not self.object:
+                self.object = self.get_object()
+            if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
+                free = True
+                data['charge_id'] = 'r_%s' % get_random_string(12)
 
         output_options = data.pop('output_options')
         data.pop('num_rows')
         bulk_lookup = BulkLookup.objects.create(**data)
         bulk_lookup.output_options.add(*output_options)
-        return redirect('finished', pk=bulk_lookup.id, token=bulk_lookup.charge_id)
+
+        if not free:
+            context = payment_view_context(bulk_lookup)
+            return render(self.request, 'bulk_lookup/payment.html', context)
+        else:
+            return redirect('finished', pk=bulk_lookup.id, token=bulk_lookup.charge_id)
 
 
-# The flow is from https://docs.stripe.com/payments/accept-a-payment-synchronously
-def AjaxConfirmView(request):
-    intent = None
-    try:
-        if 'payment_method_id' in request.POST:
-            intent = stripe.PaymentIntent.create(
-                payment_method=request.POST['payment_method_id'],
-                amount=settings.BULK_LOOKUP_PRICE * 100,
-                currency='gbp',
-                description='[MapIt] %s' % (request.POST['personal_details-description'] or 'Bulk lookup',),
-                receipt_email=request.POST['personal_details-email'],
-                confirmation_method='manual',
-                confirm=True,
-                payment_method_types=['card'],
-            )
-        elif 'payment_intent_id' in request.POST:
-            intent = stripe.PaymentIntent.confirm(request.POST['payment_intent_id'])
-    except stripe.error.CardError as e:
-        return output_json({'error': e.user_message}, 200)
-
-    data, code = generate_payment_response(intent)
-    return output_json(data, code)
+def payment_view_context(bulk_lookup):
+    context = {}
+    return_url = ''.join([
+        'https://',
+        get_current_site(None).domain,
+        f'/bulk/{bulk_lookup.id}/{{CHECKOUT_SESSION_ID}}',
+    ])
+    description = bulk_lookup.description or 'Bulk lookup'
+    session = stripe.checkout.Session.create(
+        line_items=[{
+            'price': 'price_1Q7y4zLoAAr9vgdbwPHVezZ6',
+            'tax_rates': [settings.STRIPE_TAX_RATE],
+            'quantity': 1,
+        }],
+        customer_email=bulk_lookup.email,
+        metadata={"mapit_id": bulk_lookup.id},
+        mode='payment',
+        ui_mode='embedded',
+        return_url=return_url,
+        payment_intent_data={"description": f'[MapIt] {description}'},
+    )
+    context['clientSecret'] = session.client_secret
+    return context
 
 
 def generate_payment_response(intent):
@@ -166,6 +173,16 @@ class FinishedView(NeverCacheMixin, DetailView):
 
     def get_object(self, *args, **kwargs):
         obj = super(FinishedView, self).get_object(*args, **kwargs)
-        if self.kwargs['token'] != obj.charge_id:
-            raise PermissionDenied
+
+        if self.kwargs['token'].startswith('r_'):
+            if self.kwargs['token'] != obj.charge_id:
+                raise PermissionDenied
+        else:
+            checkout_session = stripe.checkout.Session.retrieve(self.kwargs['token'], expand=['line_items'])
+            if checkout_session.metadata['mapit_id'] != str(obj.id):
+                raise PermissionDenied
+            if checkout_session.payment_status != 'unpaid' and not obj.charge_id:
+                obj.charge_id = self.kwargs['token']
+                obj.save()
+
         return obj

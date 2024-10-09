@@ -9,7 +9,7 @@ ordering of the fields, so we list each field separately
 {% endcomment %}
 {% if form.charitable_tick %}
     {% include 'account/_form_fields_signup.html' %}
-{% elif form.email and not form.charge_id %}
+{% elif form.email and not form.description %}
     {% include 'account/_form_field.html' with field=form.email %}
     {% include 'account/_form_field.html' with field=form.password %}
     {% include 'account/_form_field.html' with field=form.password_confirm %}
