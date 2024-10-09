@@ -16,6 +16,7 @@ from django.views.decorators.http import require_POST
 from django.http import HttpResponseRedirect, HttpResponse
 import stripe
 
+from bulk_lookup.models import BulkLookup
 from mapit_mysociety_org.mixins import NeverCacheMixin
 from .forms import SubsForm
 from .models import Subscription
@@ -469,4 +470,12 @@ def stripe_hook(request):
         if obj.status == 'uncollectible' and previous and 'status' in previous \
                 and previous['status'] != 'uncollectible':
             stripe_reset_quota(obj.subscription)
+    elif event.type == 'checkout.session.completed' or event.type == 'checkout.session.async_payment_succeeded':
+        checkout_session = stripe.checkout.Session.retrieve(obj.id, expand=['line_items'])
+        if checkout_session.payment_status != 'unpaid':
+            bulk_lookup = BulkLookup.objects.get(id=checkout_session.metadata['mapit_id'])
+            if not bulk_lookup.charge_id:
+                bulk_lookup.charge_id = obj.id
+                bulk_lookup.save()
+
     return HttpResponse(status=200)
