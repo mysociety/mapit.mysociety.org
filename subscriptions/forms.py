@@ -6,18 +6,18 @@ from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 
 
-def describe_plan(i):
+def describe_price(i):
     s = settings.PRICING[i]
     if s['calls'] == '0':
         desc = '£%d/mth - Unlimited calls' % s['price']
     else:
         desc = '£%d/mth - %s calls per month' % (s['price'], s['calls'])
-    return (s['plan'], desc)
+    return (s['id'], desc)
 
 
 class SubscriptionMixin(forms.Form):
-    plan = forms.ChoiceField(choices=(
-        describe_plan(i) for i in range(3)
+    price = forms.ChoiceField(choices=(
+        describe_price(i) for i in range(3)
     ), label='Please choose a plan', widget=forms.RadioSelect)
     charitable_tick = forms.BooleanField(
         label='I qualify for a charitable discounted price',
@@ -61,8 +61,8 @@ class SubscriptionMixin(forms.Form):
 
         payment_data = cleaned_data.get('stripeToken') or cleaned_data.get('payment_method')
         if not self.has_payment_data and not payment_data and not (
-                cleaned_data.get('plan') == settings.PRICING[0]['plan'] and typ in ('c', 'i')):
-            self.add_error('plan', 'You need to submit payment')
+                cleaned_data.get('price') == settings.PRICING[0]['id'] and typ in ('c', 'i')):
+            self.add_error('price', 'You need to submit payment')
 
         if not self.stripe and not cleaned_data.get('tandcs_tick'):
             self.add_error('tandcs_tick', 'Please agree to the terms and conditions')

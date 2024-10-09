@@ -18,11 +18,11 @@
                  Sorry, your card has been declined. Perhaps you can try another?
             </div>
 
-        {% if stripe.plan %}
-            <p>You are subscribing to <strong>{{ stripe.plan.nickname }}</strong>,
+        {% if stripe.price %}
+            <p>You are subscribing to <strong>{{ stripe.price.nickname }}</strong>,
             costing £{{ actual_paid|floatformat:-2 }}/mth.
             {% if stripe.discount %}
-                (£{{ stripe.plan.amount|floatformat:-2 }}/mth with
+                (£{{ stripe.price.unit_amount|floatformat:-2 }}/mth with
                 {{ stripe.discount.coupon.percent_off|floatformat }}% discount applied.)
             {% endif %}
             </p>

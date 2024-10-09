@@ -11,7 +11,12 @@
     {% include 'account/_form_field.html' with field=form.password_confirm %}
 {% endif %}
 
-{% include 'account/_form_field.html' with field=form.plan %}
+<span id="js-price-information"
+      data-{{ PRICING.0.id }}="{{ PRICING.0.price }}"
+      data-{{ PRICING.1.id }}="{{ PRICING.1.price }}"
+      data-{{ PRICING.2.id }}="{{ PRICING.2.price }}"></span>
+
+{% include 'account/_form_field.html' with field=form.price %}
 {% include 'account/_form_field_checkbox.html' with field=form.charitable_tick %}
 <div id="charitable-qns"{% if not form.charitable_tick.value %} style="display:none"{% endif %}>
     {% include 'account/_form_field.html' with field=form.charitable %}

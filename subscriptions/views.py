@@ -30,9 +30,9 @@ class StripeObjectMixin(object):
     def get_object(self):
         try:
             sub = self.subscription = Subscription.objects.get(user=self.request.user)
-            return stripe.Subscription.retrieve(sub.stripe_id, expand=[
+            sub_stripe = stripe.Subscription.retrieve(sub.stripe_id, expand=[
                 'customer.default_source', 'customer.invoice_settings.default_payment_method',
-                'latest_invoice.payment_intent', 'schedule.phases.items.plan'])
+                'latest_invoice.payment_intent', 'schedule.phases.items.price'])
         except Subscription.DoesNotExist:
             # There will be existing accounts with no subscription object
             return None
@@ -41,6 +41,9 @@ class StripeObjectMixin(object):
             # gone and remove here too
             sub.delete()
             return None
+        # Make a helper to the price
+        sub_stripe.price = sub_stripe['items'].data[0].price
+        return sub_stripe
 
     def get_context_data(self, **kwargs):
         context = super(StripeObjectMixin, self).get_context_data(**kwargs)
@@ -56,11 +59,11 @@ class StripeObjectMixin(object):
         # Calculate actual amount paid, including discount
         if data['discount'] and data['discount']['coupon'] and data['discount']['coupon']['percent_off']:
             context['actual_paid'] = add_vat(int(
-                data['plan']['amount'] * (100 - data['discount']['coupon']['percent_off']) / 100))
-            data['plan']['amount'] = add_vat(data['plan']['amount'])
+                data['price']['unit_amount'] * (100 - data['discount']['coupon']['percent_off']) / 100))
+            data['price']['unit_amount'] = add_vat(data['price']['unit_amount'])
         else:
-            data['plan']['amount'] = add_vat(data['plan']['amount'])
-            context['actual_paid'] = data['plan']['amount']
+            data['price']['unit_amount'] = add_vat(data['price']['unit_amount'])
+            context['actual_paid'] = data['price']['unit_amount']
 
         if data.customer.invoice_settings.default_payment_method:
             context['card_info'] = data.customer.invoice_settings.default_payment_method.card
@@ -183,13 +186,13 @@ class SubscriptionUpdateMixin(object):
         # Update Stripe subscription
 
         for p in settings.PRICING:
-            if p['plan'] == form_data['plan']:
+            if p['id'] == form_data['price']:
                 new_price = p['price'] * 100
                 if form_data['coupon'] == 'charitable100':
                     new_price = 0
                 elif form_data['coupon'] == 'charitable50':
                     new_price /= 2
-            if p['plan'] == self.object.plan.id:
+            if p['id'] == self.object.price.id:
                 old_price = p['price'] * 100
                 if self.object.discount and (coupon := self.object.discount.coupon):
                     if coupon.percent_off == 100:
@@ -210,7 +213,7 @@ class SubscriptionUpdateMixin(object):
                     'default_tax_rates': [settings.STRIPE_TAX_RATE],
                 },
                 {
-                    'items': [{'price': form_data['plan']}],
+                    'items': [{'price': form_data['price']}],
                     'iterations': 1,
                     'metadata': form_data['metadata'],
                     'proration_behavior': 'none',
@@ -228,7 +231,7 @@ class SubscriptionUpdateMixin(object):
 
         if old_price < new_price:
             args = {
-                'plan': form_data['plan'],
+                'items': [{'price': form_data['price']}],
                 'metadata': form_data['metadata'],
                 'cancel_at_period_end': False,  # just in case it had been cancelled
                 'payment_behavior': 'allow_incomplete',
@@ -276,12 +279,15 @@ class SubscriptionUpdateMixin(object):
         customer = obj.id
 
         assert form_data['stripeToken'] or form_data['payment_method'] or (
-            form_data['plan'] == settings.PRICING[0]['plan'] and form_data['coupon'] == 'charitable100')
+            form_data['price'] == settings.PRICING[0]['id'] and form_data['coupon'] == 'charitable100')
         obj = stripe.Subscription.create(
             payment_behavior='allow_incomplete',
             expand=['latest_invoice.payment_intent'],
             default_tax_rates=[settings.STRIPE_TAX_RATE],
-            customer=customer, plan=form_data['plan'], coupon=form_data['coupon'], metadata=form_data['metadata'])
+            customer=customer,
+            items=[{"price": form_data['price']}],
+            coupon=form_data['coupon'],
+            metadata=form_data['metadata'])
         stripe_id = obj.id
 
         # Now create the user (signup) or get redirect (update)
@@ -304,7 +310,7 @@ class SubscriptionUpdateMixin(object):
         form_data['coupon'] = None
         if form_data['charitable'] in ('c', 'i'):
             form_data['coupon'] = 'charitable50'
-            if form_data['plan'] == settings.PRICING[0]['plan']:
+            if form_data['price'] == settings.PRICING[0]['id']:
                 form_data['coupon'] = 'charitable100'
 
         form_data['metadata'] = {
@@ -337,14 +343,14 @@ class SubscriptionUpdateView(StripeObjectMixin, SubscriptionUpdateMixin, NeverCa
         if self.object:
             interest_contact = self.object.metadata.get('interest_contact', 'No')
             interest_contact = interest_contact == 'Yes' and True or False
-            initial['plan'] = self.object.plan.id
+            initial['price'] = self.object.price.id
             initial['charitable_tick'] = True if self.object.discount else False
             initial['charitable'] = self.object.metadata.get('charitable', '')
             initial['charity_number'] = self.object.metadata.get('charity_number', '')
             initial['description'] = self.object.metadata.get('description', '')
             initial['interest_contact'] = interest_contact
         else:
-            initial['plan'] = self.request.GET.get('plan')
+            initial['price'] = self.request.GET.get('price')
         return initial
 
     def get_form_kwargs(self):
@@ -400,8 +406,8 @@ def stripe_mapit_sub(invoice):
     # If the invoice doesn't have a subscription, ignore it
     if not invoice.subscription:
         return False
-    stripe_sub = stripe.Subscription.retrieve(invoice.subscription)
-    return stripe_sub.plan.id.startswith('mapit')
+    stripe_sub = stripe.Subscription.retrieve(invoice.subscription, expand=['items.data.price.product'])
+    return stripe_sub['items'].data[0].price.product.name.startswith('MapIt')
 
 
 def stripe_reset_quota(subscription):
@@ -429,7 +435,7 @@ def stripe_hook(request):
     elif event.type == 'customer.subscription.updated':
         try:
             sub = Subscription.objects.get(stripe_id=obj.id)
-            sub.redis_update_max(obj.plan.id)
+            sub.redis_update_max(obj['items'].data[0].price)
         except Subscription.DoesNotExist:  # pragma: no cover
             pass
     elif event.type == 'invoice.payment_failed' and obj.billing_reason == 'subscription_cycle' \
@@ -452,7 +458,7 @@ def stripe_hook(request):
         try:
             stripe_sub = stripe.Subscription.retrieve(obj.subscription)
             mapit_sub = Subscription.objects.get(stripe_id=obj.subscription)
-            mapit_sub.redis_update_max(stripe_sub.plan.id)
+            mapit_sub.redis_update_max(stripe_sub['items'].data[0].price)
         except Subscription.DoesNotExist:
             pass
         try:

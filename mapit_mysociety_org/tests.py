@@ -28,7 +28,7 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
             'password': 'password',
             'password_confirm': 'password',
             'tandcs_tick': 1,
-            'plan': 'mapit-10k-v',
+            'price': 'price_123',
             'charitable_tick': 1,
             'charitable': 'c',
             'charity_number': '123',
@@ -59,7 +59,7 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
             'password': 'password',
             'password_confirm': 'password',
             'tandcs_tick': 1,
-            'plan': 'mapit-10k-v',
+            'price': 'price_123',
             'charitable_tick': 1,
             'charitable': 'c',
             'charity_number': '123',
@@ -71,18 +71,29 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
 class ManagementTest(PatchedStripeMixin, PatchedRedisTestCase):
     def test_add_mapit_user(self):
         with patch('mapit_mysociety_org.management.commands.add_mapit_user.stripe', self.MockStripe):
-            self.MockStripe.Plan.list.return_value = convert_to_stripe_object({
-                'data': [{'id': 'mapit-0k-v'}, {'id': 'mapit-10k-v'}, {'id': 'mapit-100k-v'}]
+            self.MockStripe.Price.list.return_value = convert_to_stripe_object({
+                'data': [
+                    {'id': 'price_789',
+                     'metadata': {'calls': '0'},
+                     'product': {'id': 'prod_GHI', 'name': 'MapIt, unlimited calls'}},
+                    {'id': 'price_123',
+                     'metadata': {'calls': '10000'},
+                     'product': {'id': 'prod_ABC', 'name': 'MapIt, 10,000 calls'}},
+                    {'id': 'price_456',
+                     'metadata': {'calls': '100000'},
+                     'product': {'id': 'prod_DEF', 'name': 'MapIt, 100,000 calls'}},
+                ]
             }, None, None)
             call_command(
-                'add_mapit_user', '--email=test@example.com', '--plan=mapit-100k-v',
+                'add_mapit_user', '--email', 'test@example.com', '--price', "MapIt, 100,000 calls",
                 coupon='charitable25-6months', trial='10',
                 stdout=StringIO(), stderr=StringIO())
 
         self.MockStripe.Coupon.create.assert_called_once_with(
             id='charitable25-6months', duration='repeating', duration_in_months='6', percent_off='25')
         self.MockStripe.Subscription.create.assert_called_once_with(
-            customer='CUSTOMER-ID', plan='mapit-100k-v', coupon='charitable25-6months', trial_period_days='10')
+            customer='CUSTOMER-ID', items=[{"price": 'price_456'}],
+            coupon='charitable25-6months', trial_period_days='10')
 
         user = User.objects.get(email='test@example.com')
         sub = Subscription.objects.get(user=user)

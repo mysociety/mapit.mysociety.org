@@ -34,9 +34,9 @@
             <li><strong>Free</strong> for charitable users</li>
         </ul>
       {% if request.user.is_authenticated %}
-        <a class="btn btn--primary" href="{% url 'subscription_update' %}?plan={{ PRICING.0.plan }}">Switch plan</a>
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}?price={{ PRICING.0.id }}">Switch plan</a>
       {% else %}
-        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.0.plan }}">Sign up</a>
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?price={{ PRICING.0.id }}">Sign up</a>
       {% endif %}
     </div>
 
@@ -51,9 +51,9 @@
             <li><strong>50% off</strong> for charitable users</li>
         </ul>
       {% if request.user.is_authenticated %}
-        <a class="btn btn--primary" href="{% url 'subscription_update' %}?plan={{ PRICING.1.plan }}">Switch plan</a>
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}?price={{ PRICING.1.id }}">Switch plan</a>
       {% else %}
-        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.1.plan }}">Sign up</a>
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?price={{ PRICING.1.id }}">Sign up</a>
       {% endif %}
     </div>
 
@@ -72,9 +72,9 @@
             <li><strong>50% off</strong> for charitable users</li>
         </ul>
       {% if request.user.is_authenticated %}
-        <a class="btn btn--primary" href="{% url 'subscription_update' %}?plan={{ PRICING.2.plan }}">Switch plan</a>
+        <a class="btn btn--primary" href="{% url 'subscription_update' %}?price={{ PRICING.2.id }}">Switch plan</a>
       {% else %}
-        <a class="btn btn--primary" href="{% url 'account_signup' %}?plan={{ PRICING.2.plan }}">Sign up</a>
+        <a class="btn btn--primary" href="{% url 'account_signup' %}?price={{ PRICING.2.id }}">Sign up</a>
       {% endif %}
     </div>
 

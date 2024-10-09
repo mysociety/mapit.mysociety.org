@@ -69,7 +69,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
             if self.request.user.is_authenticated:
                 if not self.object:
                     self.object = self.get_object()
-                if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
+                if self.object and self.object.price.id == settings.PRICING[-1]['id']:
                     kwargs['free'] = True
         return kwargs
 
@@ -108,7 +108,7 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         context['num_good_rows'] = pc_data['num_rows'] - pc_data['bad_rows']
         if self.steps.current == 'personal_details':
             context['price'] = settings.BULK_LOOKUP_PRICE
-            if self.object and self.object.plan.id == settings.PRICING[-1]['plan']:
+            if self.object and self.object.price.id == settings.PRICING[-1]['id']:
                 context['price'] = 0
         return context
 

@@ -10,7 +10,7 @@
         <h2>{% trans "Invoices" %}</h2>
         {% include 'account/_messages.html' %}
 
-        {% if stripe.plan %}
+        {% if stripe.price %}
 
             <table class="striped">
                 <tr>

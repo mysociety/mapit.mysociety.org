@@ -63,10 +63,21 @@ class PatchedStripeMixin(object):
                 'invoice_settings': {'default_payment_method': None},
                 'save': Mock(),
             },
-            'plan': {
-                'id': 'mapit-0k-v',
-                'nickname': 'MapIt, unlimited calls',
-                'amount': 25000,
+            'items': {
+                'data': [{
+                    'price': {
+                        'id': 'price_789',
+                        'nickname': 'MapIt, unlimited calls',
+                        'unit_amount': 25000,
+                        'metadata': {
+                            'calls': '0',
+                        },
+                        'product': {
+                            'id': 'prod_ABC',
+                            'name': 'MapIt, unlimited calls',
+                        },
+                    },
+                }],
             },
             "schedule": None,
         }, None, None)
@@ -89,7 +100,7 @@ class PatchedStripeMixin(object):
                     'coupon': 'charitable50',
                 }],
                 'items': [{
-                    'price': 'mapit-0k-v',
+                    'price': 'price_789',
                 }]
             }],
         }, None, None)
@@ -149,14 +160,14 @@ class SubsFormTest(TestCase):
         form = SubsForm(data=data)
         self.assertEqual(form.errors, {
             "tandcs_tick": ["Please agree to the terms and conditions"],
-            "plan": ["This field is required.", "You need to submit payment"]}
+            "price": ["This field is required.", "You need to submit payment"]}
         )
         data.update({'tandcs_tick': True})
         form = SubsForm(data=data)
-        self.assertEqual(form.errors, {"plan": ["This field is required.", "You need to submit payment"]})
-        data.update({'plan': 'mapit-10k-v'})
+        self.assertEqual(form.errors, {"price": ["This field is required.", "You need to submit payment"]})
+        data.update({'price': 'price_123'})
         form = SubsForm(data=data)
-        self.assertEqual(form.errors, {"plan": ["You need to submit payment"]})
+        self.assertEqual(form.errors, {"price": ["You need to submit payment"]})
         data.update({'charitable_tick': True, 'charitable': 'c'})
         form = SubsForm(data=data)
         self.assertEqual(form.errors, {'charity_number': ['Please provide your charity number']})
@@ -171,15 +182,15 @@ class SubsFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_update_plan(self):
-        data = {'plan': 'mapit-10k-v'}
+        data = {'price': 'price_123'}
         form = SubsForm(stripe=True, data=data)
-        self.assertEqual(form.errors, {"plan": ["You need to submit payment"]})
+        self.assertEqual(form.errors, {"price": ["You need to submit payment"]})
         data.update({'stripeToken': 'TOKEN'})
         form = SubsForm(stripe=True, data=data)
         self.assertTrue(form.is_valid())
 
     def test_update_plan_has_payment(self):
-        form = SubsForm(stripe=True, has_payment_data=True, data={'plan': 'mapit-0k-v'})
+        form = SubsForm(stripe=True, has_payment_data=True, data={'price': 'price_123'})
         self.assertTrue(form.is_valid())
 
 
@@ -228,7 +239,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.client.login(username="Test user", password="password")
         response = self.client.get(reverse('subscription_update'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['form']['plan'].value(), None)
+        self.assertEqual(response.context['form']['price'].value(), None)
         self.assertEqual(bool(response.context['form']['charitable_tick'].value()), False)
         self.assertEqual(response.context['form']['tandcs_tick'].value(), None)
         self.assertContains(response, 'tandcs_tick')
@@ -237,7 +248,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.get(reverse('subscription_update'))
-        self.assertEqual(response.context['form']['plan'].value(), 'mapit-0k-v')
+        self.assertEqual(response.context['form']['price'].value(), 'price_789')
         self.assertEqual(bool(response.context['form']['charitable_tick'].value()), True)
         self.assertEqual(response.context['form']['tandcs_tick'].value(), None)
         self.assertNotContains(response, 'tandcs_tick')
@@ -246,13 +257,13 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
             'tandcs_tick': '1',
-            'plan': 'mapit-100k-v',
+            'price': 'price_456',
             'stripeToken': 'TOKEN',
         }, follow=True)
         self.assertRedirects(response, reverse('subscription'))
         self.MockStripe.Customer.create.assert_called_once_with(email='test@example.com', source='TOKEN')
         self.MockStripe.Subscription.create.assert_called_once_with(
-            customer='CUSTOMER-ID', plan='mapit-100k-v', coupon=None, default_tax_rates=[ANY],
+            customer='CUSTOMER-ID', items=[{"price": 'price_456'}], coupon=None, default_tax_rates=[ANY],
             expand=['latest_invoice.payment_intent'], payment_behavior='allow_incomplete',
             metadata={'charitable': '', 'description': '', 'charity_number': '', 'interest_contact': 'No'})
         sub = Subscription.objects.get(user=self.user)
@@ -264,7 +275,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
             'tandcs_tick': '1',
-            'plan': 'mapit-10k-v',
+            'price': 'price_123',
             'charitable_tick': '1',
             'charitable': 'c',
             'charity_number': '123',
@@ -272,7 +283,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.assertRedirects(response, reverse('subscription'))
         self.MockStripe.Customer.create.assert_called_once_with(email='test@example.com')
         self.MockStripe.Subscription.create.assert_called_once_with(
-            customer='CUSTOMER-ID', plan='mapit-10k-v', coupon='charitable100', default_tax_rates=[ANY],
+            customer='CUSTOMER-ID', items=[{"price": 'price_123'}], coupon='charitable100', default_tax_rates=[ANY],
             expand=['latest_invoice.payment_intent'], payment_behavior='allow_incomplete',
             metadata={'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'})
         sub = Subscription.objects.get(user=self.user)
@@ -283,7 +294,11 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
     def test_update_page_with_plan_add_payment(self):
         # Set sub to 10k so this is an upgrade
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = convert_to_stripe_object({'id': 'mapit-10k-v', 'nickname': 'MapIt', 'amount': 10000})
+        sub['items'].data[0].price = convert_to_stripe_object({
+            'id': 'price_123',
+            'nickname': 'MapIt',
+            'unit_amount': 10000
+        })
 
         self.MockStripe.PaymentMethod.attach.return_value = convert_to_stripe_object({
             'id': 'PMPM',
@@ -292,27 +307,22 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
-            'plan': 'mapit-100k-v',
+            'price': 'price_456',
             'payment_method': 'PMPM',
             'charitable_tick': 1,
             'charitable': 'c',
             'charity_number': 123,
         })
         self.assertEqual(response.status_code, 302)
-        # The real code refetches from stripe after the redirect
-        # Our test, the plan is no longer a dict so we need to make it so
         self.MockStripe.Subscription.modify.assert_called_once_with(
             'SUBSCRIPTION-ID', payment_behavior='allow_incomplete', coupon='charitable50',
             cancel_at_period_end=False,
             proration_behavior='always_invoice',
             metadata={
                 'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'
-            }, plan='mapit-100k-v')
+            }, items=[{"price": 'price_456'}])
 
-        sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = {'id': sub.plan, 'nickname': 'MapIt', 'amount': 10000}
         self.client.get(response['Location'])
-
         self.MockStripe.PaymentMethod.attach.assert_called_once_with('PMPM', customer='CUSTOMER-ID')
         self.MockStripe.Customer.modify.assert_called_once_with(
             'CUSTOMER-ID', invoice_settings={'default_payment_method': {'id': 'PMPM'}})
@@ -320,12 +330,16 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
     def test_update_page_with_plan_upgrade(self):
         # Set sub to 10k so this is an upgrade
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = convert_to_stripe_object({'id': 'mapit-10k-v', 'nickname': 'MapIt', 'amount': 10000})
+        sub['items'].data[0].price = convert_to_stripe_object({
+            'id': 'price_123',
+            'nickname': 'MapIt',
+            'unit_amount': 1667,
+        })
 
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
-            'plan': 'mapit-100k-v',
+            'price': 'price_456',
             'charitable_tick': 1,
             'charitable': 'c',
             'charity_number': 123,
@@ -338,22 +352,26 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             proration_behavior='always_invoice',
             metadata={
                 'charitable': 'c', 'description': '', 'charity_number': '123', 'interest_contact': 'No'
-            }, plan='mapit-100k-v')
+            }, items=[{"price": 'price_456'}])
 
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = {'id': sub.plan, 'nickname': 'MapIt', 'amount': 1667}
-        sub.discount.coupon.percent_off = 100.0
+        sub['items'].data[0].price = convert_to_stripe_object({
+            'id': 'price_456',
+            'nickname': 'MapIt',
+            'unit_amount': 7500
+        })
+        sub.discount.coupon.percent_off = 50.0
         response = self.client.get(response['Location'])
         self.assertContains(
-            response, u'<p>It costs you £0/mth. (£20/mth with 100% discount applied.)</p>', html=True)
+            response, u'<p>It costs you £45/mth. (£90/mth with 50% discount applied.)</p>', html=True)
 
     def test_update_page_with_plan_downgrade(self):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
-            'plan': 'mapit-10k-v',
+            'price': 'price_123',
             'charitable_tick': 1,
             'charitable': 'c',
             'charity_number': 123,
@@ -363,14 +381,14 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(from_subscription='SUBSCRIPTION-ID')
         self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
             'SCHEDULE-ID', phases=[{
-                'items': [{'price': 'mapit-0k-v'}],
+                'items': [{'price': 'price_789'}],
                 'start_date': ANY,
                 'end_date': ANY,
                 'default_tax_rates': [ANY],
                 'proration_behavior': 'none',
                 'discounts': [{'coupon': 'charitable50'}],
             }, {
-                'items': [{'price': 'mapit-10k-v'}],
+                'items': [{'price': 'price_123'}],
                 'iterations': 1,
                 'metadata': {'charitable': 'c', 'charity_number': '123', 'description': '', 'interest_contact': 'No'},
                 'default_tax_rates': [ANY],
@@ -382,12 +400,16 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
     def test_update_page_with_plan_remove_charitable_upgrade(self):
         # Set sub to 10k so this is an upgrade
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = convert_to_stripe_object({'id': 'mapit-10k-v', 'nickname': 'MapIt', 'amount': 10000})
+        sub['items'].data[0].price = convert_to_stripe_object({
+            'id': 'price_123',
+            'nickname': 'MapIt',
+            'unit_amount': 10000
+        })
 
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
-            'plan': 'mapit-100k-v',
+            'price': 'price_456',
         })
         self.assertEqual(response.status_code, 302)
         self.MockStripe.Customer.modify.assert_not_called()
@@ -397,12 +419,16 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             proration_behavior='always_invoice',
             metadata={
                 'charitable': '', 'description': '', 'charity_number': '', 'interest_contact': 'No'
-            }, plan='mapit-100k-v')
+            }, items=[{"price": 'price_456'}])
 
         # The real code refetches from stripe after the redirect
         # We need to reset the plan and the discount
         sub = self.MockStripe.Subscription.retrieve.return_value
-        sub.plan = {'id': sub.plan, 'nickname': 'MapIt', 'amount': 8333}
+        sub['items'].data[0].price = convert_to_stripe_object({
+            'id': sub['items'].data[0].price.id,
+            'nickname': 'MapIt',
+            'unit_amount': 8333
+        })
         sub.discount = None
         response = self.client.get(response['Location'])
         self.assertContains(response, u'<p>It costs you £100/mth.</p>', html=True)
@@ -411,7 +437,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
         self.client.login(username="Test user", password="password")
         response = self.client.post(reverse('subscription_update'), {
-            'plan': 'mapit-100k-v',
+            'price': 'price_456',
         })
         self.assertEqual(response.status_code, 302)
         self.MockStripe.Customer.modify.assert_not_called()
@@ -419,14 +445,14 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(from_subscription='SUBSCRIPTION-ID')
         self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
             'SCHEDULE-ID', phases=[{
-                'items': [{'price': 'mapit-0k-v'}],
+                'items': [{'price': 'price_789'}],
                 'start_date': ANY,
                 'end_date': ANY,
                 'default_tax_rates': [ANY],
                 'proration_behavior': 'none',
                 'discounts': [{'coupon': 'charitable50'}],
             }, {
-                'items': [{'price': 'mapit-100k-v'}],
+                'items': [{'price': 'price_456'}],
                 'iterations': 1,
                 'metadata': {'charitable': '', 'charity_number': '', 'description': '', 'interest_contact': 'No'},
                 'default_tax_rates': [ANY],
@@ -491,7 +517,15 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Event.retrieve.return_value = convert_to_stripe_object({
             'id': 'EVENT-ID-UPDATED',
             'type': 'customer.subscription.updated',
-            'data': {'object': {'id': 'ID', 'plan': {'id': 'mapit-10k-v'}}}
+            'data': {'object': {
+                'id': 'ID',
+                'items': {'data': [{
+                    "price": {
+                        'id': 'price_123',
+                        'metadata': {'calls': 10000},
+                    }
+                }]}
+            }}
         }, None, None)
         self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': [], 'quota': 0, 'blocked': 0})
         self.post_to_hook('EVENT-ID-UPDATED')
@@ -647,6 +681,163 @@ class SubscriptionHookViewTest(PatchedStripeMixin, UserTestCase):
         self.assertEqual(self.sub.redis_status(), {'count': 0, 'history': [b'1234'], 'quota': 0, 'blocked': 0})
         self.MockStripe.Charge.modify.assert_called_once_with('CHARGE', description='MapIt')
         self.MockStripe.PaymentIntent.modify.assert_called_once_with('PI', description='MapIt')
+
+
+class PriceChangeTest(PatchedStripeMixin, UserTestCase):
+    def setUp(self):
+        super().setUp()
+        Subscription.objects.create(user=self.user, stripe_id='ID')
+        self.MockStripe.Price.list.return_value = convert_to_stripe_object({
+            'data': [
+                {'id': 'price_789',
+                 'metadata': {'calls': '0'},
+                 'product': {'id': 'prod_GHI', 'name': 'MapIt, unlimited calls'}},
+                {'id': 'price_789b',
+                 'metadata': {'calls': '0'},
+                 'product': {'id': 'prod_GHI', 'name': 'MapIt, unlimited calls'}},
+                {'id': 'price_123',
+                 'metadata': {'calls': '10000'},
+                 'product': {'id': 'prod_ABC', 'name': 'MapIt, 10,000 calls'}},
+                {'id': 'price_123b',
+                 'metadata': {'calls': '10000'},
+                 'product': {'id': 'prod_ABC', 'name': 'MapIt, 10,000 calls'}},
+                {'id': 'price_456',
+                 'metadata': {'calls': '100000'},
+                 'product': {'id': 'prod_DEF', 'name': 'MapIt, 100,000 calls'}},
+                {'id': 'price_456b',
+                 'metadata': {'calls': '100000'},
+                 'product': {'id': 'prod_DEF', 'name': 'MapIt, 100,000 calls'}},
+            ]
+        }, None, None)
+
+    def test_change_price_charitable_sub(self):
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_789', '--new', 'price_789b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(
+            from_subscription='SUBSCRIPTION-ID')
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_789'}],
+                'start_date': ANY,
+                'iterations': 2,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+                'discounts': [{'coupon': 'charitable50'}]
+            }, {
+                'items': [{'price': 'price_789b'}],
+                'iterations': 1,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+                'discounts': [{'coupon': 'charitable50'}]
+            }])
+
+    def test_change_price_non_charitable_sub(self):
+        sub = self.MockStripe.SubscriptionSchedule.create.return_value
+        sub.phases[0].discounts = None
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_789', '--new', 'price_789b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(
+            from_subscription='SUBSCRIPTION-ID')
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_789'}],
+                'start_date': ANY,
+                'iterations': 2,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+            }, {
+                'items': [{'price': 'price_789b'}],
+                'iterations': 1,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+            }])
+
+    def test_change_price_just_downgraded(self):
+        sub = self.MockStripe.Subscription.retrieve.return_value
+        sub.schedule = convert_to_stripe_object({
+            'id': 'SCHEDULE-ID',
+            'phases': [{
+                'start_date': time.time(),
+                'end_date': time.time(),
+                'discounts': [{'coupon': 'charitable50'}],
+                'items': [{
+                    'price': 'price_789',
+                }]
+            }, {
+                'start_date': time.time(),
+                'end_date': time.time(),
+                'discounts': [{'coupon': 'charitable50'}],
+                'items': [{
+                    'price': 'price_456',
+                }]
+            }],
+        }, None, None)
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_456', '--new', 'price_456b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_789'}],
+                'start_date': ANY,
+                'end_date': ANY,
+                'discounts': [{'coupon': 'charitable50'}]
+            }, {
+                'items': [{'price': 'price_456'}],
+                'start_date': ANY,
+                'end_date': ANY,
+                'discounts': [{'coupon': 'charitable50'}]
+            }, {
+                'items': [{'price': 'price_456b'}],
+                'iterations': 1,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+                'discounts': [{'coupon': 'charitable50'}]
+            }])
+
+    def test_change_price_downgraded_last_month(self):
+        sub = self.MockStripe.Subscription.retrieve.return_value
+        sub.schedule = convert_to_stripe_object({
+            'id': 'SCHEDULE-ID',
+            'phases': [{
+                'start_date': time.time(),
+                'end_date': time.time(),
+                'discounts': [{'coupon': 'charitable50'}],
+                'items': [{
+                    'price': 'price_456',
+                }]
+            }],
+        }, None, None)
+        sub = self.MockStripe.SubscriptionSchedule.create.return_value
+        sub.phases[0].discounts = None
+        sub.phases[0]['items'][0].price = 'price_456'
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_456', '--new', 'price_456b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(
+            from_subscription='SUBSCRIPTION-ID')
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_456'}],
+                'iterations': 2,
+                'start_date': ANY,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+            }, {
+                'items': [{'price': 'price_456b'}],
+                'iterations': 1,
+                'proration_behavior': 'none',
+                'default_tax_rates': [ANY],
+            }])
 
 
 @override_settings(REDIS_API_NAME='test_api')
