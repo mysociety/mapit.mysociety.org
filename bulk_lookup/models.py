@@ -56,13 +56,14 @@ class BulkLookupQuerySet(models.QuerySet):
         """
         Bulk lookups that need processing:
         - Haven't already started
+        - Have been paid (or got something in charge_id)
         - Have failed less than MAX_RETRIES times already
         - Last failed more than RETRY_INTERVAL minutes ago (if they've ever failed)
         """
         retry_minutes = settings.RETRY_INTERVAL
         retry_time = timezone.now() - timedelta(minutes=retry_minutes)
         retry_count = settings.MAX_RETRIES
-        return self.filter(started__isnull=True, error_count__lt=retry_count).filter(
+        return self.filter(started__isnull=True, error_count__lt=retry_count).exclude(charge_id='').filter(
             models.Q(last_error__lt=retry_time) | models.Q(last_error=None)
         ).distinct()
 
