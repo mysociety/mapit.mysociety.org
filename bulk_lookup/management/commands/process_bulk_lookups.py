@@ -110,13 +110,13 @@ class Command(BaseCommand):
             get_current_site(None).domain,
             bulk_lookup.output_file.url
         ])
-        message = """
+        message = f"""
 We have matched your postcodes and added all the results to your data.
 
-You can download your new file from {0}
+You can download your new file within the next week from {url}
 
 Thanks for using MapIt, a service from mySociety.
-""".format(url)
+"""
         send_mail(
             'Your MapIt file is ready',
             message,

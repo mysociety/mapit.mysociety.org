@@ -10,7 +10,8 @@
       {% if bulklookup.finished %}
         <p>
             Your job has been completed, download your enhanced CSV here:
-            <a href="{{ bulklookup.output_file.url }}">{{ bulklookup.output_file_name }}</a>
+            <a href="{{ bulklookup.output_file.url }}">{{ bulklookup.output_file_name }}</a>.
+            It will be kept by us for one week.
         </p>
       {% else %}
         <p>
