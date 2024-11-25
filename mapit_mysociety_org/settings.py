@@ -188,9 +188,19 @@ if 'test' in sys.argv:
         {'id': 'price_456', 'price': 100, 'calls': '100,000'},
         {'id': 'price_789', 'price': 300, 'calls': '0'},
     ]
+    OLD_PRICING = [
+        {'id': 'price_old_123'},
+        {'id': 'price_old_456'},
+        {'id': 'price_old_789'},
+    ]
 else:
     PRICING = [
         {'id': config.get('PRICING_TIER_1_ID'), 'price': config.get('PRICING_TIER_1_AMOUNT'), 'calls': '10,000'},
         {'id': config.get('PRICING_TIER_2_ID'), 'price': config.get('PRICING_TIER_2_AMOUNT'), 'calls': '100,000'},
         {'id': config.get('PRICING_TIER_3_ID'), 'price': config.get('PRICING_TIER_3_AMOUNT'), 'calls': '0'},
+    ]
+    OLD_PRICING = [
+        {'id': config.get('PRICING_TIER_1_OLD_ID')},
+        {'id': config.get('PRICING_TIER_2_OLD_ID')},
+        {'id': config.get('PRICING_TIER_3_OLD_ID')},
     ]

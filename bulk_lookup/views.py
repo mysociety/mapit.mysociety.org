@@ -103,7 +103,8 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
             if self.request.user.is_authenticated:
                 if not self.object:
                     self.object = self.get_object()
-                if self.object and self.object.price.id == settings.PRICING[-1]['id']:
+                max_pricing = (settings.PRICING[-1]['id'], settings.OLD_PRICING[-1]['id'])
+                if self.object and self.object.price.id in max_pricing:
                     context['price'] = 0
         return context
 
@@ -117,7 +118,8 @@ class WizardView(NeverCacheMixin, StripeObjectMixin, SessionWizardView):
         if self.request.user.is_authenticated:
             if not self.object:
                 self.object = self.get_object()
-            if self.object and self.object.price.id == settings.PRICING[-1]['id']:
+            max_pricing = (settings.PRICING[-1]['id'], settings.OLD_PRICING[-1]['id'])
+            if self.object and self.object.price.id in max_pricing:
                 free = True
                 data['charge_id'] = 'r_%s' % get_random_string(12)
 

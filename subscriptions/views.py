@@ -193,8 +193,9 @@ class SubscriptionUpdateMixin(object):
                     new_price = 0
                 elif form_data['coupon'] == 'charitable50':
                     new_price /= 2
+        for p in (*settings.PRICING, *settings.OLD_PRICING):
             if p['id'] == self.object.price.id:
-                old_price = p['price'] * 100
+                old_price = add_vat(self.object.price.unit_amount) * 100
                 if self.object.discount and (coupon := self.object.discount.coupon):
                     if coupon.percent_off == 100:
                         old_price = 0

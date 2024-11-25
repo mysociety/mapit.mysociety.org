@@ -301,7 +301,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             'price': {
                 'id': 'price_123',
                 'nickname': 'MapIt',
-                'unit_amount': 10000
+                'unit_amount': 1667
             }
         })
 
@@ -413,7 +413,7 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             'price': {
                 'id': 'price_123',
                 'nickname': 'MapIt',
-                'unit_amount': 10000
+                'unit_amount': 1667
             }
         })
 
@@ -469,6 +469,45 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
                 'default_tax_rates': [ANY],
                 'proration_behavior': 'none'
             }])
+
+    def test_update_page_with_plan_downgrade_from_old_pricing(self):
+        # Set sub to 100k so this is a downgrade
+        sub = self.MockStripe.Subscription.retrieve.return_value
+        sub['items'].data[0] = convert_to_stripe_object({
+            'id': 'si_RG4',
+            'price': {
+                'id': 'price_old_456',
+                'nickname': 'MapIt',
+                'unit_amount': 8333
+            }
+        })
+        ss = self.MockStripe.SubscriptionSchedule.create.return_value
+        ss['phases'][0]['items'][0]['price'] = 'price_old_456'
+        ss['phases'][0]['discounts'] = []
+
+        Subscription.objects.create(user=self.user, stripe_id='SUBSCRIPTION-ID')
+        self.client.login(username="Test user", password="password")
+        response = self.client.post(reverse('subscription_update'), {
+            'price': 'price_123',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.MockStripe.Customer.modify.assert_not_called()
+        self.MockStripe.SubscriptionSchedule.create.assert_called_once_with(from_subscription='SUBSCRIPTION-ID')
+        self.MockStripe.SubscriptionSchedule.modify.assert_called_once_with(
+            'SCHEDULE-ID', phases=[{
+                'items': [{'price': 'price_old_456'}],
+                'start_date': ANY,
+                'end_date': ANY,
+                'default_tax_rates': [ANY],
+                'proration_behavior': 'none',
+            }, {
+                'items': [{'price': 'price_123'}],
+                'iterations': 1,
+                'metadata': {'charitable': '', 'charity_number': '', 'description': '', 'interest_contact': 'No'},
+                'default_tax_rates': [ANY],
+                'proration_behavior': 'none',
+            }
+            ])
 
 
 class SubscriptionOtherViewsTest(PatchedStripeMixin, UserTestCase):
