@@ -113,7 +113,7 @@ class Command(BaseCommand):
         message = f"""
 We have matched your postcodes and added all the results to your data.
 
-You can download your new file within the next week from {url}
+Your file is available to download for the next seven days from {url}
 
 Thanks for using MapIt, a service from mySociety.
 """
