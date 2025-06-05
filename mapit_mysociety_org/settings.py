@@ -57,7 +57,9 @@ INSTALLED_APPS.extend(['django.contrib.sites', 'account', 'mailer', 'api_keys', 
 
 # Insert our project app before mapit and mapit_gb so that the templates
 # take precedence
+print(INSTALLED_APPS)
 INSTALLED_APPS.insert(INSTALLED_APPS.index('mapit_gb'), 'mapit_mysociety_org')
+print(INSTALLED_APPS)
 ROOT_URLCONF = 'mapit_mysociety_org.urls'
 WSGI_APPLICATION = 'mapit_mysociety_org.wsgi.application'
 

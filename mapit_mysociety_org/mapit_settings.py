@@ -219,9 +219,14 @@ INSTALLED_APPS = [
 
 if MAPIT_COUNTRY:
     c = 'mapit_%s' % MAPIT_COUNTRY.lower()
-    c_spec = importlib.machinery.PathFinder.find_spec(c)
+    print(c)
+    import sys
+    print(sys.path)
+    print(sys.meta_path)
+    c_spec = importlib.util.find_spec(c)
     if c_spec is not None:
         # Put before 'mapit', so country templates take precedence
         INSTALLED_APPS.insert(INSTALLED_APPS.index('mapit'), c)
+        print(INSTALLED_APPS)
 
 DATE_FORMAT = 'j F Y'
