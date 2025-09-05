@@ -479,7 +479,7 @@ def stripe_hook(request):
             stripe_reset_quota(obj.subscription)
     elif event.type == 'checkout.session.completed' or event.type == 'checkout.session.async_payment_succeeded':
         checkout_session = stripe.checkout.Session.retrieve(obj.id, expand=['line_items'])
-        if checkout_session.payment_status != 'unpaid':
+        if checkout_session.payment_status != 'unpaid' and 'mapit_id' in checkout_session.metadata:
             bulk_lookup = BulkLookup.objects.get(id=checkout_session.metadata['mapit_id'])
             if not bulk_lookup.charge_id:
                 bulk_lookup.charge_id = obj.id
