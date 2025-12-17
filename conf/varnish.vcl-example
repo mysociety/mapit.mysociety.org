@@ -25,7 +25,8 @@ sub recognize_apiname_apikey_token {
     req.url ~ "^\/areas\/.*(?<!\.html)$" ||
     req.url ~ "^\/nearest\/.*(?<!\.html)$" ||
     req.url ~ "^\/code\/.*(?<!\.html)$" ||
-    req.url ~ "^\/generations\/.*(?<!\.html)$") {
+    req.url ~ "^\/types\.html$") {
+    req.url ~ "^\/generations\.html$") {
     set req.http.apiname = "mapit";
 
     # Save the key if there is one in the api_key querystring parameter or the
