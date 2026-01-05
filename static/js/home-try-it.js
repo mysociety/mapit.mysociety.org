@@ -78,7 +78,7 @@ $(function() {
             map.setView(point, 14);
 
             var layers = {
-                osm: new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                osm: new L.TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: 'Map © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     maxZoom: 14,
                     minZoom: 4
