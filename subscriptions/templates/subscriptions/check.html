@@ -19,7 +19,7 @@
             </div>
 
         {% if stripe.price %}
-            <p>You are subscribing to <strong>{{ stripe.price.nickname }}</strong>,
+            <p>You are subscribing to <strong>{{ stripe.price.product.name }}</strong>,
             costing £{{ actual_paid|floatformat:-2 }}/mth.
             {% if stripe.discount %}
                 (£{{ stripe.price.unit_amount|floatformat:-2 }}/mth with

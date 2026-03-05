@@ -33,7 +33,8 @@ class StripeObjectMixin(object):
             sub = self.subscription = Subscription.objects.get(user=self.request.user)
             sub_stripe = stripe.Subscription.retrieve(sub.stripe_id, expand=[
                 'customer.default_source', 'customer.invoice_settings.default_payment_method',
-                'latest_invoice.payment_intent', 'schedule.phases.items.price'])
+                'latest_invoice.payment_intent', 'schedule.phases.items.price',
+                'items.data.price.product'])
         except Subscription.DoesNotExist:
             # There will be existing accounts with no subscription object
             return None

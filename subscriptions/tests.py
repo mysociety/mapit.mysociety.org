@@ -69,7 +69,6 @@ class PatchedStripeMixin(object):
                 'data': [{
                     'price': {
                         'id': 'price_789',
-                        'nickname': 'MapIt, unlimited calls',
                         'unit_amount': 25000,
                         'metadata': {
                             'calls': '0',
@@ -300,7 +299,6 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             'id': 'si_RG4',
             'price': {
                 'id': 'price_123',
-                'nickname': 'MapIt',
                 'unit_amount': 1667
             }
         })
@@ -339,7 +337,6 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             'id': 'si_RG4',
             'price': {
                 'id': 'price_123',
-                'nickname': 'MapIt',
                 'unit_amount': 1667,
             }
         })
@@ -367,7 +364,6 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         sub = self.MockStripe.Subscription.retrieve.return_value
         sub['items'].data[0].price = convert_to_stripe_object({
             'id': 'price_456',
-            'nickname': 'MapIt',
             'unit_amount': 7500
         })
         sub.discount.coupon.percent_off = 50.0
@@ -412,7 +408,6 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             'id': 'si_RG4',
             'price': {
                 'id': 'price_123',
-                'nickname': 'MapIt',
                 'unit_amount': 1667
             }
         })
@@ -437,7 +432,6 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
         sub = self.MockStripe.Subscription.retrieve.return_value
         sub['items'].data[0].price = convert_to_stripe_object({
             'id': sub['items'].data[0].price.id,
-            'nickname': 'MapIt',
             'unit_amount': 8333
         })
         sub.discount = None
@@ -477,7 +471,6 @@ class SubscriptionUpdateViewTest(PatchedStripeMixin, UserTestCase):
             'id': 'si_RG4',
             'price': {
                 'id': 'price_old_456',
-                'nickname': 'MapIt',
                 'unit_amount': 8333
             }
         })
