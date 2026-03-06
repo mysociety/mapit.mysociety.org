@@ -52,9 +52,6 @@ class Command(BaseCommand):
         for sub_obj in Subscription.objects.all():
             subscription = stripe.Subscription.retrieve(sub_obj.stripe_id, expand=[
                 'schedule.phases.items.price', 'discounts'])
-            if subscription.discounts and subscription.discounts[0].coupon.id == 'charitable100':
-                # Ignore free subscriptions
-                continue
             if subscription.status != 'active':
                 # Ignore non-active subscriptions
                 continue
@@ -122,6 +119,15 @@ class Command(BaseCommand):
             else:
                 if subscription['items'].data[0].price.id != old_price.id:
                     continue
+
+                if subscription.discounts and subscription.discounts[0].coupon.id == 'charitable100':
+                    # Can move free subscription immediately
+                    self.stdout.write(f"{sub_info} has no phase, adding schedule to new price")
+                    if options['commit']:
+                        stripe.SubscriptionItem.modify(
+                            subscription['items'].data[0].id, price=new_price.id, proration_behavior="none")
+                    continue
+
                 self.stdout.write(f"{sub_info} has no phase, adding schedule to new price")
                 if options['commit']:
                     self.new_schedule(subscription, new_price.id)
