@@ -47,11 +47,18 @@ class PatchedStripeMixin(object):
             'cancel_at_period_end': False,
             'discount': {
                 'coupon': {
+                    'id': 'charitable50',
                     'percent_off': 50.0,
                 },
                 'end': time.time(),
             },
-            'discounts': None,
+            'discounts': [{
+                'coupon': {
+                    'id': 'charitable50',
+                    'percent_off': 50.0,
+                },
+                'end': time.time(),
+            }],
             'latest_invoice': None,
             'metadata': {
                 'charitable': 'c',
@@ -733,23 +740,55 @@ class PriceChangeTest(PatchedStripeMixin, UserTestCase):
         self.MockStripe.Price.list.return_value = convert_to_stripe_object([
             {'id': 'price_789',
              'metadata': {'calls': '0'},
+             'nickname': 'Old',
+             'unit_amount': 33000,
              'product': {'id': 'prod_GHI', 'name': 'MapIt, unlimited calls'}},
             {'id': 'price_789b',
              'metadata': {'calls': '0'},
+             'nickname': 'Current',
+             'unit_amount': 34000,
              'product': {'id': 'prod_GHI', 'name': 'MapIt, unlimited calls'}},
             {'id': 'price_123',
              'metadata': {'calls': '10000'},
+             'nickname': 'Old',
+             'unit_amount': 2200,
              'product': {'id': 'prod_ABC', 'name': 'MapIt, 10,000 calls'}},
             {'id': 'price_123b',
              'metadata': {'calls': '10000'},
+             'nickname': 'Current',
+             'unit_amount': 2300,
              'product': {'id': 'prod_ABC', 'name': 'MapIt, 10,000 calls'}},
             {'id': 'price_456',
              'metadata': {'calls': '100000'},
+             'nickname': 'Old',
+             'unit_amount': 11000,
              'product': {'id': 'prod_DEF', 'name': 'MapIt, 100,000 calls'}},
             {'id': 'price_456b',
              'metadata': {'calls': '100000'},
+             'nickname': 'Current',
+             'unit_amount': 11300,
              'product': {'id': 'prod_DEF', 'name': 'MapIt, 100,000 calls'}},
         ], None, None)
+
+    def test_change_price_free_sub(self):
+        sub = self.MockStripe.Subscription.retrieve.return_value
+        sub['discounts'][0]['coupon']['id'] = 'charitable100'
+        sub['discounts'][0]['coupon']['percent_off'] = 100.0
+        sub['items'].data[0] = convert_to_stripe_object({
+            'id': 'si_FRE',
+            'price': {
+                'id': 'price_123',
+                'unit_amount': 1667
+            }
+        })
+
+        with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
+            call_command(
+                'schedule_price_change', '--old', 'price_123', '--new', 'price_123b',
+                '--commit', stdout=StringIO(), stderr=StringIO())
+
+        self.MockStripe.SubscriptionItem.modify.assert_called_once_with(
+            'si_FRE', price='price_123b', proration_behavior='none')
 
     def test_change_price_charitable_sub(self):
         with patch('subscriptions.management.commands.schedule_price_change.stripe', self.MockStripe):
