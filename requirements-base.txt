@@ -1,5 +1,5 @@
 psycopg[c]>=3.3.3
--e git+https://github.com/mysociety/mapit.git@master#egg=django-mapit
+-e git+https://github.com/mysociety/mapit.git@django-6-psycopg3-etc#egg=django-mapit
 django-appconf==1.2.0
 django-formtools==2.5.1
 django-mailer==2.3.2
