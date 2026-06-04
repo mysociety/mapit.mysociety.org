@@ -112,8 +112,19 @@ ACCOUNT_SIGNUP_REDIRECT_URL = '/account/subscription'
 ACCOUNT_LOGIN_REDIRECT_URL = '/account/subscription'
 DEFAULT_HTTP_PROTOCOL = 'https'
 # Enable authentication by email address not username
-AUTHENTICATION_BACKENDS = ('account.auth_backends.EmailAuthenticationBackend',
-                           'django.contrib.auth.backends.ModelBackend')
+AUTHENTICATION_BACKENDS = (
+    "account.auth_backends.EmailAuthenticationBackend",
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
 
 # Redis connection for syncing user accounts with Varnish
 REDIS_DB_HOST = config.get('REDIS_DB_HOST')

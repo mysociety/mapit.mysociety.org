@@ -25,8 +25,8 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
         self.client.get(reverse('account_signup'))
         resp = self.client.post(reverse('account_signup'), {
             'email': 'testing@example.net',
-            'password': 'password',
-            'password_confirm': 'password',
+            'password': 'password789',
+            'password_confirm': 'password789',
             'tandcs_tick': 1,
             'price': 'price_123',
             'charitable_tick': 1,
@@ -56,8 +56,8 @@ class SignupViewTest(PatchedStripeMixin, PatchedRedisTestCase):
         self.client.get(reverse('account_signup'))
         resp = self.client.post(reverse('account_signup'), {
             'email': 'testing@example.net',
-            'password': 'password',
-            'password_confirm': 'password',
+            'password': 'password654',
+            'password_confirm': 'password654',
             'tandcs_tick': 1,
             'price': 'price_123',
             'charitable_tick': 1,
