@@ -21,3 +21,7 @@ pyexcel-io==0.3.4.1
 pyexcel-odsr==0.3.2
 pyexcel-xls==0.3.3
 pyexcel-xlsx==0.3.0
+
+# Added for 'batched()'.
+# Can go back to stdlib at Python >= 3.12.
+more-itertools==11.1.0

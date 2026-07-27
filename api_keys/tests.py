@@ -321,3 +321,62 @@ class ThrottleAPICommandTest(PatchedRedisTestCase):
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE_COUNTER))
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE_BLOCKED))
         self.assertIsNone(r.get(RedisStrings.API_THROTTLE_DEFAULT_LIMIT))
+
+
+@override_settings(REDIS_API_NAME="test_api")
+class ReconcileAPIKeysWithRedisCommandTest(PatchedRedisTestCase):
+
+    def setUp(self):
+        super(ReconcileAPIKeysWithRedisCommandTest, self).setUp()
+        self.user = User.objects.create_user(
+            "Test user", "test@example.com", "password"
+        )
+        self.user_bytes = str(self.user.id).encode("utf-8")
+
+        self.keys = [
+            APIKey.objects.create(user=self.user, key=APIKey.generate_key())
+            for _ in range(600)
+        ]
+        self.keys_to_remove = self.keys[:200]
+        self.keys_to_keep = self.keys[200:400]
+        self.keys_to_add = self.keys[400:]
+
+        for k in self.keys_to_remove:
+            k.delete()
+            k.save_key_to_redis()
+
+        for k in self.keys_to_add:
+            k.delete_key_from_redis()
+
+    def tearDown(self):
+        super(ReconcileAPIKeysWithRedisCommandTest, self).tearDown()
+        self.user.delete()
+        [k.delete() for k in self.keys if k.id]
+
+    def test_reconcile_redis(self):
+        r = redis_connection()
+
+        for k in self.keys_to_remove:
+            self.assertEqual(r.get(k.redis_key), self.user_bytes)
+
+        for k in self.keys_to_keep:
+            self.assertEqual(r.get(k.redis_key), self.user_bytes)
+
+        for k in self.keys_to_add:
+            self.assertIsNone(r.get(k.redis_key))
+
+        call_command(
+            "reconcile_api_keys_with_redis",
+            "--commit",
+            stdout=StringIO(),
+            stderr=StringIO(),
+        )
+
+        for k in self.keys_to_remove:
+            self.assertIsNone(r.get(k.redis_key))
+
+        for k in self.keys_to_keep:
+            self.assertEqual(r.get(k.redis_key), self.user_bytes)
+
+        for k in self.keys_to_add:
+            self.assertEqual(r.get(k.redis_key), self.user_bytes)
