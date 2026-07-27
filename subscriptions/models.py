@@ -19,31 +19,59 @@ class Subscription(models.Model):
     def __str__(self):
         return u"%s (%s)" % (self.user, self.stripe_id)
 
+    @classmethod
+    def redis_key_for_user_id(cls, uid):
+        return "user:{0}:quota:{1}".format(uid, settings.REDIS_API_NAME)
+
+    @classmethod
+    def redis_key_count_for_user_id(cls, uid):
+        return "{0}:count".format(cls.redis_key_for_user_id(uid))
+
+    @classmethod
+    def redis_key_max_for_user_id(cls, uid):
+        return "{0}:max".format(cls.redis_key_for_user_id(uid))
+
+    @classmethod
+    def redis_key_blocked_for_user_id(cls, uid):
+        return "{0}:blocked".format(cls.redis_key_for_user_id(uid))
+
+    @classmethod
+    def redis_key_history_for_user_id(cls, uid):
+        return "{0}:history".format(cls.redis_key_for_user_id(uid))
+
+    @classmethod
+    def delete_from_redis_for_user_id(cls, uid):
+        r = redis_connection()
+        r.delete(cls.redis_key_max_for_user_id(uid))
+        r.delete(cls.redis_key_count_for_user_id(uid))
+        r.delete(cls.redis_key_blocked_for_user_id(uid))
+
     @property
     def redis_key(self):
-        return "user:{0}:quota:{1}".format(self.user.id, settings.REDIS_API_NAME)
+        return self.redis_key_for_user_id(self.user.id)
 
     @property
     def redis_key_count(self):
-        return "{0}:count".format(self.redis_key)
+        return self.redis_key_count_for_user_id(self.user.id)
 
     @property
     def redis_key_max(self):
-        return "{0}:max".format(self.redis_key)
+        return self.redis_key_max_for_user_id(self.user.id)
 
     @property
     def redis_key_blocked(self):
-        return "{0}:blocked".format(self.redis_key)
+        return self.redis_key_blocked_for_user_id(self.user.id)
 
     @property
     def redis_key_history(self):
-        return "{0}:history".format(self.redis_key)
+        return self.redis_key_history_for_user_id(self.user.id)
 
-    def redis_update_max(self, price):
+    def redis_update_max(self, price, unblock=True):
         max = int(price.metadata['calls'])
         r = redis_connection()
         r.set(self.redis_key_max, max)
-        r.delete(self.redis_key_blocked)
+        if unblock:
+            r.delete(self.redis_key_blocked)
 
     def redis_reset_quota(self):
         r = redis_connection()
@@ -53,10 +81,7 @@ class Subscription(models.Model):
         r.delete(self.redis_key_blocked)
 
     def delete_from_redis(self):
-        r = redis_connection()
-        r.delete(self.redis_key_max)
-        r.delete(self.redis_key_count)
-        r.delete(self.redis_key_blocked)
+        self.delete_from_redis_for_user_id(self.user.id)
 
     def redis_status(self):
         r = redis_connection()

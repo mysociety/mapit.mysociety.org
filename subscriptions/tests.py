@@ -2,6 +2,8 @@
 
 import json
 from io import StringIO
+import random
+import string
 import time
 from mock import patch, Mock, ANY
 
@@ -909,7 +911,7 @@ class PriceChangeTest(PatchedStripeMixin, UserTestCase):
 
 
 @override_settings(REDIS_API_NAME='test_api')
-class ManagementTest(PatchedRedisTestCase):
+class ManagementQuotaCommandsTest(PatchedRedisTestCase):
     @override_settings(API_THROTTLE_UNLIMITED=['127.0.0.4'])
     def test_default_quota(self):
         call_command('subscription_default_quota', stdout=StringIO(), stderr=StringIO())
@@ -937,3 +939,109 @@ class ManagementTest(PatchedRedisTestCase):
     def test_reset_ip_quotas(self):
         self._test_reset_ip_quotas()
         self._test_reset_ip_quotas(verbosity=2)
+
+
+@override_settings(REDIS_API_NAME="test_api")
+class ReconcileSubscriptionsWithRedisCommandTest(
+    PatchedStripeMixin, PatchedRedisTestCase
+):
+
+    def setUp(self):
+        super(ReconcileSubscriptionsWithRedisCommandTest, self).setUp()
+
+        self.calls = "100"
+        self.price = convert_to_stripe_object({"metadata": {"calls": self.calls}})
+
+        def random_alpha(n):
+            return "".join(random.choices(string.ascii_letters, k=n))
+
+        self.users = [
+            User.objects.create_user(
+                random_alpha(10), random_alpha(10) + "@example.com", "password"
+            )
+            for _ in range(7)
+        ]
+        self.subs = [
+            Subscription.objects.create(stripe_id=random_alpha(10), user_id=u.id)
+            for u in self.users
+        ]
+
+        self.in_redis = self.subs[:4]
+        self.not_in_redis = self.subs[4:]
+
+        self.active_subs = {s for s in self.in_redis[:1] + self.not_in_redis[:1]}
+        self.past_due_subs = {s for s in self.in_redis[1:2] + self.not_in_redis[1:2]}
+        self.cancelled_subs = {s for s in self.in_redis[2:3] + self.not_in_redis[2:3]}
+        self.sub_in_redis_but_not_db = self.in_redis[3]
+
+        self.sub_in_redis_but_not_db.delete()
+        for s in self.in_redis + [self.sub_in_redis_but_not_db]:
+            s.redis_update_max(self.price)
+
+        def mock_sub_retrieve(id_):
+            sub = {
+                "status": "unknown",
+                "items": {
+                    "data": [
+                        {
+                            "price": self.price,
+                        }
+                    ]
+                },
+            }
+            if id_ in {s.stripe_id for s in self.active_subs}:
+                sub["status"] = "active"
+            elif id_ in {s.stripe_id for s in self.past_due_subs}:
+                sub["status"] = "past_due"
+            elif id_ in {s.stripe_id for s in self.cancelled_subs}:
+                sub["status"] = "canceled"
+
+            return convert_to_stripe_object(sub)
+
+        self.MockStripe.Subscription.retrieve.side_effect = mock_sub_retrieve
+
+        self.ip_based_quota_max_keys = [
+            Subscription.redis_key_max_for_user_id("127.0.0.1"),
+            Subscription.redis_key_max_for_user_id("::1"),
+        ]
+
+        r = redis_connection()
+        for k in self.ip_based_quota_max_keys:
+            r.set(k, self.calls)
+
+    def tearDown(self):
+        super(ReconcileSubscriptionsWithRedisCommandTest, self).tearDown()
+        [u.delete() for u in self.users if u.id]
+        [s.delete() for s in self.subs if s.id]
+        r = redis_connection()
+        [r.delete(k) for k in self.ip_based_quota_max_keys]
+
+    def test_reconcile_redis(self):
+        r = redis_connection()
+
+        with patch(
+            "subscriptions.management.commands.reconcile_subscriptions_with_redis.stripe",
+            self.MockStripe,
+        ):
+            call_command(
+                "reconcile_subscriptions_with_redis",
+                "--commit",
+                stdout=StringIO(),
+                stderr=StringIO(),
+            )
+
+        calls_value = str(self.calls).encode("utf-8")
+        for s in self.active_subs:
+            self.assertEqual(r.get(s.redis_key_max), calls_value)
+
+        for s in self.past_due_subs:
+            self.assertEqual(r.get(s.redis_key_max), calls_value)
+
+        for s in self.cancelled_subs:
+            self.assertIsNone(r.get(s.redis_key_max))
+
+        self.assertIsNone(r.get(self.sub_in_redis_but_not_db.redis_key_max))
+
+        # IP based quotas aren't touched.
+        for k in self.ip_based_quota_max_keys:
+            self.assertEqual(r.get(k), calls_value)
