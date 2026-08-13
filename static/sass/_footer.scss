@@ -43,6 +43,26 @@
     @media (min-width: 56.8889em) {
         margin-top: 0;
     }
+
+    .mysoc-newsletter--input-wrapper {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+        gap: 0;
+
+        input[type="email"] {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            height: 38px;
+        }
+
+        .btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            height: 38px;
+            line-height: 1;
+        }
+    }
 }
 
 .mysoc-footer__donate {
