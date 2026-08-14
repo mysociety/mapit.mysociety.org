@@ -59,7 +59,7 @@ class Command(BaseCommand):
             default_tax_rates=[settings.STRIPE_TAX_RATE],
             customer=customer,
             items=[{"price": price.id}],
-            coupon=coupon,
+            discounts=[{'coupon': coupon}],
             trial_period_days=options['trial']).id
 
         sub = Subscription.objects.create(user=user, stripe_id=stripe_sub)

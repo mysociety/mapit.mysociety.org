@@ -289,7 +289,7 @@ class SubscriptionUpdateMixin(object):
             default_tax_rates=[settings.STRIPE_TAX_RATE],
             customer=customer,
             items=[{"price": form_data['price']}],
-            coupon=form_data['coupon'],
+            discounts=[{'coupon': form_data['coupon']}],
             metadata=form_data['metadata'])
         stripe_id = obj.id
 
