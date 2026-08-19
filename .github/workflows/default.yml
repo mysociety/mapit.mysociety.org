@@ -9,7 +9,7 @@ jobs:
 
     services:
       postgres:
-        image: postgis/postgis:15-3.3
+        image: postgis/postgis:15-3.5
         env:
           POSTGRES_PASSWORD: mapit
         ports:
@@ -29,8 +29,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10"]
-        thing-to-test: [flake8, "4.2", "5.2"]
+        python-version: ["3.13"]
+        thing-to-test: ["flake8", "4.2", "5.2", "6"]
 
     steps:
     - uses: actions/checkout@v5
@@ -50,7 +50,7 @@ jobs:
     - name: Install GDAL
       run: |
         sudo apt-get update
-        sudo apt-get install gdal-bin
+        sudo apt-get install gdal-bin libmemcached-dev
 
     - name: Set up config
       run: |
