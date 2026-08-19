@@ -363,3 +363,21 @@
     width: 50%;
     float: left;
 }
+
+.homepage-section--newsletter {
+    text-align: center;
+    border-top: 2px solid #f3f1eb;
+
+    .container {
+        max-width: 40em;
+        margin: 0 auto;
+    }
+
+    img {
+        margin-bottom: 0.5rem;
+    }
+
+    .mysoc-newsletter--input-wrapper {
+        align-items: center;
+    }
+}

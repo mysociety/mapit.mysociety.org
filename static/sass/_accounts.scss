@@ -115,3 +115,9 @@ table.striped {
 button[disabled], button[disabled]:hover, button[disabled]:focus {
     background-color: #999;
 }
+
+.sidebar--newsletter {
+    @media (max-width: 50em) {
+        display: none;
+    }
+}
